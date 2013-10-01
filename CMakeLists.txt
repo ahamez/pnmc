@@ -31,11 +31,12 @@ endif ()
 
 add_definitions("-Wall")
 add_definitions("-std=c++11")
+add_definitions("-ftemplate-depth=256")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_definitions("-stdlib=libc++")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -std=c++11 -stdlib=libc++")
-  set(CMAKE_CXX_FLAGS_RELEASE "-O4 -ftemplate-depth=256")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O4")
 endif ()
 
 set( CMAKE_CXX_FLAGS_RELEASE
