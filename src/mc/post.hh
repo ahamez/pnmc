@@ -4,8 +4,8 @@
 #include <functional> // hash
 #include <iosfwd>
 
-#include "sdd/sdd.hh"
-//#include "sdd/values/flat_set.hh"
+#include "sdd/values/flat_set.hh"
+#include "sdd/values_manager.hh"
 
 namespace pnmc { namespace mc {
 
