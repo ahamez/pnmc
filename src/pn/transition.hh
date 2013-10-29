@@ -27,53 +27,7 @@ struct transition
   std::multimap<std::string, arc> post;
 
   /// @brief Constructor.
-  transition(const std::string& id, const std::string& label)
-    : id(id)
-    , label(label)
-    , pre()
-    , post()
-  {
-  }
-
-  /// @brief Used by Boost.MultiIndex.
-  struct add_post_place
-  {
-    const arc& new_arc;
-    std::string new_place;
-
-    add_post_place(const arc& a, const std::string& id)
-  	  : new_arc(a)
-      , new_place(id)
-    {
-    }
-
-    void
-    operator()(transition& t)
-    const
-    {
-      t.post.insert(std::make_pair(new_place , new_arc));
-    }
-  };
-
-  /// @brief Used by Boost.MultiIndex.
-  struct add_pre_place
-  {
-    const arc& new_arc;
-    std::string new_place;
-
-    add_pre_place(const arc& a, const std::string& id)
-	  	: new_arc(a)
-  	  , new_place(id)
-    {
-    }
-
-    void
-    operator()(transition& t)
-    const
-    {
-      t.pre.insert(std::make_pair(new_place , new_arc));
-    }
-  };
+  transition(const std::string& id, const std::string& label);
 };
 
 /*------------------------------------------------------------------------------------------------*/

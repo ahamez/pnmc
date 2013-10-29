@@ -77,29 +77,43 @@ public:
   /// @brief The set of transitions.
   transitions_type transitions_set;
 
-  /// @brief
+  /// @brief The hierarchical description, if any, of this Petri net.
   module modules;
 
+  /// @brief Default constructor.
   net();
 
+  /// @brief Add a place.
+  ///
+  /// If the place already exist, its label and marking are updated.
   const place&
   add_place(const std::string& id, const std::string& label, unsigned int marking);
 
+  /// @brief Add a transition.
+  ///
+  /// It is an error to add an already existing transition.
   const transition&
   add_transition(const std::string& tid, const std::string& label);
 
+  /// @brief Add a post place to a transition.
+  ///
+  /// If the place doesn't exist, it is created with an empty label and a marking set to 0.
   void
   add_post_place(const std::string& tid, const std::string& post, const arc& a);
 
+  /// @brief Add a pre place to a transition.
+  ///
+  /// If the place doesn't exist, it is created with an empty label and a marking set to 0.
   void
   add_pre_place(const std::string& tid, const std::string& post, const arc& a);
 
+  /// @brief Return all places.
   const places_type::index<id_index>::type&
   places() const noexcept;
 
+  /// @brief Return all transitions.
   const transitions_type::index<id_index>::type&
   transitions() const noexcept;
-
 };
 
 /*------------------------------------------------------------------------------------------------*/

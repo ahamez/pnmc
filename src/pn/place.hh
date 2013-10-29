@@ -21,11 +21,8 @@ struct place
   /// @brief This place's marking.
   unsigned int marking;
 
-  place(const std::string& id, const std::string& label, unsigned int m)
-    : id(id)
-    , label(label)
-    , marking(m)
-  {}
+  /// @brief Constructor.
+  place(const std::string& id, const std::string& label, unsigned int m);
 };
 
 /*------------------------------------------------------------------------------------------------*/

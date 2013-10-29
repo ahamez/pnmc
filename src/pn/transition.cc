@@ -3,9 +3,15 @@
 #include "pn/transition.hh"
 
 namespace pnmc { namespace pn {
-  
+
 /*------------------------------------------------------------------------------------------------*/
-  
+
+transition::transition(const std::string& id, const std::string& label)
+  : id(id), label(label), pre(), post()
+{}
+
+/*------------------------------------------------------------------------------------------------*/
+
 /// Compare two transitions using their ids.
 bool
 operator<(const transition& left, const transition& right)
@@ -15,7 +21,7 @@ noexcept
 }
 
 /*------------------------------------------------------------------------------------------------*/
-  
+
 /// Export a transition to an output stream.
 std::ostream&
 operator<<(std::ostream& os, const transition& t)
@@ -32,7 +38,7 @@ operator<<(std::ostream& os, const transition& t)
   }  
   return os;
 }
-  
+
 /*------------------------------------------------------------------------------------------------*/
-  
+
 }} // namespace pnmc::pn

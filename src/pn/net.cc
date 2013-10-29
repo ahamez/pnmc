@@ -11,11 +11,69 @@ namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Used by Boost.MultiIndex.
+struct add_post_place_to_transition
+{
+  const arc& new_arc;
+  std::string new_place;
+
+  add_post_place_to_transition(const arc& a, const std::string& id)
+	  : new_arc(a), new_place(id)
+  {}
+
+  void
+  operator()(transition& t)
+  const
+  {
+    t.post.insert(std::make_pair(new_place , new_arc));
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+/// @brief Used by Boost.MultiIndex.
+struct add_pre_place_to_transition
+{
+  const arc& new_arc;
+  std::string new_place;
+
+  add_pre_place_to_transition(const arc& a, const std::string& id)
+  	: new_arc(a), new_place(id)
+  {}
+
+  void
+  operator()(transition& t)
+  const
+  {
+    t.pre.insert(std::make_pair(new_place , new_arc));
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+/// @brief Used by Boost.MultiIndex.
+struct update_place
+{
+  const std::string label;
+  const unsigned int marking;
+
+  update_place(const std::string& l, unsigned int m)
+  	: label(l), marking(m)
+  {}
+
+  void
+  operator()(place& p)
+  const
+  {
+    p.label = label;
+    p.marking = marking;
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
 net::net()
-  : name()
-  , places_set()
-  , transitions_set()
-  , modules(nullptr)
+  : name(), places_set(), transitions_set(), modules(nullptr)
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -26,9 +84,7 @@ net::add_place(const std::string& pid, const std::string& label, unsigned int ma
   const auto insertion = places_set.insert({pid, label, marking});
   if (not insertion.second)
   {
-    std::stringstream ss;
-    ss << "Place " << pid << " already exists" << std::endl;
-    throw std::runtime_error(ss.str());
+    places_set.modify(insertion.first, update_place(label, marking));
   }
   return *insertion.first;
 }
@@ -53,30 +109,24 @@ net::add_transition(const std::string& tid, const std::string& label)
 void
 net::add_post_place(const std::string& tid, const std::string& post, const arc& a)
 {
-  auto it = transitions_set.get<id_index>().find(tid);
-  if(it != transitions_set.get<id_index>().end())
+  const auto it = transitions_set.get<id_index>().find(tid);
+  transitions_set.modify(it, add_post_place_to_transition(a,post));
+  if (places().find(post) == places().end())
   {
-    transitions_set.modify(it, transition::add_post_place(a,post));
-  }
-  else
-  {
-    assert(false);
+    add_place(post, post, 0);
   }
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 void
-net::add_pre_place(const std::string& tid, const std::string& post, const arc& a)
+net::add_pre_place(const std::string& tid, const std::string& pre, const arc& a)
 {
-  auto it = transitions_set.get<id_index>().find(tid);
-  if(it != transitions_set.get<id_index>().end())
+  const auto it = transitions_set.get<id_index>().find(tid);
+  transitions_set.modify(it, add_pre_place_to_transition(a,pre));
+  if (places().find(pre) == places().end())
   {
-    transitions_set.modify(it, transition::add_pre_place(a,post));
-  }
-  else
-  {
-    assert(false);
+    add_place(pre, pre, 0);
   }
 }
 

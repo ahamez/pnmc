@@ -3,7 +3,13 @@
 #include "pn/place.hh"
 
 namespace pnmc { namespace pn {
-  
+
+/*------------------------------------------------------------------------------------------------*/
+
+place::place(const std::string& id, const std::string& label, unsigned int m)
+  : id(id), label(label), marking(m)
+{}
+
 /*------------------------------------------------------------------------------------------------*/
 
 bool
