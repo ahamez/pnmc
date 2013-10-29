@@ -9,7 +9,7 @@ project (pnmc)
 ################################################################################
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.54.0 REQUIRED COMPONENTS program_options context coroutine)
+find_package(Boost 1.54.0 REQUIRED COMPONENTS program_options context coroutine system)
 message("-- Boost Include: ${Boost_INCLUDE_DIR}")
 message("-- Boost Libraries: ${Boost_LIBRARY_DIRS}")
 
@@ -40,7 +40,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif ()
 
 set( CMAKE_CXX_FLAGS_RELEASE
-     "${CMAKE_CXX_FLAGS_RELEASE} -fvisibility=hidden -fstrict-aliasing -DNDEBUG")
+     "${CMAKE_CXX_FLAGS_RELEASE} -fstrict-aliasing -DNDEBUG")
 
 set( CMAKE_CXX_FLAGS_DEBUG
      "${CMAKE_CXX_FLAGS_DEBUG} -O0")
