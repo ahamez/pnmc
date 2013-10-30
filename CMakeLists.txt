@@ -9,7 +9,7 @@ project (pnmc)
 ################################################################################
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.54.0 REQUIRED COMPONENTS program_options context coroutine system)
+find_package(Boost 1.54.0 REQUIRED COMPONENTS program_options coroutine system context)
 message("-- Boost Include: ${Boost_INCLUDE_DIR}")
 message("-- Boost Libraries: ${Boost_LIBRARY_DIRS}")
 
