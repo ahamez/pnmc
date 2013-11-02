@@ -6,8 +6,8 @@ namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
-transition::transition(const std::string& id, const std::string& label)
-  : id(id), label(label), pre(), post()
+transition::transition(const std::string& id, const std::string& label, std::size_t index)
+  : id(id), label(label), index(index), pre(), post()
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -17,7 +17,7 @@ bool
 operator<(const transition& left, const transition& right)
 noexcept
 {
-  return left.id < right.id;
+  return left.index < right.index;
 }
 
 /*------------------------------------------------------------------------------------------------*/

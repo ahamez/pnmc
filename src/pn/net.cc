@@ -94,7 +94,8 @@ net::add_place(const std::string& pid, const std::string& label, unsigned int ma
 const transition&
 net::add_transition(const std::string& tid, const std::string& label)
 {
-  const auto insertion = transitions_set.insert({tid, label});
+  static std::size_t transition_index = 0;
+  const auto insertion = transitions_set.insert({tid, label, transition_index++});
   if (not insertion.second)
   {
     std::stringstream ss;
@@ -146,6 +147,15 @@ net::transitions()
 const noexcept
 {
   return transitions_set.get<id_index>();
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+const transition&
+net::get_transition_by_index(std::size_t index)
+const
+{
+  return *transitions_set.get<index_index>().find(index);
 }
 
 /*------------------------------------------------------------------------------------------------*/

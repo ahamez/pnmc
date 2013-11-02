@@ -14,10 +14,13 @@ struct pnmc_configuration
 {
   std::string file_name;
   input_format file_type;
+
   bool show_order;
   bool show_relation;
   bool show_time;
   bool show_hash_tables_stats;
+
+  bool compute_dead_transitions;
 };
 
 /*------------------------------------------------------------------------------------------------*/

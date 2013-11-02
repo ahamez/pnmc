@@ -2,6 +2,7 @@ set(SOURCES
     main.cc
     conf/configuration.cc
     conf/fill_configuration.cc
+    mc/live.cc
     mc/post.cc
     mc/pre.cc
     mc/work.cc

@@ -20,6 +20,9 @@ struct transition
   /// @brief This transition's label.
   std::string label;
 
+  /// @brief This transition's index.
+  const std::size_t index;
+
   /// @brief Pre-places
   std::multimap<std::string, arc> pre;
 
@@ -27,7 +30,7 @@ struct transition
   std::multimap<std::string, arc> post;
 
   /// @brief Constructor.
-  transition(const std::string& id, const std::string& label);
+  transition(const std::string& id, const std::string& label, std::size_t index);
 };
 
 /*------------------------------------------------------------------------------------------------*/

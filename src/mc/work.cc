@@ -1,10 +1,12 @@
 #include <chrono>
 #include <iostream>
+#include <memory>  // unique_ptr
 #include <set>
 #include <utility> // pair
 
 #include <sdd/sdd.hh>
 
+#include "mc/live.hh"
 #include "mc/post.hh"
 #include "mc/pre.hh"
 #include "mc/work.hh"
@@ -86,7 +88,7 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 
 homomorphism
 transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
-                    , const pn::net& net)
+                   , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset)
 {
   chrono::time_point<chrono::system_clock> start;
   chrono::time_point<chrono::system_clock> end;
@@ -99,6 +101,12 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
   for (const auto& transition : net.transitions())
   {
     homomorphism h_t = sdd::Id<sdd_conf>();
+    if (conf.compute_dead_transitions)
+    {
+      const auto f = ValuesFunction<sdd_conf>( o, transition.post.begin()->first
+                                             , live(transition.index, transitions_bitset));
+      h_t = sdd::carrier(o, transition.post.begin()->first, f);
+    }
 
     // post actions.
     for (const auto& arc : transition.post)
@@ -161,6 +169,8 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
 {
   auto manager = sdd::manager<sdd_conf>::init();
 
+  boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
+
   const sdd::order<sdd_conf>& o = mk_order(net);
   if (conf.show_order)
   {
@@ -168,7 +178,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   }
   const SDD m0 = initial_state(o, net);
 
-  const homomorphism h = transition_relation(conf, o, net);
+  const homomorphism h = transition_relation(conf, o, net, transitions_bitset);
   if (conf.show_relation)
   {
     std::cout << h << std::endl;
@@ -179,6 +189,26 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   const auto n = sdd::count_combinations(m);
   long double n_prime = n.template convert_to<long double>();
   std::cout << n_prime << " states" << std::endl;
+
+  if (conf.compute_dead_transitions)
+  {
+    std::deque<std::string> dead_transitions;
+    for (auto i = 0; i < net.transitions().size(); ++i)
+    {
+      if (not transitions_bitset[i])
+      {
+        dead_transitions.push_back(net.get_transition_by_index(i).id);
+      }
+    }
+
+    std::cout << dead_transitions.size() << " dead transitions." << std::endl;
+    if (not dead_transitions.empty())
+    {
+      std::copy( dead_transitions.cbegin(), std::prev(dead_transitions.cend())
+               , std::ostream_iterator<std::string>(std::cout, ","));
+      std::cout << *std::prev(dead_transitions.cend());
+    }
+  }
 
   if (conf.show_hash_tables_stats)
   {

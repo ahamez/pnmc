@@ -121,13 +121,14 @@ keyword(const std::string& lhs, const std::string& rhs)
   }
 }
 
-void
+std::string
 prefix(const std::string& lhs, char c)
 {
   if (lhs[0] != c)
   {
     throw parse_error();
   }
+  return lhs.substr(1);
 }
 
 unsigned int
@@ -260,25 +261,25 @@ bpn(std::istream& in)
     {
       // input places
       in >> s0 >> s1;
-      prefix(s0, 'T');
+      const auto transition_id = prefix(s0, 'T');
 
-      net.add_transition(s0, s0);
+      net.add_transition(transition_id, "");
 
       auto nb_places = sharp(s1);
       while (nb_places > 0)
       {
-        in >> s1;
-        net.add_pre_place(s0, s1, pn::arc());
+        in >> s0;
+        net.add_pre_place(transition_id, s0, pn::arc());
         --nb_places;
       }
 
       // output places
-      in >> s1;
-      nb_places = sharp(s1);
+      in >> s0;
+      nb_places = sharp(s0);
       while (nb_places > 0)
       {
-        in >> s1;
-        net.add_post_place(s0, s1, pn::arc());
+        in >> s0;
+        net.add_post_place(transition_id, s0, pn::arc());
         --nb_places;
       }
 

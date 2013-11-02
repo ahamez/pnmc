@@ -92,6 +92,12 @@ fill_configuration(int argc, char** argv)
     ("show-time"                , "Show miscellaneous execution times")
   ;
 
+  po::options_description petri_options("Petri net options");
+  petri_options.add_options()
+    ("dead-transitions"         , "Compute dead transitions")
+  ;
+
+
   po::options_description hidden_options("Hidden options");
   hidden_options.add_options()
     ("input-file"             , po::value<std::string>(), "The Petri net file to analyse")
@@ -106,6 +112,7 @@ fill_configuration(int argc, char** argv)
     .add(file_options)
     .add(order_options)
     .add(hom_options)
+    .add(petri_options)
     .add(stats_options)
   	.add(hidden_options);
   
@@ -129,6 +136,7 @@ fill_configuration(int argc, char** argv)
     std::cout << file_options << std::endl;
     std::cout << order_options << std::endl;
     std::cout << hom_options << std::endl;
+    std::cout << petri_options << std::endl;
     std::cout << stats_options << std::endl;
     return empty_result();
   }
@@ -151,6 +159,7 @@ fill_configuration(int argc, char** argv)
   conf.show_relation = vm.count("show-relation");
   conf.show_hash_tables_stats = vm.count("show-hash-stats");
   conf.show_time = vm.count("show-time");
+  conf.compute_dead_transitions = vm.count("dead-transitions");
 
   if (vm.count("show-configuration"))
   {

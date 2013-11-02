@@ -32,6 +32,8 @@ private:
   /// @brief A tag to identify index for boost::multi_index
   struct marking_index{};
 
+  struct index_index{};
+
 public:
 
   /// @brief The type of the set of all places.
@@ -65,6 +67,10 @@ public:
                    // sort by label
                    , ordered_non_unique< tag<label_index>
                                        , member<transition, std::string, &transition::label>>
+
+                   // sort by index
+                   , ordered_unique< tag<index_index>
+                                   , member<transition, const std::size_t, &transition::index>>
               >
          > transitions_type;
 
@@ -114,6 +120,10 @@ public:
   /// @brief Return all transitions.
   const transitions_type::index<id_index>::type&
   transitions() const noexcept;
+
+  /// @brief Get a transition using its index.
+  const transition&
+  get_transition_by_index(std::size_t index) const;
 };
 
 /*------------------------------------------------------------------------------------------------*/
