@@ -1,5 +1,6 @@
 #include <istream>
 
+#include "parsers/bpn.hh"
 #include "parsers/parse.hh"
 #include "parsers/prod.hh"
 #include "parsers/tina.hh"
@@ -10,29 +11,17 @@ namespace pnmc { namespace parsers {
 /*------------------------------------------------------------------------------------------------*/
 
 std::shared_ptr<pn::net>
-parse(std::istream& in)
+parse(const conf::pnmc_configuration& conf, std::istream& in)
 {
   std::shared_ptr<pn::net> net_ptr;
 
-  // TINA pase.
-  net_ptr = parsers::tina(in);
-  if (net_ptr)
+  switch (conf.file_type)
   {
-    return net_ptr;
+    case (conf::input_format::bpn)  : return parsers::bpn(in);
+    case (conf::input_format::prod) : return parsers::prod(in);
+    case (conf::input_format::tina) : return parsers::tina(in);
+    case (conf::input_format::xml)  : return parsers::xml(in);
   }
-
-  // TINA parse failed, let's try PROD.
-  in.seekg(0, std::ios::beg);
-  net_ptr = parsers::prod(in);
-  if (net_ptr)
-  {
-    return net_ptr;
-  }
-
-  // PROD parse failed, let's try XML.
-  in.seekg(0, std::ios::beg);
-  net_ptr = parsers::xml(in);
-  return net_ptr;
 }
 
 /*------------------------------------------------------------------------------------------------*/

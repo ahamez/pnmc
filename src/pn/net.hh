@@ -105,7 +105,7 @@ public:
   ///
   /// If the place doesn't exist, it is created with an empty label and a marking set to 0.
   void
-  add_pre_place(const std::string& tid, const std::string& post, const arc& a);
+  add_pre_place(const std::string& tid, const std::string& pre, const arc& a);
 
   /// @brief Return all places.
   const places_type::index<id_index>::type&

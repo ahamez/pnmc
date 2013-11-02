@@ -11,8 +11,7 @@ struct arc
 {
   /// There are different types of arcs.
   enum class type
-  {
-    normal
+  { normal
   , test
   , inhibitor
   , stopwatch
@@ -29,10 +28,10 @@ struct arc
   weight_type weight;
 
   /// Constructor.
-  arc(type k = type::normal, weight_type w = 1)
-  	: kind(k)
-    , weight(w)
-  {}
+  arc(type k, weight_type w);
+
+  /// Default constructor;
+  arc();
 };
 
 /*------------------------------------------------------------------------------------------------*/

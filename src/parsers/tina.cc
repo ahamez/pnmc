@@ -9,7 +9,6 @@
 
 #include "parsers/tina.hh"
 #include "pn/arc.hh"
-#include "pn/net.hh"
 
 namespace pnmc { namespace parsers {
 

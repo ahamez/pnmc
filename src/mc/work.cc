@@ -85,7 +85,8 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 /*------------------------------------------------------------------------------------------------*/
 
 homomorphism
-transition_relation(const sdd::order<sdd_conf>& o, const pn::net& net)
+transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
+                    , const pn::net& net)
 {
   chrono::time_point<chrono::system_clock> start;
   chrono::time_point<chrono::system_clock> end;
@@ -117,13 +118,21 @@ transition_relation(const sdd::order<sdd_conf>& o, const pn::net& net)
   }
   end = chrono::system_clock::now();
   elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-  std::cout << "Transition relation time: " << elapsed << "s" << std::endl;
+
+  if (conf.show_time)
+  {
+    std::cout << "Transition relation time: " << elapsed << "s" << std::endl;
+  }
 
   start = chrono::system_clock::now();
   const auto res = sdd::rewrite(Fixpoint(Sum<sdd_conf>(o, operands.cbegin(), operands.cend())), o);
   end = chrono::system_clock::now();
   elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-  std::cout << "Rewrite time: " << elapsed << "s" << std::endl;
+
+  if (conf.show_time)
+  {
+    std::cout << "Rewrite time: " << elapsed << "s" << std::endl;
+  }
 
   return res;
 }
@@ -131,37 +140,50 @@ transition_relation(const sdd::order<sdd_conf>& o, const pn::net& net)
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
-state_space(const sdd::order<sdd_conf>& o, SDD m, homomorphism h)
+state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD m
+           , homomorphism h)
 {
-  return h(o, m);
+  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
+  const auto res = h(o, m);
+  chrono::time_point<chrono::system_clock> end = chrono::system_clock::now();
+  const std::size_t elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
+  if (conf.show_time)
+  {
+    std::cout << "State space computation time: " << elapsed << "s" << std::endl;
+  }
+  return res;
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 void
-work(const conf::pnmc_configuration&, const pn::net& net)
+work(const conf::pnmc_configuration& conf, const pn::net& net)
 {
   auto manager = sdd::manager<sdd_conf>::init();
 
   const sdd::order<sdd_conf>& o = mk_order(net);
-//  std::cout << o << std::endl;
+  if (conf.show_order)
+  {
+    std::cout << o << std::endl;
+  }
   const SDD m0 = initial_state(o, net);
-//  std::cout << m0 << std::endl << std::endl;
 
-  const homomorphism h = transition_relation(o, net);
-  std::cout << h << std::endl;
+  const homomorphism h = transition_relation(conf, o, net);
+  if (conf.show_relation)
+  {
+    std::cout << h << std::endl;
+  }
 
-  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
-  const SDD m = state_space(o, m0, h);
-  chrono::time_point<chrono::system_clock> end = chrono::system_clock::now();
-  const std::size_t elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-  std::cout << "State space computation time: " << elapsed << "s" << std::endl;
+  const SDD m = state_space(conf, o, m0, h);
 
   const auto n = sdd::count_combinations(m);
   long double n_prime = n.template convert_to<long double>();
-  std::cout << n_prime << std::endl;
+  std::cout << n_prime << " states" << std::endl;
 
-  std::cout << manager << std::endl;
+  if (conf.show_hash_tables_stats)
+  {
+    std::cout << manager << std::endl;
+  }
 }
 
 /*------------------------------------------------------------------------------------------------*/

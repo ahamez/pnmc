@@ -8,13 +8,16 @@ namespace pnmc { namespace conf {
   
 /*------------------------------------------------------------------------------------------------*/
 
+enum class input_format {bpn, prod, tina, xml};
+
 struct pnmc_configuration
 {
   std::string file_name;
-
-  pnmc_configuration()
-  	: file_name()
-  {}
+  input_format file_type;
+  bool show_order;
+  bool show_relation;
+  bool show_time;
+  bool show_hash_tables_stats;
 };
 
 /*------------------------------------------------------------------------------------------------*/

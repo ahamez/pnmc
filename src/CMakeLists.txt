@@ -5,6 +5,7 @@ set(SOURCES
     mc/post.cc
     mc/pre.cc
     mc/work.cc
+    parsers/bpn.cc
     parsers/parse.cc
     parsers/prod.cc
     parsers/tina.cc

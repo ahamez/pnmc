@@ -6,7 +6,6 @@
 
 #include "parsers/xml.hh"
 #include "parsers/rapidxml/rapidxml.hpp"
-#include "pn/net.hh"
 
 namespace pnmc { namespace parsers {
 

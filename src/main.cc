@@ -29,10 +29,10 @@ main(int argc, char** argv)
       }
 
       // Try to parse the model.
-      const auto net_ptr = parsers::parse(in);
+      const auto net_ptr = parsers::parse(*conf_opt, in);
       if (not net_ptr)
       {
-        std::cerr << "\'" << file_name << "\' is not a valid TINA or PROD file." << std::endl;
+        std::cerr << "\'" << file_name << "\' is not a valid file." << std::endl;
         return 1;
       }
 
