@@ -40,7 +40,7 @@ struct tina_parser
   qi::rule< Iterator, void(), ascii::space_type>
           time_interval;
 
-  qi::rule< Iterator, pn::arc(), qi::locals<pn::arc::type>, ascii::space_type>
+  qi::rule< Iterator, pn::arc(), ascii::space_type>
           arc;
 
   qi::rule< Iterator, unsigned int(), ascii::space_type>
@@ -96,14 +96,8 @@ struct tina_parser
 
     valuation = uint_[_val = _1] >> -(lit('K')[_val *= 1000]|lit('M')[_val *= 1000000]);
 
-    arc = 
-    ( lit('*')  [_a = pn::arc::type::normal]
-    | lit('?')  [_a = pn::arc::type::test]
-    | lit("?-") [_a = pn::arc::type::inhibitor]
-    | lit('!')  [_a = pn::arc::type::stopwatch]
-    | lit("!-") [_a = pn::arc::type::stopwatch_inhibitor]
-    )
-    >> valuation [_val = construct<pn::arc>(_a, _1)];
+    arc = ( lit('*') | lit('?') | lit("?-") | lit('!') | lit("!-") )
+          >> valuation [_val = construct<pn::arc>(_1)];
 
     transition =
        lit("tr")

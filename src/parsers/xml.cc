@@ -54,7 +54,7 @@ xml_parse_transition(std::shared_ptr<pn::net> net, rapidxml::xml_node<>* node)
     auto ref = node->first_node();
     while (ref)
     {
-      pn::arc a(pn::arc::type::normal, std::atoi(ref->first_attribute("weight")->value()));
+      pn::arc a(std::atoi(ref->first_attribute("weight")->value()));
       const std::string rid(ref->first_attribute("ref")->value());
       if (std::strncmp(ref->name(), "pre", std::strlen("pre")) == 0)
       {
