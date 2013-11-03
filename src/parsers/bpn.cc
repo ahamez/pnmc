@@ -301,7 +301,7 @@ bpn(std::istream& in)
   try
   {
     // temporary string placeholders
-    std::string s0, s1, s2, s3;
+    std::string s0, s1;
 
     // map unit ids to modules
     std::unordered_map<std::string, pn::module> modules;
