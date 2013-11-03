@@ -1,10 +1,10 @@
-#include <exception>
 #include <istream>
 #include <string>
 #include <tuple>
 #include <unordered_map>
 
 #include "parsers/bpn.hh"
+#include "parse_error.hh"
 
 namespace pnmc { namespace parsers {
 
@@ -90,25 +90,6 @@ namespace pnmc { namespace parsers {
 //  27.  each <trans-nb> occurs once and only once after a "T"
 // In each <input-place-list> and each <output-place-list>
 //  28. <min-place-nb> <= <place-nb> <= <max-place-nb>
-
-/*------------------------------------------------------------------------------------------------*/
-
-struct parse_error final
-  : public std::exception
-{
-public:
-
-  ~parse_error()
-  noexcept
-  {}
-
-  const char*
-  what()
-  const noexcept
-  {
-    return "";
-  }
-};
 
 /*------------------------------------------------------------------------------------------------*/
 

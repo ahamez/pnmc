@@ -2,6 +2,7 @@
 #include <istream>
 #include <sstream>
 
+#include "parsers/parse_error.hh"
 #include "parsers/tina.hh"
 #include "pn/arc.hh"
 
@@ -9,22 +10,6 @@ namespace pnmc { namespace parsers {
 
 /*------------------------------------------------------------------------------------------------*/
 
-struct parse_error final
-  : public std::exception
-{
-public:
-
-  ~parse_error()
-  noexcept
-  {}
-
-  const char*
-  what()
-  const noexcept
-  {
-    return "";
-  }
-};
 
 /*------------------------------------------------------------------------------------------------*/
 
