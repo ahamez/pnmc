@@ -21,6 +21,9 @@ struct transition
   std::string label;
 
   /// @brief This transition's index.
+  ///
+  /// Used to compute dead transitions: this index is used to get the position of this transition
+  /// into a bitset describing all transitions' status.
   const std::size_t index;
 
   /// @brief Pre-places
