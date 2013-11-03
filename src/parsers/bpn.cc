@@ -1,3 +1,4 @@
+#include <functional>
 #include <istream>
 #include <string>
 #include <tuple>
@@ -93,89 +94,203 @@ namespace pnmc { namespace parsers {
 
 /*------------------------------------------------------------------------------------------------*/
 
-void
-keyword(const std::string& lhs, const std::string& rhs)
+struct kw
 {
-  if (lhs != rhs)
-  {
-    throw parse_error();
-  }
-}
+  const std::string k_;
+  
+  kw(const std::string& k)
+    : k_(k)
+  {}
 
-std::string
-prefix(const std::string& lhs, char c)
-{
-  if (lhs[0] != c)
+  friend
+  std::istream&
+  operator>>(std::istream& in, const kw& manip)
   {
-    throw parse_error();
-  }
-  return lhs.substr(1);
-}
-
-unsigned int
-uint(const std::string& s)
-{
-  try
-  {
-    return std::stoi(s);
-  }
-  catch (const std::invalid_argument&)
-  {
-    throw parse_error();
-  }
-}
-
-unsigned int
-sharp(const std::string& s)
-{
-  if (s[0] != '#')
-  {
-    throw parse_error();
-  }
-  return uint(s.substr(1));
-}
-
-std::pair<unsigned int, unsigned int>
-interval(const std::string& s)
-{
-  unsigned int first;
-  unsigned int last;
-  std::size_t pos;
-
-  try
-  {
-    first = std::stoi(s, &pos);
-  }
-  catch (const std::invalid_argument&)
-  {
-    throw parse_error();
-  }
-
-  auto cit = s.cbegin() + pos;
-  for (auto i = 0; i < 3; ++i) // three more dots
-  {
-    if (cit != s.cend() and *cit == '.')
+    std::string s;
+    if (not (in >> s))
     {
-      ++cit;
-      continue;
+      throw parse_error("Expected " + manip.k_);
     }
-    else
+    else if (s != manip.k_)
     {
-      throw parse_error();
+      throw parse_error("Expected " + manip.k_ + ", got " + s);
     }
+    return in;    
   }
+};
 
-  try
-  {
-    last = std::stoi(std::string(cit, s.cend()));
-  }
-  catch (const std::invalid_argument&)
-  {
-    throw parse_error();
-  }
+/*------------------------------------------------------------------------------------------------*/
 
-  return std::make_pair(first, last);
-}
+struct uint
+{
+  unsigned int& res_;
+
+  uint(unsigned int& res)
+    : res_(res)
+  {}
+
+  friend
+  std::istream&
+  operator>>(std::istream& in, const uint& manip)
+  {
+    std::string s;
+    if (not (in >> s))
+    {
+      throw parse_error("Expected a value");
+    }
+    try
+    {
+      manip.res_ = std::stoi(s);
+    }
+    catch (const std::invalid_argument&)
+    {
+      throw parse_error("Expected a value, got " + s);
+    }
+    return in;
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+struct sharp
+{
+  unsigned int* res_;
+
+  sharp(unsigned int& res)
+    : res_(&res)
+  {}
+
+  sharp()
+    : res_(nullptr)
+  {}
+
+  friend
+  std::istream&
+  operator>>(std::istream& in, const sharp& manip)
+  {
+    std::string s;
+    if (not (in >> s))
+    {
+      throw parse_error("Expected a #value");
+    }
+    try
+    {
+      if (s[0] != '#')
+      {
+        throw parse_error("Expected a #value, got " + s);
+      }
+      const auto res = std::stoi(s.substr(1));
+      if (manip.res_)
+      {
+        *manip.res_ = res;
+      }
+    }
+    catch (const std::invalid_argument&)
+    {
+      throw parse_error("Expected a #value, got " + s);
+    }
+    return in;
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+struct interval
+{
+  unsigned int* first_;
+  unsigned int* last_;
+
+  interval(unsigned int& first, unsigned int& last)
+    : first_(&first), last_(&last)
+  {}
+
+  interval()
+    : first_(nullptr), last_(nullptr)
+  {}
+
+  friend
+  std::istream&
+  operator>>(std::istream& in, const interval& manip)
+  {
+    unsigned int first;
+    unsigned int last;
+    std::size_t pos;
+
+    std::string s;
+    if (not (in >> s))
+    {
+      throw parse_error("Expected an interval");
+    }
+
+    try
+    {
+      first = std::stoi(s, &pos);
+    }
+    catch (const std::invalid_argument&)
+    {
+      throw parse_error("Expected a value in interval, got " + s);
+    }
+
+    auto cit = s.cbegin() + pos;
+    if (std::distance(cit, s.cend()) < 3 or std::any_of(cit, cit + 3, [](char c){return c != '.';}))
+    {
+      throw parse_error("Expected '...' in interval, got " + s);
+    }
+    std::advance(cit, 3);
+
+    try
+    {
+      last = std::stoi(std::string(cit, s.cend()));
+    }
+    catch (const std::invalid_argument&)
+    {
+      throw parse_error("Expected a value in interval, got " + s);
+    }
+
+    if (manip.first_)
+    {
+      *manip.first_ = first;
+      *manip.last_  = last;
+    }
+
+    return in;
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+struct prefix
+{
+  const char p_;
+  std::string* res_;
+
+  prefix(char p, std::string& res)
+    : p_(p)
+    , res_(&res)
+  {}
+
+  prefix(char p)
+    : p_(p)
+    , res_(nullptr)
+  {}
+
+  friend
+  std::istream&
+  operator>>(std::istream& in, const prefix& manip)
+  {
+    std::string s;
+
+    if (not (in >> s))
+      throw parse_error("Expected a prefixed value");
+
+    if (s[0] != manip.p_)
+      throw parse_error("Expected a prefixed value, got " + s);
+    if (manip.res_)
+      *manip.res_ = s.substr(1);
+
+    return in;
+  }
+};
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -190,44 +305,27 @@ bpn(std::istream& in)
     // temporary string placeholders
     std::string s0, s1, s2, s3;
 
-    if (not (in >> s0 >> s1 >> s2))
-    {
-      throw parse_error();
-    }
-    keyword(s0, "places"); sharp(s1); interval(s2);
+    // map unit ids to modules
+    std::unordered_map<std::string, pn::module> modules;
 
-    if (not (in >> s0 >> s1 >> s2))
-    {
-      throw parse_error();
-    }
-    keyword(s0, "initial"); keyword(s1, "place");
-    const auto initial_place = uint(s2);
+    in >> kw("places") >> sharp() >> interval();
 
-    if (not (in >> s0 >> s1 >> s2))
-    {
-      throw parse_error();
-    }
-    keyword(s0, "units"); interval(s2);
-    auto nb_units = sharp(s1);
+    unsigned int initial_place;
+    in >> kw("initial") >> kw("place") >> uint(initial_place);
+
+    unsigned int nb_units;
+    in >> kw("units") >> sharp(nb_units) >> interval();
 
     // units
-    if (not (in >> s0 >> s1 >> s2))
-    {
-      throw parse_error();
-    }
-    keyword(s0, "root"); keyword(s1, "unit"); uint(s2);
-    const auto root_module = "U" + s2;
-    std::unordered_map<std::string, pn::module> modules;;
+    unsigned int root_module_nb;
+    in >> kw("root") >> kw("unit") >> uint(root_module_nb);
+
+    const auto root_module = "U" + std::to_string(root_module_nb);
+
     while (nb_units > 0)
     {
-      if (not (in >> s0 >> s1 >> s2 >> s3))
-      {
-        throw parse_error();
-      }
-      prefix(s0, 'U');
-      sharp(s1);
-      unsigned int first, last;
-      std::tie(first, last) = interval(s2);
+      unsigned int nb_nested_units, first, last;
+      in >> prefix('U') >> sharp() >> interval(first, last) >> sharp(nb_nested_units);
 
       pn::module_node m(s0);
       for (auto i = first; i <= last; ++i)
@@ -236,7 +334,6 @@ bpn(std::istream& in)
         m.add_module(pn::make_module(p));
       }
 
-      const auto nb_nested_units = sharp(s3);
       for (auto i = 0; i < nb_nested_units; ++i)
       {
         if (not(in >> s1))
@@ -252,25 +349,17 @@ bpn(std::istream& in)
     net.modules = modules[root_module];
 
     // transitions
-    if (not(in >> s0 >> s1 >> s2))
-    {
-      throw parse_error();
-    }
-    keyword(s0, "transitions");
-    auto nb_transitions = sharp(s1);
-    interval(s2);
+    unsigned int nb_transitions;
+    in >> kw("transitions") >> sharp(nb_transitions) >> interval();
     while (nb_transitions > 0)
     {
       // input places
-      if (not(in >> s0 >> s1))
-      {
-        throw parse_error();
-      }
-      const auto transition_id = prefix(s0, 'T');
+      unsigned int nb_places;
+      std::string transition_id;
+      in >> prefix('T', transition_id) >> sharp(nb_places);
 
       net.add_transition(transition_id, "");
 
-      auto nb_places = sharp(s1);
       while (nb_places > 0)
       {
         if (not (in >> s0))
@@ -282,11 +371,7 @@ bpn(std::istream& in)
       }
 
       // output places
-      if (not(in >> s0))
-      {
-        throw parse_error();
-      }
-      nb_places = sharp(s0);
+      in >> sharp(nb_places);
       while (nb_places > 0)
       {
         if (not (in >> s0))
@@ -302,8 +387,9 @@ bpn(std::istream& in)
 
     net.add_place(std::to_string(initial_place), "", 1);
   }
-  catch (parse_error&)
+  catch (const parse_error& p)
   {
+    std::cerr << p.what() << std::endl;
     return nullptr;
   }
 
