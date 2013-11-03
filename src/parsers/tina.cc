@@ -98,7 +98,8 @@ tina(std::istream& in)
 
         // Skip time interval, if any.
         const auto c = (ss >> std::ws).peek();
-        if (c == '[' or c == ']')
+        if (  c == std::char_traits<char>::to_int_type('[')
+           or c == std::char_traits<char>::to_int_type(']'))
         {
           ss >> s1;
         }
