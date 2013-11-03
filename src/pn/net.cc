@@ -81,12 +81,21 @@ net::net()
 const place&
 net::add_place(const std::string& pid, const std::string& label, unsigned int marking)
 {
-  const auto insertion = places_set.insert({pid, label, marking});
-  if (not insertion.second)
+  const auto cit = places_set.get<id_index>().find(pid);
+  if (cit == places_set.get<id_index>().cend())
   {
-    places_set.modify(insertion.first, update_place(label, marking));
+    return *places_set.insert({pid, label, marking}).first;
   }
-  return *insertion.first;
+  else
+  {
+    // This place was created before by add_post_place() or add_pre_place().
+    // At this time, the marking was not known. Thus, we now update it.
+    // The assert() is here because modify() would return false if the place could not have been
+    // modified (when bmi sees a conflict on unique keys). Which is impossible here, because
+    // the marking is not a unique key.
+    assert(places_set.modify(cit, update_place(label, marking)));
+    return *cit;
+  }
 }
 
 /*------------------------------------------------------------------------------------------------*/
