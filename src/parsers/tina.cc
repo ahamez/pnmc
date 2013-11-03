@@ -73,7 +73,7 @@ tina(std::istream& in)
       std::istringstream ss(line);
 
       // Empty line or comment.
-      if (((ss >> std::ws).peek() == '#') or not (ss >> s0))
+      if (((ss >> std::ws).peek() == std::char_traits<char>::to_int_type('#')) or not (ss >> s0))
       {
         continue;
       }
