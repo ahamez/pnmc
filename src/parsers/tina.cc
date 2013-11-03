@@ -28,7 +28,7 @@ place_valuation(const std::string& s)
   }
   catch (const std::invalid_argument&)
   {
-    throw parse_error();
+    throw parse_error("Valuation '" + std::string(star_cit + 1, s.cend()) + "' is not a value");
   }
 }
 
@@ -45,12 +45,13 @@ marking(const std::string& s)
     }
     catch (const std::invalid_argument&)
     {
-      throw parse_error();
+      throw parse_error( "Marking '" + std::string(std::next(s.cbegin()), std::prev(s.cend()))
+                       + "' is not a value");
     }
   }
   else
   {
-    throw parse_error();
+    throw parse_error("Invalid marking format: " + s);
   }
 }
 
@@ -95,7 +96,7 @@ tina(std::istream& in)
         }
         else
         {
-          throw parse_error();
+          throw parse_error("Invalid transition: " + line);
         }
 
         // Skip time interval, if any.
@@ -131,19 +132,20 @@ tina(std::istream& in)
         }
         else
         {
-          throw parse_error();
+          throw parse_error("Invalid place: " + line);
         }
       }
 
       // Error.
       else
       {
-        throw parse_error();
+        throw parse_error("Invalid line: " + line);
       }
     }
   }
-  catch (const parse_error&)
+  catch (const parse_error& p)
   {
+    std::cerr << p.what() << std::endl;
     return nullptr;
   }
 
