@@ -190,25 +190,40 @@ bpn(std::istream& in)
     // temporary string placeholders
     std::string s0, s1, s2, s3;
 
-    in >> s0 >> s1 >> s2;
+    if (not (in >> s0 >> s1 >> s2))
+    {
+      throw parse_error();
+    }
     keyword(s0, "places"); sharp(s1); interval(s2);
 
-    in >> s0 >> s1 >> s2;
+    if (not (in >> s0 >> s1 >> s2))
+    {
+      throw parse_error();
+    }
     keyword(s0, "initial"); keyword(s1, "place");
     const auto initial_place = uint(s2);
 
-    in >> s0 >> s1 >> s2;
+    if (not (in >> s0 >> s1 >> s2))
+    {
+      throw parse_error();
+    }
     keyword(s0, "units"); interval(s2);
     auto nb_units = sharp(s1);
 
     // units
-    in >> s0 >> s1 >> s2;
+    if (not (in >> s0 >> s1 >> s2))
+    {
+      throw parse_error();
+    }
     keyword(s0, "root"); keyword(s1, "unit"); uint(s2);
     const auto root_module = "U" + s2;
     std::unordered_map<std::string, pn::module> modules;;
     while (nb_units > 0)
     {
-      in >> s0 >> s1 >> s2 >> s3;
+      if (not (in >> s0 >> s1 >> s2 >> s3))
+      {
+        throw parse_error();
+      }
       prefix(s0, 'U');
       sharp(s1);
       unsigned int first, last;
@@ -224,7 +239,10 @@ bpn(std::istream& in)
       const auto nb_nested_units = sharp(s3);
       for (auto i = 0; i < nb_nested_units; ++i)
       {
-        in >> s1;
+        if (not(in >> s1))
+        {
+          throw parse_error();
+        }
         m.add_module(modules["U" + s1]);
       }
       modules[s0] = pn::make_module(m);
@@ -234,14 +252,20 @@ bpn(std::istream& in)
     net.modules = modules[root_module];
 
     // transitions
-    in >> s0 >> s1 >> s2;
+    if (not(in >> s0 >> s1 >> s2))
+    {
+      throw parse_error();
+    }
     keyword(s0, "transitions");
     auto nb_transitions = sharp(s1);
     interval(s2);
     while (nb_transitions > 0)
     {
       // input places
-      in >> s0 >> s1;
+      if (not(in >> s0 >> s1))
+      {
+        throw parse_error();
+      }
       const auto transition_id = prefix(s0, 'T');
 
       net.add_transition(transition_id, "");
@@ -249,17 +273,26 @@ bpn(std::istream& in)
       auto nb_places = sharp(s1);
       while (nb_places > 0)
       {
-        in >> s0;
+        if (not (in >> s0))
+        {
+          throw parse_error();
+        }
         net.add_pre_place(transition_id, s0, pn::arc());
         --nb_places;
       }
 
       // output places
-      in >> s0;
+      if (not(in >> s0))
+      {
+        throw parse_error();
+      }
       nb_places = sharp(s0);
       while (nb_places > 0)
       {
-        in >> s0;
+        if (not (in >> s0))
+        {
+          throw parse_error();
+        }
         net.add_post_place(transition_id, s0, pn::arc());
         --nb_places;
       }
