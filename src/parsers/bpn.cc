@@ -1,3 +1,4 @@
+#include <algorithm> // any_of
 #include <istream>
 #include <string>
 #include <unordered_map>
@@ -210,8 +211,7 @@ struct interval
   std::istream&
   operator>>(std::istream& in, const interval& manip)
   {
-    unsigned int first;
-    unsigned int last;
+    unsigned int first, last;
     std::size_t pos;
 
     std::string s;
@@ -223,22 +223,13 @@ struct interval
     try
     {
       first = std::stoi(s, &pos);
-    }
-    catch (const std::invalid_argument&)
-    {
-      throw parse_error("Expected a value in interval, got " + s);
-    }
-
-    auto cit = s.cbegin() + pos;
-    if (std::distance(cit, s.cend()) < 3 or std::any_of(cit, cit + 3, [](char c){return c != '.';}))
-    {
-      throw parse_error("Expected '...' in interval, got " + s);
-    }
-    std::advance(cit, 3);
-
-    try
-    {
-      last = std::stoi(std::string(cit, s.cend()));
+      auto it = s.cbegin() + pos;
+      if (std::distance(it, s.cend()) < 3 or std::any_of(it, it + 3, [](char c){return c != '.';}))
+      {
+        throw parse_error("Expected '...' in interval, got " + s);
+      }
+      std::advance(it, 3);
+      last = std::stoi(std::string(it, s.cend()));
     }
     catch (const std::invalid_argument&)
     {
@@ -250,7 +241,6 @@ struct interval
       *manip.first_ = first;
       *manip.last_  = last;
     }
-
     return in;
   }
 };
@@ -263,13 +253,11 @@ struct prefix
   std::string* res_;
 
   prefix(char p, std::string& res)
-    : p_(p)
-    , res_(&res)
+    : p_(p), res_(&res)
   {}
 
   prefix(char p)
-    : p_(p)
-    , res_(nullptr)
+    : p_(p), res_(nullptr)
   {}
 
   friend
@@ -279,12 +267,17 @@ struct prefix
     std::string s;
 
     if (not (in >> s))
+    {
       throw parse_error("Expected a prefixed value");
-
+    }
     if (s[0] != manip.p_)
+    {
       throw parse_error("Expected a prefixed value, got " + s);
+    }
     if (manip.res_)
+    {
       *manip.res_ = s.substr(1);
+    }
 
     return in;
   }
