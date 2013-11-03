@@ -12,7 +12,6 @@ set(SOURCES
     parsers/prod.cc
     parsers/tina.cc
     parsers/xml.cc
-    pn/arc.cc
     pn/module.cc
     pn/net.cc
     pn/place.cc

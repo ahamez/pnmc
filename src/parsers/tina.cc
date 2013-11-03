@@ -4,7 +4,6 @@
 
 #include "parsers/parse_error.hh"
 #include "parsers/tina.hh"
-#include "pn/arc.hh"
 
 namespace pnmc { namespace parsers {
 
@@ -113,7 +112,7 @@ tina(std::istream& in)
             break;
           }
           std::tie(place_id, valuation) = place_valuation(s1);
-          net.add_pre_place(s0, place_id, pn::arc(valuation));
+          net.add_pre_place(s0, place_id, valuation);
         }
 
         if (not found_arrow)
@@ -124,7 +123,7 @@ tina(std::istream& in)
         while (ss >> s1)
         {
           std::tie(place_id, valuation) = place_valuation(s1);
-          net.add_post_place(s0, place_id, pn::arc(valuation));
+          net.add_post_place(s0, place_id, valuation);
         }
       }
 

@@ -6,7 +6,6 @@
 #include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/member.hpp>
 
-#include "pn/arc.hh"
 #include "pn/module.hh"
 #include "pn/place.hh"
 #include "pn/transition.hh"
@@ -101,13 +100,13 @@ public:
   ///
   /// If the place doesn't exist, it is created with a marking set to 0.
   void
-  add_post_place(const std::string& tid, const std::string& post, const arc& a);
+  add_post_place(const std::string& tid, const std::string& post, unsigned int marking);
 
   /// @brief Add a pre place to a transition.
   ///
   /// If the place doesn't exist, it is created with a marking set to 0.
   void
-  add_pre_place(const std::string& tid, const std::string& pre, const arc& a);
+  add_pre_place(const std::string& tid, const std::string& pre, unsigned int marking);
 
   /// @brief Return all places.
   const places_type::index<id_index>::type&

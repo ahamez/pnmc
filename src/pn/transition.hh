@@ -5,8 +5,6 @@
 #include <limits>
 #include <map>
 
-#include "pn/arc.hh"
-
 namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
@@ -27,10 +25,10 @@ struct transition
   const std::size_t index;
 
   /// @brief Pre-places
-  std::multimap<std::string, arc> pre;
+  std::multimap<std::string, unsigned int> pre;
 
   /// @brief Post-places
-  std::multimap<std::string, arc> post;
+  std::multimap<std::string, unsigned int> post;
 
   /// @brief Constructor.
   transition(const std::string& id, const std::string& label, std::size_t index);

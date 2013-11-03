@@ -10,7 +10,6 @@
 #include <boost/spirit/include/phoenix_statement.hpp>
 
 #include "parsers/prod.hh"
-#include "pn/arc.hh"
 
 namespace pnmc { namespace parsers {
 
@@ -29,10 +28,11 @@ struct prod_parser
   qi::rule< Iterator, void(), ascii::space_type>
           start;
 
-  qi::rule<Iterator, std::string(), ascii::space_type, qi::locals<std::string,unsigned int>>
+  qi::rule<Iterator, std::string(), ascii::space_type, qi::locals<std::string, unsigned int>>
           place;
 
-  qi::rule<Iterator, std::string(), ascii::space_type, qi::locals<std::string,std::string,pn::arc>>
+  qi::rule< Iterator, std::string(), ascii::space_type
+          , qi::locals<std::string, std::string, unsigned int>>
           trans;
 
   qi::rule<Iterator, std::string()>
@@ -58,7 +58,6 @@ struct prod_parser
     using qi::lexeme;
 
     using pn::net;
-    using pn::arc;
 
     id %= +(qi::alpha|qi::digit|'_');
 
@@ -68,7 +67,7 @@ struct prod_parser
           >> lit('{')
     				>> *( id [_b = _1]
 			         >> lit(':')
-        			 >> -(uint_[_c = construct<pn::arc>(_1)] >> -lit('*'))
+        			 >> -(uint_[_c = _1] >> -lit('*'))
                >> lit("<..>")
 			         >> lit(';')[bind(&net::add_pre_place, n, _a, _b, _c )]
                )
@@ -77,7 +76,7 @@ struct prod_parser
 				    >> lit('{')
     					>> *( id[_b = _1]
          				 >> lit(':')
-                 >> -(uint_[_c = construct<pn::arc>(_1)] >> -lit('*') )
+                 >> -(uint_[_c = _1] >> -lit('*') )
                  >> lit("<..>")
                  >> lit(';') [bind(&net::add_post_place, n, _a, _b, _c )]
                  )

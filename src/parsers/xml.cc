@@ -53,15 +53,15 @@ xml_parse_transition(std::shared_ptr<pn::net> net, rapidxml::xml_node<>* node)
     auto ref = node->first_node();
     while (ref)
     {
-      pn::arc a(std::atoi(ref->first_attribute("weight")->value()));
+      const unsigned int valuation = std::atoi(ref->first_attribute("weight")->value());
       const std::string rid(ref->first_attribute("ref")->value());
       if (std::strncmp(ref->name(), "pre", std::strlen("pre")) == 0)
       {
-        net->add_pre_place(id, rid, a);
+        net->add_pre_place(id, rid, valuation);
       }
       else if (std::strncmp(ref->name(), "post", std::strlen("post")) == 0)
       {
-        net->add_post_place(id, rid, a);
+        net->add_post_place(id, rid, valuation);
       }
       else
       {

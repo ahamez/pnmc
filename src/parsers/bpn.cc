@@ -357,7 +357,7 @@ bpn(std::istream& in)
         {
           throw parse_error();
         }
-        net.add_pre_place(transition_id, s0, pn::arc());
+        net.add_pre_place(transition_id, s0, 1);
         --nb_places;
       }
 
@@ -369,7 +369,7 @@ bpn(std::istream& in)
         {
           throw parse_error();
         }
-        net.add_post_place(transition_id, s0, pn::arc());
+        net.add_post_place(transition_id, s0, 1);
         --nb_places;
       }
 

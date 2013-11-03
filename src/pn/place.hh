@@ -4,8 +4,6 @@
 #include <iosfwd>
 #include <string>
 
-#include "pn/arc.hh"
-
 namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/

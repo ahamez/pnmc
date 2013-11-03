@@ -111,14 +111,14 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     // post actions.
     for (const auto& arc : transition.post)
     {
-      homomorphism f = ValuesFunction<sdd_conf>(o, arc.first, post(arc.second.weight));
+      homomorphism f = ValuesFunction<sdd_conf>(o, arc.first, post(arc.second));
       h_t = Composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
     // pre actions.
     for (const auto& arc : transition.pre)
     {
-      homomorphism f = ValuesFunction<sdd_conf>(o, arc.first, pre(arc.second.weight));
+      homomorphism f = ValuesFunction<sdd_conf>(o, arc.first, pre(arc.second));
       h_t = Composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
