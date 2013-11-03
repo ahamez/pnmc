@@ -133,7 +133,7 @@ tina(std::istream& in)
       {
         if (ss >> s1 >> s2)
         {
-          net.add_place(s1, "", marking(s2));
+          net.add_place(s1, marking(s2));
         }
         else
         {

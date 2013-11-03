@@ -45,10 +45,6 @@ public:
                      ordered_unique<tag< id_index>
                                        , member<place, const std::string, &place::id>>
 
-                  // sort by label
-                  , ordered_non_unique< tag<label_index>
-                                      , member<place, std::string, &place::label>>
-
                   // sort by marking
                   , ordered_non_unique< tag<marking_index>
                                       , member<place, unsigned int, &place::marking>>
@@ -91,9 +87,9 @@ public:
 
   /// @brief Add a place.
   ///
-  /// If the place already exist, its label and marking are updated.
+  /// If the place already exist, its marking is updated.
   const place&
-  add_place(const std::string& id, const std::string& label, unsigned int marking);
+  add_place(const std::string& id, unsigned int marking);
 
   /// @brief Add a transition.
   ///
@@ -103,13 +99,13 @@ public:
 
   /// @brief Add a post place to a transition.
   ///
-  /// If the place doesn't exist, it is created with an empty label and a marking set to 0.
+  /// If the place doesn't exist, it is created with a marking set to 0.
   void
   add_post_place(const std::string& tid, const std::string& post, const arc& a);
 
   /// @brief Add a pre place to a transition.
   ///
-  /// If the place doesn't exist, it is created with an empty label and a marking set to 0.
+  /// If the place doesn't exist, it is created with a marking set to 0.
   void
   add_pre_place(const std::string& tid, const std::string& pre, const arc& a);
 

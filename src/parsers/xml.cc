@@ -17,10 +17,9 @@ xml_parse_place(std::shared_ptr<pn::net> net, rapidxml::xml_node<>* node)
   using namespace rapidxml;
   if (std::strncmp(node->name(), "place", std::strlen("place")) == 0)
   {
-    const std::string name(node->first_attribute("name")->value());
     const std::string id(node->first_attribute("id")->value());
     const unsigned int marking(std::atoi(node->first_attribute("marking")->value()));
-    return pn::make_module(net->add_place(id, name, marking));
+    return pn::make_module(net->add_place(id, marking));
   }
   else if (std::strncmp(node->name(), "module", std::strlen("module")) == 0)
   {

@@ -15,14 +15,11 @@ struct place
   /// @brief This place's id.
   const std::string id;
 
-  /// @brief This place's label.
-  std::string label;
-
   /// @brief This place's marking.
   unsigned int marking;
 
   /// @brief Constructor.
-  place(const std::string& id, const std::string& label, unsigned int m);
+  place(const std::string& id, unsigned int m);
 };
 
 /*------------------------------------------------------------------------------------------------*/

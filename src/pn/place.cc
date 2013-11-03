@@ -6,8 +6,8 @@ namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
-place::place(const std::string& id, const std::string& label, unsigned int m)
-  : id(id), label(label), marking(m)
+place::place(const std::string& id, unsigned int m)
+  : id(id), marking(m)
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -23,7 +23,7 @@ operator<(const pn::place& lhs, const pn::place& rhs)
 std::ostream&
 operator<<(std::ostream& os, const pn::place& p)
 {
-  return os << "pl " << p.id << ":" << p.label <<  " (" << p.marking << ")";
+  return os << "pl " << p.id  <<  " (" << p.marking << ")";
 }
 
 /*------------------------------------------------------------------------------------------------*/

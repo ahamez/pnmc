@@ -91,7 +91,7 @@ struct prod_parser
           >> -(lit('(') >> id >> lit(')'))
           >> id[_a = _1]
           >> -marking[_b = _1]
-          >> eps[bind(&net::add_place, n, _a, _a, _b)]
+          >> eps[bind(&net::add_place, n, _a, _b)]
           ;
 
     start = +(place|trans);

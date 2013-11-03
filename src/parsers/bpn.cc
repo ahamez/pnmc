@@ -328,7 +328,7 @@ bpn(std::istream& in)
       pn::module_node m(s0);
       for (auto i = first; i <= last; ++i)
       {
-        const auto& p = net.add_place(std::to_string(i), "", 0);
+        const auto& p = net.add_place(std::to_string(i), 0);
         m.add_module(pn::make_module(p));
       }
 
@@ -383,7 +383,7 @@ bpn(std::istream& in)
       --nb_transitions;
     }
 
-    net.add_place(std::to_string(initial_place), "", 1);
+    net.add_place(std::to_string(initial_place), 1);
   }
   catch (const parse_error& p)
   {

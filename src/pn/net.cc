@@ -54,18 +54,16 @@ struct add_pre_place_to_transition
 /// @brief Used by Boost.MultiIndex.
 struct update_place
 {
-  const std::string label;
   const unsigned int marking;
 
-  update_place(const std::string& l, unsigned int m)
-  	: label(l), marking(m)
+  update_place(unsigned int m)
+  	: marking(m)
   {}
 
   void
   operator()(place& p)
   const
   {
-    p.label = label;
     p.marking = marking;
   }
 };
@@ -79,12 +77,12 @@ net::net()
 /*------------------------------------------------------------------------------------------------*/
 
 const place&
-net::add_place(const std::string& pid, const std::string& label, unsigned int marking)
+net::add_place(const std::string& pid, unsigned int marking)
 {
   const auto cit = places_set.get<id_index>().find(pid);
   if (cit == places_set.get<id_index>().cend())
   {
-    return *places_set.insert({pid, label, marking}).first;
+    return *places_set.insert({pid, marking}).first;
   }
   else
   {
@@ -93,7 +91,7 @@ net::add_place(const std::string& pid, const std::string& label, unsigned int ma
     // The assert() is here because modify() would return false if the place could not have been
     // modified (when bmi sees a conflict on unique keys). Which is impossible here, because
     // the marking is not a unique key.
-    assert(places_set.modify(cit, update_place(label, marking)));
+    assert(places_set.modify(cit, update_place(marking)));
     return *cit;
   }
 }
@@ -123,7 +121,7 @@ net::add_post_place(const std::string& tid, const std::string& post, const arc& 
   transitions_set.modify(it, add_post_place_to_transition(a,post));
   if (places().find(post) == places().end())
   {
-    add_place(post, post, 0);
+    add_place(post, 0);
   }
 }
 
@@ -136,7 +134,7 @@ net::add_pre_place(const std::string& tid, const std::string& pre, const arc& a)
   transitions_set.modify(it, add_pre_place_to_transition(a,pre));
   if (places().find(pre) == places().end())
   {
-    add_place(pre, pre, 0);
+    add_place(pre, 0);
   }
 }
 
