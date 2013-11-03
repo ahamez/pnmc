@@ -106,14 +106,21 @@ tina(std::istream& in)
           ss >> s1;
         }
 
+        bool found_arrow = false;
         while (ss >> s1)
         {
           if (s1 == "->")
           {
+            found_arrow = true;
             break;
           }
           std::tie(place_id, valuation) = place_valuation(s1);
           net.add_pre_place(s0, place_id, pn::arc(valuation));
+        }
+
+        if (not found_arrow)
+        {
+          throw parse_error("Invalid transition (missing '->'): " + line);
         }
 
         while (ss >> s1)
