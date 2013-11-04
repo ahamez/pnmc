@@ -104,7 +104,7 @@ tina(std::istream& in)
 
       if (ss >> s0)
       {
-        net.add_transition(s0, "");
+        net.add_transition(s0);
       }
       else
       {

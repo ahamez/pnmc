@@ -91,10 +91,10 @@ net::add_place(const std::string& pid, unsigned int marking)
 /*------------------------------------------------------------------------------------------------*/
 
 const transition&
-net::add_transition(const std::string& tid, const std::string& label)
+net::add_transition(const std::string& tid)
 {
   static std::size_t transition_index = 0;
-  const auto insertion = transitions_set.insert({tid, label, transition_index++});
+  const auto insertion = transitions_set.insert({tid, transition_index++});
   if (not insertion.second)
   {
     throw "Transition " + tid + " already exists";

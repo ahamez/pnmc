@@ -348,7 +348,7 @@ bpn(std::istream& in)
     std::string transition_id;
     in >> prefix('T', transition_id) >> sharp(nb_places);
 
-    net.add_transition(transition_id, "");
+    net.add_transition(transition_id);
 
     while (nb_places > 0)
     {

@@ -48,9 +48,8 @@ xml_parse_transition(std::shared_ptr<pn::net> net, rapidxml::xml_node<>* node)
   using namespace rapidxml;
   if (std::strncmp(node->name(), "transition", std::strlen("transition")) == 0)
   {
-    const std::string name(node->first_attribute("name")->value());
     const std::string id(node->first_attribute("id")->value());
-    net->add_transition(id, name);
+    net->add_transition(id);
     auto ref = node->first_node();
     while (ref)
     {

@@ -15,9 +15,6 @@ struct transition
   /// @brief This transition's id.
   const std::string id;
 
-  /// @brief This transition's label.
-  std::string label;
-
   /// @brief This transition's index.
   ///
   /// Used to compute dead transitions: this index is used to get the position of this transition
@@ -31,7 +28,7 @@ struct transition
   std::multimap<std::string, unsigned int> post;
 
   /// @brief Constructor.
-  transition(const std::string& id, const std::string& label, std::size_t index);
+  transition(const std::string& id, std::size_t index);
 };
 
 /*------------------------------------------------------------------------------------------------*/

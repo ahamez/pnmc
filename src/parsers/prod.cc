@@ -63,7 +63,7 @@ struct prod_parser
     id %= +(qi::alpha|qi::digit|'_');
 
     trans =  lit("#trans")
-          >> id[bind(&net::add_transition, n, _1, _1) , _a = _1]
+          >> id[bind(&net::add_transition, n, _1) , _a = _1]
           >> lit("in")
           >> lit('{')
     				>> *( id [_b = _1]

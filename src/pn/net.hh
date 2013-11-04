@@ -22,15 +22,13 @@ struct net
 {
 private:
 
-  /// @brief A tag to identify index for boost::multi_index.
+  /// @brief A tag to identify the view ordered by idendifiers for boost::multi_index.
   struct id_index{};
 
-  /// @brief A tag to identify index for boost::multi_index.
-  struct label_index{};
-
-  /// @brief A tag to identify index for boost::multi_index
+  /// @brief A tag to identify the view ordered by markings for boost::multi_index.
   struct marking_index{};
 
+  /// @brief A tag to identify the view ordered by indices for boost::multi_index.
   struct index_index{};
 
 public:
@@ -58,10 +56,6 @@ public:
                    // sort by id
                      ordered_unique<tag< id_index>
                                        , member<transition, const std::string, &transition::id>>
-
-                   // sort by label
-                   , ordered_non_unique< tag<label_index>
-                                       , member<transition, std::string, &transition::label>>
 
                    // sort by index
                    , ordered_unique< tag<index_index>
@@ -94,7 +88,7 @@ public:
   ///
   /// It is an error to add an already existing transition.
   const transition&
-  add_transition(const std::string& tid, const std::string& label);
+  add_transition(const std::string& tid);
 
   /// @brief Add a post place to a transition.
   ///

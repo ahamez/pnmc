@@ -6,8 +6,8 @@ namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
-transition::transition(const std::string& id, const std::string& label, std::size_t index)
-  : id(id), label(label), index(index), pre(), post()
+transition::transition(const std::string& id, std::size_t index)
+  : id(id), index(index), pre(), post()
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -26,7 +26,7 @@ noexcept
 std::ostream&
 operator<<(std::ostream& os, const transition& t)
 {
-  os << "tr " << t.id << ":" << t.label << " ";
+  os << "tr " << t.id;
   for(auto p : t.pre)
   {
     os << " " << p.first << p.second;
