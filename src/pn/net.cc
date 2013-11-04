@@ -1,6 +1,3 @@
-#include <cassert>
-#include <stdexcept>
-
 #include "pn/net.hh"
 #include "pn/place.hh"
 #include "pn/transition.hh"
@@ -100,7 +97,7 @@ net::add_transition(const std::string& tid, const std::string& label)
   const auto insertion = transitions_set.insert({tid, label, transition_index++});
   if (not insertion.second)
   {
-    throw std::runtime_error("Transition " + tid + " already exists");
+    throw "Transition " + tid + " already exists";
   }
   return *insertion.first;
 }
