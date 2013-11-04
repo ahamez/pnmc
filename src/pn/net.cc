@@ -86,10 +86,7 @@ net::add_place(const std::string& pid, unsigned int marking)
   {
     // This place was created before by add_post_place() or add_pre_place().
     // At this time, the marking was not known. Thus, we now update it.
-    // The assert() is here because modify() would return false if the place could not have been
-    // modified (when bmi sees a conflict on unique keys). Which is impossible here, because
-    // the marking is not a unique key.
-    assert(places_set.modify(cit, update_place(marking)));
+    places_set.modify(cit, update_place(marking));
     return *cit;
   }
 }
