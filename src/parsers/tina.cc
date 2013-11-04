@@ -9,6 +9,39 @@ namespace pnmc { namespace parsers {
 
 /*------------------------------------------------------------------------------------------------*/
 
+unsigned int
+value(std::string::const_iterator cit, std::string::const_iterator cend)
+{
+  std::string s(cit, cend);
+  try
+  {
+    std::size_t pos;
+    auto value = std::stoi(s, &pos);
+    std::advance(cit, pos);
+    if (std::distance(cit, cend) == 1)
+    {
+      switch (*cit)
+      {
+        case 'K': value *= 1000; break;
+        case 'M': value *= 1000000; break;
+        case 'G': value *= 1000000000; break;
+        default: throw parse_error("Invalid suffix, got " + std::string(*cit, 1));
+      }
+    }
+    else if (std::distance(cit, cend) > 1)
+    {
+      throw parse_error("Invalid suffix, got " + std::string(cit, cend));
+    }
+    return value;
+  }
+  catch (const std::invalid_argument&)
+  {
+    throw parse_error("Expected a value, got " + s);
+  }
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 std::pair<std::string, unsigned int>
 place_valuation(const std::string& s)
 {
@@ -17,15 +50,8 @@ place_valuation(const std::string& s)
   {
     return std::make_pair(s, 1);
   }
-  try
-  {
-    const auto valuation = std::stoi(std::string(star_cit + 1, s.cend()));
-    return std::make_pair(std::string(s.cbegin(), star_cit), valuation);
-  }
-  catch (const std::invalid_argument&)
-  {
-    throw parse_error("Valuation '" + std::string(star_cit + 1, s.cend()) + "' is not a value");
-  }
+  const auto valuation = value(star_cit + 1, s.cend());
+  return std::make_pair(std::string(s.cbegin(), star_cit), valuation);
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -35,15 +61,7 @@ marking(const std::string& s)
 {
   if (*s.cbegin() == '(' and *std::prev(s.cend()) == ')')
   {
-    try
-    {
-      return std::stoi(std::string(std::next(s.cbegin()), std::prev(s.cend())));
-    }
-    catch (const std::invalid_argument&)
-    {
-      throw parse_error( "Marking '" + std::string(std::next(s.cbegin()), std::prev(s.cend()))
-                       + "' is not a value");
-    }
+    return value(std::next(s.cbegin()), std::prev(s.cend()));
   }
   else
   {
