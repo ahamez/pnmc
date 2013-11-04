@@ -291,99 +291,91 @@ bpn(std::istream& in)
   auto net_ptr = std::make_shared<pn::net>();
   auto& net = *net_ptr;
 
-  try
+  // temporary string placeholders
+  std::string s0, s1;
+
+  // map unit ids to modules
+  std::unordered_map<std::string, pn::module> modules;
+
+  in >> kw("places") >> sharp() >> interval();
+
+  unsigned int initial_place;
+  in >> kw("initial") >> kw("place") >> uint(initial_place);
+
+  unsigned int nb_units;
+  in >> kw("units") >> sharp(nb_units) >> interval();
+
+  // units
+  unsigned int root_module_nb;
+  in >> kw("root") >> kw("unit") >> uint(root_module_nb);
+
+  const auto root_module = std::to_string(root_module_nb);
+
+  while (nb_units > 0)
   {
-    // temporary string placeholders
-    std::string s0, s1;
+    unsigned int nb_nested_units, first, last;
+    std::string module_name;
+    in >> prefix('U', module_name) >> sharp() >> interval(first, last) >> sharp(nb_nested_units);
 
-    // map unit ids to modules
-    std::unordered_map<std::string, pn::module> modules;
-
-    in >> kw("places") >> sharp() >> interval();
-
-    unsigned int initial_place;
-    in >> kw("initial") >> kw("place") >> uint(initial_place);
-
-    unsigned int nb_units;
-    in >> kw("units") >> sharp(nb_units) >> interval();
-
-    // units
-    unsigned int root_module_nb;
-    in >> kw("root") >> kw("unit") >> uint(root_module_nb);
-
-    const auto root_module = std::to_string(root_module_nb);
-
-    while (nb_units > 0)
+    pn::module_node m(module_name);
+    for (auto i = first; i <= last; ++i)
     {
-      unsigned int nb_nested_units, first, last;
-      std::string module_name;
-      in >> prefix('U', module_name) >> sharp() >> interval(first, last) >> sharp(nb_nested_units);
-
-      pn::module_node m(module_name);
-      for (auto i = first; i <= last; ++i)
-      {
-        const auto& p = net.add_place(std::to_string(i), 0);
-        m.add_module(pn::make_module(p));
-      }
-
-      for (auto i = 0; i < nb_nested_units; ++i)
-      {
-        if (not(in >> s1))
-        {
-          throw parse_error();
-        }
-        m.add_module(modules["U" + s1]);
-      }
-      modules[module_name] = pn::make_module(m);
-
-      --nb_units;
-    }
-    net.modules = modules["U" + root_module];
-
-    // transitions
-    unsigned int nb_transitions;
-    in >> kw("transitions") >> sharp(nb_transitions) >> interval();
-    while (nb_transitions > 0)
-    {
-      // input places
-      unsigned int nb_places;
-      std::string transition_id;
-      in >> prefix('T', transition_id) >> sharp(nb_places);
-
-      net.add_transition(transition_id, "");
-
-      while (nb_places > 0)
-      {
-        if (not (in >> s0))
-        {
-          throw parse_error();
-        }
-        net.add_pre_place(transition_id, s0, 1);
-        --nb_places;
-      }
-
-      // output places
-      in >> sharp(nb_places);
-      while (nb_places > 0)
-      {
-        if (not (in >> s0))
-        {
-          throw parse_error();
-        }
-        net.add_post_place(transition_id, s0, 1);
-        --nb_places;
-      }
-
-      --nb_transitions;
+      const auto& p = net.add_place(std::to_string(i), 0);
+      m.add_module(pn::make_module(p));
     }
 
-    net.add_place(std::to_string(initial_place), 1);
+    for (auto i = 0; i < nb_nested_units; ++i)
+    {
+      if (not(in >> s1))
+      {
+        throw parse_error();
+      }
+      m.add_module(modules["U" + s1]);
+    }
+    modules[module_name] = pn::make_module(m);
+
+    --nb_units;
   }
-  catch (const parse_error& p)
+  net.modules = modules["U" + root_module];
+
+  // transitions
+  unsigned int nb_transitions;
+  in >> kw("transitions") >> sharp(nb_transitions) >> interval();
+  while (nb_transitions > 0)
   {
-    std::cerr << p.what() << std::endl;
-    return nullptr;
+    // input places
+    unsigned int nb_places;
+    std::string transition_id;
+    in >> prefix('T', transition_id) >> sharp(nb_places);
+
+    net.add_transition(transition_id, "");
+
+    while (nb_places > 0)
+    {
+      if (not (in >> s0))
+      {
+        throw parse_error();
+      }
+      net.add_pre_place(transition_id, s0, 1);
+      --nb_places;
+    }
+
+    // output places
+    in >> sharp(nb_places);
+    while (nb_places > 0)
+    {
+      if (not (in >> s0))
+      {
+        throw parse_error();
+      }
+      net.add_post_place(transition_id, s0, 1);
+      --nb_places;
+    }
+
+    --nb_transitions;
   }
+
+  net.add_place(std::to_string(initial_place), 1);
 
   return net_ptr;
 }

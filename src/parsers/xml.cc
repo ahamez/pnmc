@@ -4,6 +4,7 @@
 #include <istream>
 #include <string>
 
+#include "parsers/parse_error.hh"
 #include "parsers/xml.hh"
 #include "parsers/rapidxml/rapidxml.hpp"
 
@@ -35,7 +36,7 @@ xml_parse_place(std::shared_ptr<pn::net> net, rapidxml::xml_node<>* node)
   }
   else
   {
-    throw std::runtime_error("XML parse error.");
+    throw parse_error();
   }
 }
 
@@ -65,7 +66,7 @@ xml_parse_transition(std::shared_ptr<pn::net> net, rapidxml::xml_node<>* node)
       }
       else
       {
-        throw std::runtime_error("XML parse error.");
+        throw parse_error();
       }
       ref = ref->next_sibling();
     }
@@ -114,44 +115,36 @@ xml(std::istream& in)
 
   auto net_ptr = std::make_shared<pn::net>();
 
-  try
+  xml_node<>* node = doc.first_node();
+  net_ptr->name = node->first_attribute("name")->value();
+
+  pn::module_node mn(net_ptr->name);
+
+  // Places.
+  auto place = node->first_node("places")->first_node();
+  while (place)
   {
-    xml_node<>* node = doc.first_node();
-    net_ptr->name = node->first_attribute("name")->value();
-
-    pn::module_node mn(net_ptr->name);
-
-    // Places.
-    auto place = node->first_node("places")->first_node();
-    while (place)
-    {
-      mn.add_module(xml_parse_place(net_ptr, place));
-      place = place->next_sibling();
-    }
-
-    // Transitions.
-    auto transition = node->first_node("transitions")->first_node();
-    while (transition)
-    {
-      xml_parse_transition(net_ptr, transition);
-      transition = transition->next_sibling();
-    }
-
-    const bool only_places = std::all_of( mn.nested.begin(), mn.nested.end()
-                                        , [](const pn::module& m)
-                                            {
-                                              return boost::apply_visitor(xml_only_places(), *m);
-                                            }
-                                        );
-    if (not only_places)
-    {
-      net_ptr->modules = make_module(mn);
-    }
+    mn.add_module(xml_parse_place(net_ptr, place));
+    place = place->next_sibling();
   }
-  catch (std::exception&)
+
+  // Transitions.
+  auto transition = node->first_node("transitions")->first_node();
+  while (transition)
   {
-    // Parse failed.
-    return nullptr;
+    xml_parse_transition(net_ptr, transition);
+    transition = transition->next_sibling();
+  }
+
+  const bool only_places = std::all_of( mn.nested.begin(), mn.nested.end()
+                                       , [](const pn::module& m)
+                                       {
+                                         return boost::apply_visitor(xml_only_places(), *m);
+                                       }
+                                       );
+  if (not only_places)
+  {
+    net_ptr->modules = make_module(mn);
   }
 
   return net_ptr;

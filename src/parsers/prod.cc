@@ -9,6 +9,7 @@
 #include <boost/spirit/include/phoenix_scope.hpp>
 #include <boost/spirit/include/phoenix_statement.hpp>
 
+#include "parsers/parse_error.hh"
 #include "parsers/prod.hh"
 
 namespace pnmc { namespace parsers {
@@ -116,8 +117,7 @@ prod(std::istream& input)
 
   if (not r or cit != end)
   {
-    // Parse failed.
-    return nullptr;
+    throw parse_error();;
   }
 
   return net_ptr;

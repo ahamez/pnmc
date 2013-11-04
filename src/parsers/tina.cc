@@ -59,98 +59,90 @@ tina(std::istream& in)
   std::shared_ptr<pn::net> net_ptr = std::make_shared<pn::net>();
   auto& net = *net_ptr;
 
-  try
+  std::string line, s0, s1, s2;
+  line.reserve(1024);
+
+  while (std::getline(in, line))
   {
-    std::string line, s0, s1, s2;
-    line.reserve(1024);
+    std::istringstream ss(line);
 
-    while (std::getline(in, line))
+    // Empty line or comment.
+    if (((ss >> std::ws).peek() == std::char_traits<char>::to_int_type('#')) or not (ss >> s0))
     {
-      std::istringstream ss(line);
+      continue;
+    }
 
-      // Empty line or comment.
-      if (((ss >> std::ws).peek() == std::char_traits<char>::to_int_type('#')) or not (ss >> s0))
+    // Net
+    if (s0 == "net")
+    {
+      continue;
+    }
+
+    // Transitions
+    else if (s0 == "tr")
+    {
+      std::string place_id;
+      unsigned int valuation;
+
+      if (ss >> s0)
       {
-        continue;
+        net.add_transition(s0, "");
       }
-
-      // Net
-      if (s0 == "net")
-      {
-        continue;
-      }
-
-      // Transitions
-      else if (s0 == "tr")
-      {
-        std::string place_id;
-        unsigned int valuation;
-
-        if (ss >> s0)
-        {
-          net.add_transition(s0, "");
-        }
-        else
-        {
-          throw parse_error("Invalid transition: " + line);
-        }
-
-        // Skip time interval, if any.
-        const auto c = (ss >> std::ws).peek();
-        if (  c == std::char_traits<char>::to_int_type('[')
-           or c == std::char_traits<char>::to_int_type(']'))
-        {
-          ss >> s1;
-        }
-
-        bool found_arrow = false;
-        while (ss >> s1)
-        {
-          if (s1 == "->")
-          {
-            found_arrow = true;
-            break;
-          }
-          std::tie(place_id, valuation) = place_valuation(s1);
-          net.add_pre_place(s0, place_id, valuation);
-        }
-
-        if (not found_arrow)
-        {
-          throw parse_error("Invalid transition (missing '->'): " + line);
-        }
-
-        while (ss >> s1)
-        {
-          std::tie(place_id, valuation) = place_valuation(s1);
-          net.add_post_place(s0, place_id, valuation);
-        }
-      }
-
-      // Places
-      else if (s0 == "pl")
-      {
-        if (ss >> s1 >> s2)
-        {
-          net.add_place(s1, marking(s2));
-        }
-        else
-        {
-          throw parse_error("Invalid place: " + line);
-        }
-      }
-
-      // Error.
       else
       {
-        throw parse_error("Invalid line: " + line);
+        throw parse_error("Invalid transition: " + line);
+      }
+
+      // Skip time interval, if any.
+      const auto c = (ss >> std::ws).peek();
+      if (  c == std::char_traits<char>::to_int_type('[')
+          or c == std::char_traits<char>::to_int_type(']'))
+      {
+        ss >> s1;
+      }
+
+      bool found_arrow = false;
+      while (ss >> s1)
+      {
+        if (s1 == "->")
+        {
+          found_arrow = true;
+          break;
+        }
+        std::tie(place_id, valuation) = place_valuation(s1);
+        net.add_pre_place(s0, place_id, valuation);
+      }
+
+      if (not found_arrow)
+      {
+        throw parse_error("Invalid transition (missing '->'): " + line);
+      }
+
+      while (ss >> s1)
+      {
+        std::tie(place_id, valuation) = place_valuation(s1);
+        net.add_post_place(s0, place_id, valuation);
       }
     }
-  }
-  catch (const parse_error& p)
-  {
-    std::cerr << p.what() << std::endl;
-    return nullptr;
+
+    // Places
+    else if (s0 == "pl")
+    {
+      if (ss >> s1 >> s2)
+      {
+        net.add_place(s1, marking(s2));
+      }
+      else
+      {
+        throw parse_error("Invalid place: " + line);
+      }
+    }
+
+    // Error.
+    else
+    {
+      throw parse_error("Invalid line: " + line);
+    }
   }
 
   return net_ptr;
