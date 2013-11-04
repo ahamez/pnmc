@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <istream>
+#include <iostream>
 #include <sstream>
 
 #include "parsers/parse_error.hh"

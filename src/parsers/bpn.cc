@@ -1,5 +1,5 @@
 #include <algorithm> // any_of
-#include <istream>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 
