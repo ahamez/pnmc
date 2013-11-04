@@ -188,8 +188,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   const SDD m = state_space(conf, o, m0, h);
 
   const auto n = sdd::count_combinations(m);
-  long double n_prime = n.template convert_to<long double>();
-  std::cout << n_prime << " states" << std::endl;
+  std::cout << n.template convert_to<long double>() << " states" << std::endl;
 
   if (conf.compute_dead_transitions)
   {
@@ -202,12 +201,16 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       }
     }
 
-    std::cout << dead_transitions.size() << " dead transitions." << std::endl;
     if (not dead_transitions.empty())
     {
+      std::cout << dead_transitions.size() << " dead transition(s): ";
       std::copy( dead_transitions.cbegin(), std::prev(dead_transitions.cend())
                , std::ostream_iterator<std::string>(std::cout, ","));
-      std::cout << *std::prev(dead_transitions.cend());
+      std::cout << *std::prev(dead_transitions.cend()) << std::endl;
+    }
+    else
+    {
+      std::cout << "No dead transitions" << std::endl;
     }
   }
 
