@@ -94,12 +94,15 @@ const transition&
 net::add_transition(const std::string& tid)
 {
   static std::size_t transition_index = 0;
-  const auto insertion = transitions_set.insert({tid, transition_index++});
-  if (not insertion.second)
+  const auto cit = transitions_set.get<id_index>().find(tid);
+  if (cit == transitions_set.get<id_index>().cend())
   {
-    throw "Transition " + tid + " already exists";
+    return *transitions_set.get<id_index>().insert({tid, transition_index++}).first;
   }
-  return *insertion.first;
+  else
+  {
+    return *cit;
+  }
 }
 
 /*------------------------------------------------------------------------------------------------*/

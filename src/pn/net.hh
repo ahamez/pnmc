@@ -86,7 +86,7 @@ public:
 
   /// @brief Add a transition.
   ///
-  /// It is an error to add an already existing transition.
+  /// If the transition already exists, no operation is done.
   const transition&
   add_transition(const std::string& tid);
 
