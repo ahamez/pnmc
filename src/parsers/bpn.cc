@@ -276,7 +276,7 @@ struct prefix
     }
     if (manip.res_)
     {
-      *manip.res_ = s.substr(1);
+      *manip.res_ = s;
     }
 
     return in;
@@ -311,14 +311,15 @@ bpn(std::istream& in)
     unsigned int root_module_nb;
     in >> kw("root") >> kw("unit") >> uint(root_module_nb);
 
-    const auto root_module = "U" + std::to_string(root_module_nb);
+    const auto root_module = std::to_string(root_module_nb);
 
     while (nb_units > 0)
     {
       unsigned int nb_nested_units, first, last;
-      in >> prefix('U') >> sharp() >> interval(first, last) >> sharp(nb_nested_units);
+      std::string module_name;
+      in >> prefix('U', module_name) >> sharp() >> interval(first, last) >> sharp(nb_nested_units);
 
-      pn::module_node m(s0);
+      pn::module_node m(module_name);
       for (auto i = first; i <= last; ++i)
       {
         const auto& p = net.add_place(std::to_string(i), 0);
@@ -333,11 +334,11 @@ bpn(std::istream& in)
         }
         m.add_module(modules["U" + s1]);
       }
-      modules[s0] = pn::make_module(m);
+      modules[module_name] = pn::make_module(m);
 
       --nb_units;
     }
-    net.modules = modules[root_module];
+    net.modules = modules["U" + root_module];
 
     // transitions
     unsigned int nb_transitions;
