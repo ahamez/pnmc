@@ -68,6 +68,7 @@ struct prod_parser
           >> lit('{')
     				>> *( id [_b = _1]
 			         >> lit(':')
+               >> eps[_c = 1]
         			 >> -(uint_[_c = _1] >> -lit('*'))
                >> lit("<..>")
 			         >> lit(';')[bind(&net::add_pre_place, n, _a, _b, _c )]
@@ -77,6 +78,7 @@ struct prod_parser
 				    >> lit('{')
     					>> *( id[_b = _1]
          				 >> lit(':')
+                 >> eps[_c = 1]
                  >> -(uint_[_c = _1] >> -lit('*') )
                  >> lit("<..>")
                  >> lit(';') [bind(&net::add_post_place, n, _a, _b, _c )]
