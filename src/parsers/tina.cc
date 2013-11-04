@@ -24,7 +24,6 @@ value(std::string::const_iterator cit, std::string::const_iterator cend)
       {
         case 'K': value *= 1000; break;
         case 'M': value *= 1000000; break;
-        case 'G': value *= 1000000000; break;
         default: throw parse_error("Invalid suffix, got " + std::string(*cit, 1));
       }
     }
