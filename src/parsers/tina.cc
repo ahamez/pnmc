@@ -146,9 +146,16 @@ tina(std::istream& in)
     // Places
     else if (s0 == "pl")
     {
-      if (ss >> s1 >> s2)
+      if (ss >> s1)
       {
-        net.add_place(s1, marking(s2));
+        if (ss >> s2)
+        {
+          net.add_place(s1, marking(s2));
+        }
+        else
+        {
+          net.add_place(s1, 0);
+        }
       }
       else
       {
