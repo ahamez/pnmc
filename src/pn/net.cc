@@ -82,7 +82,7 @@ net::add_place(const std::string& pid, unsigned int marking)
   else
   {
     // This place was created before by add_post_place() or add_pre_place().
-    // At this time, the marking was not known. Thus, we now update it.
+    // At this time, the marking was not known. We can now update it.
     places_set.modify(cit, update_place(marking));
     return *cit;
   }

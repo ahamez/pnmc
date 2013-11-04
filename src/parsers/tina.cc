@@ -111,6 +111,7 @@ tina(std::istream& in)
       }
 
       // Skip time interval, if any.
+      // We don't check if the interval is well-formed...
       const auto c = (ss >> std::ws).peek();
       if (  c == std::char_traits<char>::to_int_type('[')
           or c == std::char_traits<char>::to_int_type(']'))
