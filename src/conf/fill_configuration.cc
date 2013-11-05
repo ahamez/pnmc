@@ -54,9 +54,6 @@ const std::string version
 
 /*------------------------------------------------------------------------------------------------*/
 
-
-/*------------------------------------------------------------------------------------------------*/
-
 boost::optional<pnmc_configuration>
 fill_configuration(int argc, char** argv)
 {
@@ -68,7 +65,6 @@ fill_configuration(int argc, char** argv)
   general_options.add_options()
     ( "help"                  , "Show this help")
     ( "version"               , "Show version")
-    ( "show-configuration"    , "Show the configuration")
   ;
 
   po::options_description file_options("Input file options");
@@ -163,11 +159,6 @@ fill_configuration(int argc, char** argv)
   conf.show_time = vm.count("show-time");
   conf.compute_dead_transitions = vm.count("dead-transitions");
 
-  if (vm.count("show-configuration"))
-  {
-    std::cout << conf << std::endl;
-  }
-  
   return conf;
 }
 

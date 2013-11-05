@@ -26,11 +26,6 @@ struct pnmc_configuration
 
 /*------------------------------------------------------------------------------------------------*/
 
-std::ostream&
-operator<<(std::ostream&, const pnmc_configuration&);
-
-/*------------------------------------------------------------------------------------------------*/
-
 }} // namespace pnmc::configuration
 
 #endif // _PNMC_CONF_CONFIGURATION_HH_
