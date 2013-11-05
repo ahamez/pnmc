@@ -110,7 +110,14 @@ xml(std::istream& in)
   }
 
   rapidxml::xml_document<> doc;
-  doc.parse<0>(&buffer[0]); // is it really OK to modify the content of the string?
+  try
+  {
+    doc.parse<0>(&buffer[0]); // is it really OK to modify the content of the string?
+  }
+  catch (const rapidxml::parse_error& p)
+  {
+    throw parse_error(p.what());
+  }
 
   auto net_ptr = std::make_shared<pn::net>();
 
@@ -136,11 +143,11 @@ xml(std::istream& in)
   }
 
   const bool only_places = std::all_of( mn.nested.begin(), mn.nested.end()
-                                       , [](const pn::module& m)
-                                       {
-                                         return boost::apply_visitor(xml_only_places(), *m);
-                                       }
-                                       );
+                                      , [](const pn::module& m)
+                                          {
+                                            return boost::apply_visitor(xml_only_places(), *m);
+                                          }
+                                      );
   if (not only_places)
   {
     net_ptr->modules = make_module(mn);
