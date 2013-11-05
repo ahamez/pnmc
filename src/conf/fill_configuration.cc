@@ -49,7 +49,8 @@ namespace pnmc { namespace conf {
 
 namespace po = boost::program_options;
 
-const std::string version = "Petri Net Model Checker v __DATE__ (__TIME__)";
+const std::string version
+  = "Petri Net Model Checker (built " + std::string(__DATE__) + " " + std::string(__TIME__)  + ")";
 
 /*------------------------------------------------------------------------------------------------*/
 
