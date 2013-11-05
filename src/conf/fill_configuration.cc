@@ -97,7 +97,8 @@ fill_configuration(int argc, char** argv)
 
   po::options_description hidden_options("Hidden options");
   hidden_options.add_options()
-    ("input-file"             , po::value<std::string>(), "The Petri net file to analyse")
+    ("input-file", po::value<std::string>(), "The Petri net file to analyse")
+    ("delete-file", "Delete model file after reading it")
   ;
 
   po::positional_options_description p;
@@ -153,6 +154,7 @@ fill_configuration(int argc, char** argv)
   conf.file_name = vm["input-file"].as<std::string>();
   conf.file_type = vm["input-format"].as<input_format>();
   conf.read_stdin = conf.file_name == "-";
+  conf.delete_file = vm.count("delete-file");
   conf.show_order = vm.count("show-order");
   conf.show_relation = vm.count("show-relation");
   conf.show_hash_tables_stats = vm.count("show-hash-stats");

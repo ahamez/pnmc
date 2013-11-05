@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 
@@ -20,18 +21,19 @@ main(int argc, char** argv)
     const auto conf_opt = conf::fill_configuration(argc, argv);
     if (conf_opt) // configuration succeeded
     {
+      const auto& conf = *conf_opt;
       std::istream* in;
       std::ifstream fstream;
-      if (conf_opt->read_stdin)
+      if (conf.read_stdin)
       {
         in = &std::cin;
       }
       else
       {
-        fstream = std::ifstream(conf_opt->file_name);
+        fstream = std::ifstream(conf.file_name);
         if (not fstream.is_open())
         {
-          std::cerr << "Can't open " << conf_opt->file_name << std::endl;
+          std::cerr << "Can't open " << conf.file_name << std::endl;
           return 1;
         }
         in = &fstream;
@@ -40,8 +42,12 @@ main(int argc, char** argv)
       // Try to parse the model.
       try
       {
-        const auto net_ptr = parsers::parse(*conf_opt, *in);
-        mc::work(*conf_opt, *net_ptr);
+        const auto net_ptr = parsers::parse(conf, *in);
+        if (conf.delete_file and not conf.read_stdin)
+        {
+          std::remove(conf.file_name.c_str());
+        }
+        mc::work(conf, *net_ptr);
       }
       catch (const parsers::parse_error& p)
       {
