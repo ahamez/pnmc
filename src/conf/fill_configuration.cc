@@ -156,6 +156,7 @@ fill_configuration(int argc, char** argv)
 
   conf.file_name = vm["input-file"].as<std::string>();
   conf.file_type = vm["input-format"].as<input_format>();
+  conf.read_stdin = conf.file_name == "-";
   conf.show_order = vm.count("show-order");
   conf.show_relation = vm.count("show-relation");
   conf.show_hash_tables_stats = vm.count("show-hash-stats");

@@ -14,6 +14,7 @@ struct pnmc_configuration
 {
   std::string file_name;
   input_format file_type;
+  bool read_stdin;
 
   bool show_order;
   bool show_relation;
