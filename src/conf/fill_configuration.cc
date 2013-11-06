@@ -6,43 +6,6 @@
 #include "conf/configuration.hh"
 #include "conf/fill_configuration.hh"
 
-namespace boost {
-
-namespace po = boost::program_options;
-
-void validate(boost::any& v, const std::vector<std::string>& values, pnmc::conf::input_format*, int)
-{
-  // Make sure no previous assignment to 'v' was made.
-  po::validators::check_first_occurrence(v);
-
-  // Extract the first string from 'values'. If there is more than
-  // one string, it's an error, and exception will be thrown.
-  const std::string& s = po::validators::get_single_string(values);
-
-  if (s == "bpn")
-  {
-    v = boost::any(pnmc::conf::input_format::bpn);
-  }
-  else if (s == "prod")
-  {
-    v = boost::any(pnmc::conf::input_format::prod);
-  }
-  else if (s == "tina")
-  {
-    v = boost::any(pnmc::conf::input_format::tina);
-  }
-  else if (s == "xml")
-  {
-    v = boost::any(pnmc::conf::input_format::xml);
-  }
-  else
-  {
-    throw po::validation_error(po::validation_error::invalid_option_value);
-  }
-}
-
-} // namespace boost
-
 namespace pnmc { namespace conf {
 
 /*------------------------------------------------------------------------------------------------*/
@@ -51,6 +14,40 @@ namespace po = boost::program_options;
 
 const std::string version
   = "Petri Net Model Checker (built " + std::string(__DATE__) + " " + std::string(__TIME__)  + ")";
+
+/*------------------------------------------------------------------------------------------------*/
+
+input_format
+file_type(const po::variables_map& vm)
+{
+  const bool bpn = vm.count("bpn");
+  const bool prod = vm.count("prod");
+  const bool tina = vm.count("tina");
+
+  if (not (bpn or prod or tina))
+  {
+    return input_format::xml;
+  }
+  else if (not (bpn xor prod xor tina))
+  {
+    throw po::error("Can specify only one input format.");
+  }
+  else
+  {
+    if (bpn)
+    {
+      return input_format::bpn;
+    }
+    else if (prod)
+    {
+      return input_format::prod;
+    }
+    else // tina
+    {
+      return input_format::tina;
+    }
+  }
+}
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -69,8 +66,10 @@ fill_configuration(int argc, char** argv)
 
   po::options_description file_options("Input file options");
   file_options.add_options()
-    ( "input-format"          , po::value<input_format>()->default_value(input_format::xml, "xml")
-                              , "The file format: [bpn|prod|tina|xml]")
+    ("bpn"                      , "Parse BPN format")
+    ("prod"                     , "Parse PROD format")
+    ("tina"                     , "Parse TINA format")
+    ("xml"                      , "Parse pnmc's XML format (default)")
   ;
 
   po::options_description order_options("Order options");
@@ -152,7 +151,7 @@ fill_configuration(int argc, char** argv)
   }
 
   conf.file_name = vm["input-file"].as<std::string>();
-  conf.file_type = vm["input-format"].as<input_format>();
+  conf.file_type = file_type(vm);
   conf.read_stdin = conf.file_name == "-";
   conf.delete_file = vm.count("delete-file");
   conf.show_order = vm.count("show-order");
