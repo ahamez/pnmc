@@ -6,6 +6,7 @@ set(SOURCES
     mc/pre.cc
     mc/work.cc
     parsers/bpn.cc
+    parsers/helpers.cc
     parsers/parse_error.cc
     parsers/parse.cc
     parsers/prod.cc

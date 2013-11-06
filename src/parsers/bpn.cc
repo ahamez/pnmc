@@ -4,7 +4,8 @@
 #include <unordered_map>
 
 #include "parsers/bpn.hh"
-#include "parse_error.hh"
+#include "parsers/helpers.hh"
+#include "parsers/parse_error.hh"
 
 namespace pnmc { namespace parsers {
 
@@ -91,32 +92,6 @@ namespace pnmc { namespace parsers {
 // In each <input-place-list> and each <output-place-list>
 //  28. <min-place-nb> <= <place-nb> <= <max-place-nb>
 
-/*------------------------------------------------------------------------------------------------*/
-
-struct kw
-{
-  const std::string k_;
-  
-  kw(const std::string& k)
-    : k_(k)
-  {}
-
-  friend
-  std::istream&
-  operator>>(std::istream& in, const kw& manip)
-  {
-    std::string s;
-    if (not (in >> s))
-    {
-      throw parse_error("Expected " + manip.k_);
-    }
-    else if (s != manip.k_)
-    {
-      throw parse_error("Expected " + manip.k_ + ", got " + s);
-    }
-    return in;    
-  }
-};
 namespace {
 
 /*------------------------------------------------------------------------------------------------*/
