@@ -7,6 +7,8 @@
 
 namespace pnmc { namespace parsers {
 
+namespace {
+
 /*------------------------------------------------------------------------------------------------*/
 
 unsigned int
@@ -67,6 +69,8 @@ marking(const std::string& s)
     throw parse_error("Invalid marking format: " + s);
   }
 }
+
+} // namespace anonymous
 
 /*------------------------------------------------------------------------------------------------*/
 
