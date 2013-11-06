@@ -296,13 +296,13 @@ bpn(std::istream& in)
     in >> prefix('U', module_name) >> sharp() >> interval(first, last) >> sharp(nb_nested_units);
 
     pn::module_node m(module_name);
-    for (auto i = first; i <= last; ++i)
+    for (unsigned int i = first; i <= last; ++i)
     {
       const auto& p = net.add_place(std::to_string(i), 0);
       m.add_module(pn::make_module(p));
     }
 
-    for (auto i = 0; i < nb_nested_units; ++i)
+    for (unsigned int i = 0; i < nb_nested_units; ++i)
     {
       if (not(in >> s1))
       {
