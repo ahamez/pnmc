@@ -1,14 +1,9 @@
-#include <istream>
+#include <algorithm> // std::equal
+#include <iostream>
+#include <sstream>
+#include <unordered_map>
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_bind.hpp>
-#include <boost/spirit/include/phoenix_function.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/spirit/include/phoenix_scope.hpp>
-#include <boost/spirit/include/phoenix_statement.hpp>
-
+#include "parsers/helpers.hh"
 #include "parsers/parse_error.hh"
 #include "parsers/prod.hh"
 
@@ -16,110 +11,176 @@ namespace pnmc { namespace parsers {
 
 /*------------------------------------------------------------------------------------------------*/
 
-namespace ascii = boost::spirit::ascii;
-namespace phoenix = boost::phoenix;
-namespace qi = boost::spirit::qi;
+namespace {
 
-/*------------------------------------------------------------------------------------------------*/
-
-template <typename Iterator>
-struct prod_parser
-	: qi::grammar<Iterator, void(), ascii::space_type>
+unsigned int
+marking(std::string::const_iterator cit, std::string::const_iterator cend)
 {
-  qi::rule< Iterator, void(), ascii::space_type>
-          start;
-
-  qi::rule<Iterator, std::string(), ascii::space_type, qi::locals<std::string, unsigned int>>
-          place;
-
-  qi::rule< Iterator, std::string(), ascii::space_type
-          , qi::locals<std::string, std::string, unsigned int>>
-          trans;
-
-  qi::rule<Iterator, std::string()>
-          id;
-
-  qi::rule<Iterator, unsigned int(), ascii::space_type>
-          marking;
-
-  prod_parser(pn::net& n)
-		: prod_parser::base_type(start)
+  const auto distance = std::distance(cit, cend);
+  if (distance == 4)
   {
-    using phoenix::bind;
-    using phoenix::construct;
-
-    using qi::_1;
-    using qi::_a;
-    using qi::_b;
-    using qi::_c;
-    using qi::_val;
-    using qi::eps;
-    using qi::lit;
-    using qi::uint_;
-    using qi::lexeme;
-
-    using pn::net;
-
-    id %= +(qi::alpha|qi::digit|'_');
-
-    trans =  lit("#trans")
-          >> id[bind(&net::add_transition, n, _1) , _a = _1]
-          >> lit("in")
-          >> lit('{')
-    				>> *( id [_b = _1]
-			         >> lit(':')
-               >> eps[_c = 1]
-        			 >> -(uint_[_c = _1] >> -lit('*'))
-               >> lit("<..>")
-			         >> lit(';')[bind(&net::add_pre_place, n, _a, _b, _c )]
-               )
-          >> lit('}')
-          >> lit("out")
-				    >> lit('{')
-    					>> *( id[_b = _1]
-         				 >> lit(':')
-                 >> eps[_c = 1]
-                 >> -(uint_[_c = _1] >> -lit('*') )
-                 >> lit("<..>")
-                 >> lit(';') [bind(&net::add_post_place, n, _a, _b, _c )]
-                 )
-          >> lit('}')
-          >> lit("#endtr")
-          ;
-
-    marking = eps[_val=1] >> lit("mk(") >> -uint_[_val=_1] >> lit("<..>)");
-
-    place = lit("#place")
-          >> -(lit('(') >> id >> lit(')'))
-          >> id[_a = _1]
-          >> -marking[_b = _1]
-          >> eps[bind(&net::add_place, n, _a, _b)]
-          ;
-
-    start = +(place|trans);
+    static const std::string mk("<..>");
+    if (std::equal(cit, cend, mk.cbegin()))
+    {
+      return 1;
+    }
+    else
+    {
+      throw parse_error("Invalid marking token :" + std::string(cit, cend));
+    }
   }
-};
+  else if (distance > 4)
+  {
+    try
+    {
+      return std::stoi(std::string(cit, cend));
+    }
+    catch (const std::invalid_argument&)
+    {
+      throw parse_error("Expected a value, got " + std::string(cit, cend));
+    }
+  }
+  else
+  {
+    throw parse_error("Invalid marking token :" + std::string(cit, cend));
+  }
+}
+
+} // namespace anonymous
 
 /*------------------------------------------------------------------------------------------------*/
 
 std::shared_ptr<pn::net>
-prod(std::istream& input)
+prod(std::istream& in)
 {
   std::shared_ptr<pn::net> net_ptr = std::make_shared<pn::net>();
+  auto& net = *net_ptr;
 
-  // Don't skip spaces, the parser will do it.
-  input.unsetf(std::ios::skipws);
+  std::string line, s0, s1, s2;
+  line.reserve(1024);
 
-  boost::spirit::istream_iterator cit(input);
-  boost::spirit::istream_iterator end;
+  std::unordered_map<std::string, pn::module_node> modules;
 
-  prod_parser<boost::spirit::istream_iterator> parser(*net_ptr);
-
-  const bool r = phrase_parse(cit, end, parser, ascii::space);
-
-  if (not r or cit != end)
+  while (std::getline(in, line))
   {
-    throw parse_error();;
+    std::istringstream ss(line);
+
+    ss >> s0;
+
+    if (s0 == "#place")
+    {
+      // module, if any
+      bool has_module = false;
+      if (((ss >> std::ws).peek() == std::char_traits<char>::to_int_type('(')))
+      {
+        ss >> s0;
+        if (*std::prev(s0.cend()) != ')')
+        {
+          throw parse_error("Expected a module specification got " + s0);
+        }
+        has_module = true;
+      }
+
+      // default marking
+      unsigned int m = 0;
+      if (not(ss >> s1))// place name
+      {
+        throw parse_error("Place with no identifier ");
+      }
+      if (ss >> s2) // have marking
+      {
+        static const std::string mk("mk(");
+        if (  s2.size() < 8 or not std::equal(mk.cbegin(), mk.cend(), s2.cbegin())
+            or *(s2.cend() - 1) != ')')
+        {
+          throw parse_error("Invalid marking, got " + s2);
+        }
+        m = marking(s2.cbegin() + 3, s2.cend() - 1);
+      }
+
+      const auto& p = net.add_place(s1, m);
+      const auto insert = modules.insert({s0, pn::module_node(s0)});
+      insert.first->second.add_module(pn::make_module(p));
+    }
+
+    else if (s0 == "#trans")
+    {
+      static auto read_line = [&]()
+                                 {
+                                   if (not std::getline(in,line))
+                                     throw parse_error("Incomplete transition.");
+                                   return std::istringstream(line);
+                                 };
+      if (not (ss >> s0))
+      {
+        throw parse_error("Transition with no identifier ");
+      }
+
+      net.add_transition(s0);
+
+      // pre
+      auto l = read_line();
+      if (not (l >> kw("in") >> s1))
+      {
+        throw parse_error("Invalid pre for transition " + s0 + " : " + s1);
+      }
+
+      if (not (*s1.cbegin() == '{' and *(s1.cend() - 1) == '}'))
+      {
+        throw parse_error("Missing '{' or '}' " + s1);
+      }
+
+      for (const auto& arc_str : split(s1.cbegin() + 1, s1.cend() - 1, ';'))
+      {
+        const auto arc = split(arc_str.cbegin(), arc_str.cend(), ':');
+        if (arc.size() != 2)
+        {
+          throw parse_error("Incorrect arc " + arc_str);
+        }
+        net.add_pre_place(s0, arc[0], marking(arc[1].cbegin(), arc[1].cend()));
+      }
+
+      // post
+      l = read_line();
+      if (not (l >> kw("out") >> s1))
+      {
+        throw parse_error("Invalid post for transition " + s0 + " : " + s1);
+      }
+
+      if (not (*s1.cbegin() == '{' and *(s1.cend() - 1) == '}'))
+      {
+        throw parse_error("Missing '{' or '}' " + s1);
+      }
+
+      for (const auto& arc_str : split(s1.cbegin() + 1, s1.cend() - 1, ';'))
+      {
+        const auto arc = split(arc_str.cbegin(), arc_str.cend(), ':');
+        if (arc.size() != 2)
+        {
+          throw parse_error("Incorrect arc " + arc_str);
+        }
+        net.add_post_place(s0, arc[0], marking(arc[1].cbegin(), arc[1].cend()));
+      }
+
+      // end of transition
+      l = read_line();
+      l >> kw("#endtr");
+    }
+
+    else
+    {
+      throw parse_error("Invalid line, got " + line);
+    }
+  }
+
+  if (not modules.empty())
+  {
+    pn::module_node root("root");
+    for (const auto& kv : modules)
+    {
+      root.add_module(pn::make_module(kv.second));
+    }
+    net.modules = pn::make_module(root);
   }
 
   return net_ptr;
