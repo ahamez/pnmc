@@ -365,7 +365,7 @@ bpn(std::istream& in)
     for (const auto& module_name : kv.second.second)
     {
       const auto nested_module = modules[module_name].first;
-       boost::get<pn::module_node>(*kv.second.first).add_module(nested_module);
+      boost::get<pn::module_node>(*kv.second.first).add_module(nested_module);
     }
   }
   net.modules = modules["U" + root_module].first;
