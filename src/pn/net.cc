@@ -74,16 +74,16 @@ net::net()
 const place&
 net::add_place(const std::string& pid, unsigned int marking)
 {
-  const auto cit = places_set.get<id_index>().find(pid);
-  if (cit == places_set.get<id_index>().cend())
+  const auto cit = places_by_id().find(pid);
+  if (cit == places_by_id().cend())
   {
-    return *places_set.insert({pid, marking}).first;
+    return *places_set.get<insertion_index>().emplace_back(pid, marking).first;
   }
   else
   {
     // This place was created before by add_post_place() or add_pre_place().
     // At this time, the marking was not known. We can now update it.
-    places_set.modify(cit, update_place(marking));
+    places_set.get<id_index>().modify(cit, update_place(marking));
     return *cit;
   }
 }
@@ -112,7 +112,7 @@ net::add_post_place(const std::string& tid, const std::string& post, unsigned in
 {
   const auto it = transitions_set.get<id_index>().find(tid);
   transitions_set.modify(it, add_post_place_to_transition(valuation, post));
-  if (places().find(post) == places().end())
+  if (places_by_id().find(post) == places_by_id().end())
   {
     add_place(post, 0);
   }
@@ -125,7 +125,7 @@ net::add_pre_place(const std::string& tid, const std::string& pre, unsigned int 
 {
   const auto it = transitions_set.get<id_index>().find(tid);
   transitions_set.modify(it, add_pre_place_to_transition(valuation, pre));
-  if (places().find(pre) == places().end())
+  if (places_by_id().find(pre) == places_by_id().end())
   {
     add_place(pre, 0);
   }
@@ -133,8 +133,17 @@ net::add_pre_place(const std::string& tid, const std::string& pre, unsigned int 
 
 /*------------------------------------------------------------------------------------------------*/
 
-const net::places_type::index<net::id_index>::type&
+const net::places_type::index<net::insertion_index>::type&
 net::places()
+const noexcept
+{
+  return places_set.get<insertion_index>();
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+const net::places_type::index<net::id_index>::type&
+net::places_by_id()
 const noexcept
 {
   return places_set.get<id_index>();

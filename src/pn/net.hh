@@ -9,6 +9,7 @@
 #include <boost/multi_index/ordered_index.hpp>
 #include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/member.hpp>
+#include <boost/multi_index/sequenced_index.hpp>
 #pragma GCC diagnostic pop
 
 #include "pn/module.hh"
@@ -27,6 +28,9 @@ struct net
 {
 private:
 
+  /// @brief A tag to identify the view ordered by insertion order for boost::multi_index.
+  struct insertion_index{};
+
   /// @brief A tag to identify the view ordered by idendifiers for boost::multi_index.
   struct id_index{};
 
@@ -43,9 +47,12 @@ public:
                 place
   						, indexed_by<
 
+                  // keep insertion order
+                    sequenced<tag<insertion_index>>
+
                   // sort by id
-                     ordered_unique<tag< id_index>
-                                       , member<place, const std::string, &place::id>>
+                  ,  ordered_unique< tag<id_index>
+                                   , member<place, const std::string, &place::id>>
 
                   // sort by marking
                   , ordered_non_unique< tag<marking_index>
@@ -59,8 +66,8 @@ public:
               , indexed_by<
 
                    // sort by id
-                     ordered_unique<tag< id_index>
-                                       , member<transition, const std::string, &transition::id>>
+                     ordered_unique< tag<id_index>
+                                   , member<transition, const std::string, &transition::id>>
 
                    // sort by index
                    , ordered_unique< tag<index_index>
@@ -107,9 +114,13 @@ public:
   void
   add_pre_place(const std::string& tid, const std::string& pre, unsigned int marking);
 
-  /// @brief Return all places.
-  const places_type::index<id_index>::type&
+  /// @brief Return all places by insertion order.
+  const places_type::index<insertion_index>::type&
   places() const noexcept;
+
+  /// @brief Return all places by identifier.
+  const places_type::index<id_index>::type&
+  places_by_id() const noexcept;
 
   /// @brief Return all transitions.
   const transitions_type::index<id_index>::type&
