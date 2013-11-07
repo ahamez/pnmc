@@ -55,9 +55,9 @@ struct mk_order_visitor
 /*------------------------------------------------------------------------------------------------*/
 
 sdd::order<sdd_conf>
-mk_order(const pn::net& net)
+mk_order(const conf::pnmc_configuration& conf, const pn::net& net)
 {
-  if (net.modules)
+  if (not conf.force_flat_order and net.modules)
   {
     return sdd::order<sdd_conf>(boost::apply_visitor(mk_order_visitor(), *net.modules).second);
   }
@@ -172,7 +172,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
 
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
-  const sdd::order<sdd_conf>& o = mk_order(net);
+  const sdd::order<sdd_conf>& o = mk_order(conf, net);
   if (conf.show_order)
   {
     std::cout << o << std::endl;

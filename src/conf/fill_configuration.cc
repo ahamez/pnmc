@@ -75,6 +75,7 @@ fill_configuration(int argc, char** argv)
   po::options_description order_options("Order options");
   order_options.add_options()
     ("show-order"             , "Show the order")
+    ("flat"                   , "Don't use hierarchy informations")
   ;
 
   po::options_description hom_options("Homomorphisms options");
@@ -155,6 +156,7 @@ fill_configuration(int argc, char** argv)
   conf.read_stdin = conf.file_name == "-";
   conf.delete_file = vm.count("delete-file");
   conf.show_order = vm.count("show-order");
+  conf.force_flat_order = vm.count("flat");
   conf.show_relation = vm.count("show-relation");
   conf.show_hash_tables_stats = vm.count("show-hash-stats");
   conf.show_time = vm.count("show-time");

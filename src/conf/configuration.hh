@@ -18,6 +18,8 @@ struct pnmc_configuration
   bool delete_file;
 
   bool show_order;
+  bool force_flat_order;
+
   bool show_relation;
   bool show_time;
   bool show_hash_tables_stats;
