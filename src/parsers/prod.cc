@@ -115,12 +115,6 @@ prod(std::istream& in)
 
     else if (s0 == "#trans")
     {
-      static auto read_line = [&]()
-                                 {
-                                   if (not std::getline(in,line))
-                                     throw parse_error("Incomplete transition.");
-                                   return std::istringstream(line);
-                                 };
       if (not (ss >> s0))
       {
         throw parse_error("Transition with no identifier ");
@@ -129,8 +123,12 @@ prod(std::istream& in)
       net.add_transition(s0);
 
       // pre
-      auto l = read_line();
-      if (not (l >> kw("in") >> s1))
+      if (not std::getline(in,line))
+      {
+        throw parse_error("Incomplete transition.");
+      }
+      std::istringstream l0(line);
+      if (not (l0 >> kw("in") >> s1))
       {
         throw parse_error("Invalid pre for transition " + s0 + " : " + s1);
       }
@@ -151,8 +149,12 @@ prod(std::istream& in)
       }
 
       // post
-      l = read_line();
-      if (not (l >> kw("out") >> s1))
+      if (not std::getline(in,line))
+      {
+        throw parse_error("Incomplete transition.");
+      }
+      std::istringstream l1(line);
+      if (not (l1 >> kw("out") >> s1))
       {
         throw parse_error("Invalid post for transition " + s0 + " : " + s1);
       }
@@ -173,8 +175,12 @@ prod(std::istream& in)
       }
 
       // end of transition
-      l = read_line();
-      l >> kw("#endtr");
+      if (not std::getline(in,line))
+      {
+        throw parse_error("Incomplete transition.");
+      }
+      std::istringstream l2(line);
+      l2 >> kw("#endtr");
     }
 
     else
