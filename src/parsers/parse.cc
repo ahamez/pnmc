@@ -20,8 +20,9 @@ parse(const conf::pnmc_configuration& conf, std::istream& in)
     case (conf::input_format::bpn)  : return parsers::bpn(in);
     case (conf::input_format::prod) : return parsers::prod(in);
     case (conf::input_format::tina) : return parsers::tina(in);
-    case (conf::input_format::xml)  : return parsers::xml(in);
+    case (conf::input_format::xml)  : break;
   }
+  return parsers::xml(in);
 }
 
 /*------------------------------------------------------------------------------------------------*/
