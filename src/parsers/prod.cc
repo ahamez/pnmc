@@ -192,9 +192,9 @@ prod(std::istream& in)
   if (not modules.empty())
   {
     pn::module_node root("root");
-    for (const auto& m : modules)
+    for (auto rcit = modules.rbegin(); rcit != modules.rend(); ++rcit)
     {
-      root.add_module(pn::make_module(m));
+      root.add_module(pn::make_module(*rcit));
     }
     net.modules = pn::make_module(root);
   }
