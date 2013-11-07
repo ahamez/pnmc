@@ -45,39 +45,43 @@ main(int argc, char** argv)
 {
   using namespace pnmc;
 
+  boost::optional<conf::pnmc_configuration> conf_opt;
   try
   {
-    const auto conf_opt = conf::fill_configuration(argc, argv);
-    if (conf_opt) // configuration succeeded
-    {
-      const auto& conf = *conf_opt;
-      try
-      {
-        auto in = file_or_cin(conf);
-        const auto net_ptr = parsers::parse(conf, *in);
-        if (conf.delete_file and not conf.read_stdin)
-        {
-          std::remove(conf.file_name.c_str());
-        }
-        mc::work(conf, *net_ptr);
-      }
-      catch (const unreadable_file&)
-      {
-        std::cerr << "Can't open '" << conf.file_name << "'." << std::endl;
-        return 2;
-      }
-      catch (const parsers::parse_error& p)
-      {
-        std::cerr << "Error when parsing input." << std::endl;
-        std::cerr << p.what() << std::endl;
-        return 3;
-      }
-    }
+    conf_opt = conf::fill_configuration(argc, argv);
   }
   catch (const boost::program_options::error& e)
   {
     std::cerr << e.what() << std::endl;
     return 1;
+  }
+
+  if (not conf_opt) // --help or --version
+  {
+    return 0;
+  }
+
+  const auto& conf = *conf_opt;
+  try
+  {
+    auto in = file_or_cin(conf);
+    const auto net_ptr = parsers::parse(conf, *in);
+    if (conf.delete_file and not conf.read_stdin)
+    {
+      std::remove(conf.file_name.c_str());
+    }
+    mc::work(conf, *net_ptr);
+  }
+  catch (const unreadable_file&)
+  {
+    std::cerr << "Can't open '" << conf.file_name << "'." << std::endl;
+    return 2;
+  }
+  catch (const parsers::parse_error& p)
+  {
+    std::cerr << "Error when parsing input." << std::endl;
+    std::cerr << p.what() << std::endl;
+    return 3;
   }
   return 0;
 }

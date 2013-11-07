@@ -54,8 +54,6 @@ file_type(const po::variables_map& vm)
 boost::optional<pnmc_configuration>
 fill_configuration(int argc, char** argv)
 {
-  typedef boost::optional<pnmc_configuration> empty_result;
-
   pnmc_configuration conf;
 
   po::options_description general_options("General options");
@@ -136,19 +134,18 @@ fill_configuration(int argc, char** argv)
     std::cout << hom_options << std::endl;
     std::cout << petri_options << std::endl;
     std::cout << stats_options << std::endl;
-    return empty_result();
+    return boost::optional<pnmc_configuration>();
   }
   
   if (vm.count("version"))
   {
     std::cout << version << std::endl;
-    return empty_result();
+    return boost::optional<pnmc_configuration>();
   }
 
   if (not vm.count("input-file"))
   {
-    std::cerr << "No file specified." << std::endl;
-    return empty_result();
+    throw po::error("No file specified.");
   }
 
   conf.file_name = vm["input-file"].as<std::string>();
