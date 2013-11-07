@@ -1,7 +1,12 @@
 #include <iostream>
 #include <string>
 
+#pragma GCC diagnostic push
+#if defined(__GNUC__) && !defined(__clang__)
+# pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+#endif
 #include <boost/program_options.hpp>
+#pragma GCC diagnostic pop
 
 #include "conf/configuration.hh"
 #include "conf/fill_configuration.hh"
