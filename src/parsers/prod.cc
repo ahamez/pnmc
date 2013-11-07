@@ -1,5 +1,6 @@
 #include <algorithm> // std::equal
 #include <iostream>
+#include <list>
 #include <sstream>
 #include <unordered_map>
 
@@ -59,7 +60,8 @@ prod(std::istream& in)
   std::string line, s0, s1, s2;
   line.reserve(1024);
 
-  std::unordered_map<std::string, pn::module_node> modules;
+  std::list<pn::module_node> modules;
+  std::unordered_map<std::string, std::list<pn::module_node>::iterator> index;
 
   while (std::getline(in, line))
   {
@@ -101,8 +103,13 @@ prod(std::istream& in)
       const auto& p = net.add_place(s1, m);
       if (has_module)
       {
-        const auto insert = modules.insert({s0, pn::module_node(s0)});
-        insert.first->second.add_module(pn::make_module(p));
+        const auto search = index.find(s0);
+        if (search == index.cend())
+        {
+          modules.emplace_back(pn::module_node(s0));
+          index[s0] = std::prev(modules.end());
+        }
+        index[s0]->add_module(pn::make_module(p));
       }
     }
 
@@ -179,9 +186,9 @@ prod(std::istream& in)
   if (not modules.empty())
   {
     pn::module_node root("root");
-    for (const auto& kv : modules)
+    for (const auto& m : modules)
     {
-      root.add_module(pn::make_module(kv.second));
+      root.add_module(pn::make_module(m));
     }
     net.modules = pn::make_module(root);
   }
