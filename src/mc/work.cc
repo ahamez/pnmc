@@ -193,7 +193,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   if (conf.compute_dead_transitions)
   {
     std::deque<std::string> dead_transitions;
-    for (auto i = 0; i < net.transitions().size(); ++i)
+    for (std::size_t i = 0; i < net.transitions().size(); ++i)
     {
       if (not transitions_bitset[i])
       {
