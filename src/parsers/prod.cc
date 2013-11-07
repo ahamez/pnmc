@@ -99,8 +99,11 @@ prod(std::istream& in)
       }
 
       const auto& p = net.add_place(s1, m);
-      const auto insert = modules.insert({s0, pn::module_node(s0)});
-      insert.first->second.add_module(pn::make_module(p));
+      if (has_module)
+      {
+        const auto insert = modules.insert({s0, pn::module_node(s0)});
+        insert.first->second.add_module(pn::make_module(p));
+      }
     }
 
     else if (s0 == "#trans")
