@@ -11,6 +11,35 @@
 
 /*------------------------------------------------------------------------------------------------*/
 
+namespace pnmc {
+
+struct unreadable_file
+  : std::exception
+{};
+
+std::shared_ptr<std::istream>
+file_or_cin(const conf::pnmc_configuration& conf)
+{
+  if (conf.read_stdin)
+  {
+    std::ios_base::sync_with_stdio(false); // Standard input buffering.
+    return std::shared_ptr<std::istream>(&std::cin, [](std::istream*){}); // Avoid to erase cin.
+  }
+  else
+  {
+    std::shared_ptr<std::istream> ptr(new std::ifstream(conf.file_name));
+    if (not dynamic_cast<std::ifstream&>(*ptr).is_open())
+    {
+      throw unreadable_file();
+    }
+    return ptr;
+  } 
+}
+
+} // namespace pnmc
+
+/*------------------------------------------------------------------------------------------------*/
+
 int
 main(int argc, char** argv)
 {
@@ -22,26 +51,9 @@ main(int argc, char** argv)
     if (conf_opt) // configuration succeeded
     {
       const auto& conf = *conf_opt;
-      std::istream* in;
-      std::ifstream fstream;
-      if (conf.read_stdin)
-      {
-        in = &std::cin;
-      }
-      else
-      {
-        fstream = std::ifstream(conf.file_name);
-        if (not fstream.is_open())
-        {
-          std::cerr << "Can't open " << conf.file_name << std::endl;
-          return 1;
-        }
-        in = &fstream;
-      }
-
-      // Try to parse the model.
       try
       {
+        auto in = file_or_cin(conf);
         const auto net_ptr = parsers::parse(conf, *in);
         if (conf.delete_file and not conf.read_stdin)
         {
@@ -49,11 +61,16 @@ main(int argc, char** argv)
         }
         mc::work(conf, *net_ptr);
       }
+      catch (const unreadable_file&)
+      {
+        std::cerr << "Can't open '" << conf.file_name << "'." << std::endl;
+        return 2;
+      }
       catch (const parsers::parse_error& p)
       {
         std::cerr << "Error when parsing input." << std::endl;
         std::cerr << p.what() << std::endl;
-        return 1;
+        return 3;
       }
     }
   }
