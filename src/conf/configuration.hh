@@ -19,6 +19,7 @@ struct pnmc_configuration
 
   bool order_show;
   bool order_force_flat;
+  unsigned int order_min_height;
 
   bool show_relation;
   bool show_time;

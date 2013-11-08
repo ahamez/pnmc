@@ -29,25 +29,78 @@ using sdd::ValuesFunction;
 struct mk_order_visitor
   : public boost::static_visitor<std::pair<std::string, sdd::order_builder<sdd_conf>>>
 {
+  using result_type = std::pair<std::string, sdd::order_builder<sdd_conf>>;
+  using order_builder = sdd::order_builder<sdd_conf>;
+
+  const conf::pnmc_configuration& conf;
+
+  mk_order_visitor(const conf::pnmc_configuration& c)
+    : conf(c)
+  {}
+
   // Place: base case of the recursion, there's no more possible nested hierarchies.
-  std::pair<std::string, sdd::order_builder<sdd_conf>>
+  result_type
   operator()(const pn::place* p)
   const noexcept
   {
-    return make_pair(p->id, sdd::order_builder<sdd_conf>());
+    return make_pair(p->id, order_builder());
   }
 
   // Hierarchy.
-  std::pair<std::string, sdd::order_builder<sdd_conf>>
+  result_type
   operator()(const pn::module_node& m)
   const noexcept
   {
-    sdd::order_builder<sdd_conf> ob;
+    assert(not m.nested.empty());
+
+    std::deque<result_type> tmp;
+
     for (const auto& h : m.nested)
     {
-      const auto res = boost::apply_visitor(mk_order_visitor(), *h);
-      ob.push(res.first, res.second);
+      const auto res = boost::apply_visitor(*this, *h);
+      tmp.push_back(res);
     }
+
+    std::size_t height = 0;
+    for (const auto& p : tmp)
+    {
+      if (not p.second.empty())
+      {
+        height += p.second.height();
+      }
+      else
+      {
+        height += 1; // place
+      }
+    }
+
+    sdd::order_builder<sdd_conf> ob;
+    if (height <= conf.order_min_height)
+    {
+      std::string id;
+      for (const auto& p : tmp)
+      {
+        if (not p.second.empty())
+        {
+          id += p.first;
+          ob = p.second << ob;
+        }
+        else // place
+        {
+          id += p.first;
+          ob.push(p.first, p.second);
+        }
+      }
+      return result_type(id, ob);
+    }
+    else
+    {
+      for (const auto& p : tmp)
+      {
+        ob.push(p.first, p.second);
+      }
+    }
+
     return make_pair(m.id , ob);
   }
 };
@@ -59,7 +112,7 @@ mk_order(const conf::pnmc_configuration& conf, const pn::net& net)
 {
   if (not conf.order_force_flat and net.modules)
   {
-    return sdd::order<sdd_conf>(boost::apply_visitor(mk_order_visitor(), *net.modules).second);
+    return sdd::order<sdd_conf>(boost::apply_visitor(mk_order_visitor(conf), *net.modules).second);
   }
   else
   {

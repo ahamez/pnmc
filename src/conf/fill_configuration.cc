@@ -79,6 +79,8 @@ fill_configuration(int argc, char** argv)
   order_options.add_options()
     ("show-order"             , "Show the order")
     ("flat"                   , "Don't use hierarchy informations")
+    ("order-min-height"       , po::value<unsigned int>()->default_value(10)
+                              , "Minimal number of variables at every level of the SDD")
   ;
 
   po::options_description hom_options("Homomorphisms options");
@@ -159,6 +161,7 @@ fill_configuration(int argc, char** argv)
   conf.delete_file = vm.count("delete-file");
   conf.order_show = vm.count("show-order");
   conf.order_force_flat = vm.count("flat");
+  conf.order_min_height = vm["order-min-height"].as<unsigned int>();
   conf.show_relation = vm.count("show-relation");
   conf.show_hash_tables_stats = vm.count("show-hash-stats");
   conf.show_time = vm.count("show-time");
