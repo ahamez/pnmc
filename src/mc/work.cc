@@ -173,6 +173,8 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
   const sdd::order<sdd_conf>& o = mk_order(conf, net);
+  assert(not o.empty() && "Empty order");
+
   if (conf.order_show)
   {
     std::cout << o << std::endl;
