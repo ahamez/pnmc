@@ -57,16 +57,24 @@ prod(std::istream& in)
   std::shared_ptr<pn::net> net_ptr = std::make_shared<pn::net>();
   auto& net = *net_ptr;
 
+  // Line buffer and string placeholders.
   std::string line, s0, s1, s2;
   line.reserve(1024);
 
   std::list<pn::module_node> modules;
   std::unordered_map<std::string, std::list<pn::module_node>::iterator> index;
 
-  while (std::getline(in, line))
+  // Re-use the same stream.
+  std::istringstream ss;
+  const auto read_line = [&]{
+                              if (not std::getline(in, line))
+                                return false;
+                              ss.clear();
+                              ss.str(line);
+                              return true;
+                            };
+  while (read_line())
   {
-    std::istringstream ss(line);
-
     ss >> s0;
 
     if (s0 == "#place")
@@ -115,20 +123,16 @@ prod(std::istream& in)
 
     else if (s0 == "#trans")
     {
+      // transition name
       if (not (ss >> s0))
       {
         throw parse_error("Transition with no identifier ");
       }
-
       net.add_transition(s0);
 
       // pre
-      if (not std::getline(in,line))
-      {
-        throw parse_error("Incomplete transition.");
-      }
-      std::istringstream l0(line);
-      if (not (l0 >> kw("in") >> s1))
+      read_line();
+      if (not (ss >> kw("in") >> s1))
       {
         throw parse_error("Invalid pre for transition " + s0 + " : " + s1);
       }
@@ -149,12 +153,8 @@ prod(std::istream& in)
       }
 
       // post
-      if (not std::getline(in,line))
-      {
-        throw parse_error("Incomplete transition.");
-      }
-      std::istringstream l1(line);
-      if (not (l1 >> kw("out") >> s1))
+      read_line();
+      if (not (ss >> kw("out") >> s1))
       {
         throw parse_error("Invalid post for transition " + s0 + " : " + s1);
       }
@@ -175,12 +175,8 @@ prod(std::istream& in)
       }
 
       // end of transition
-      if (not std::getline(in,line))
-      {
-        throw parse_error("Incomplete transition.");
-      }
-      std::istringstream l2(line);
-      l2 >> kw("#endtr");
+      read_line();
+      ss >> kw("#endtr");
     }
 
     else
