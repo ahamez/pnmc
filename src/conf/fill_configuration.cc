@@ -157,8 +157,8 @@ fill_configuration(int argc, char** argv)
   conf.file_type = file_type(vm);
   conf.read_stdin = conf.file_name == "-";
   conf.delete_file = vm.count("delete-file");
-  conf.show_order = vm.count("show-order");
-  conf.force_flat_order = vm.count("flat");
+  conf.order_show = vm.count("show-order");
+  conf.order_force_flat = vm.count("flat");
   conf.show_relation = vm.count("show-relation");
   conf.show_hash_tables_stats = vm.count("show-hash-stats");
   conf.show_time = vm.count("show-time");

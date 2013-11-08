@@ -17,8 +17,8 @@ struct pnmc_configuration
   bool read_stdin;
   bool delete_file;
 
-  bool show_order;
-  bool force_flat_order;
+  bool order_show;
+  bool order_force_flat;
 
   bool show_relation;
   bool show_time;
