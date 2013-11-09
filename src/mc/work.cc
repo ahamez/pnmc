@@ -29,13 +29,15 @@ using sdd::ValuesFunction;
 struct mk_order_visitor
   : public boost::static_visitor<std::pair<std::string, sdd::order_builder<sdd_conf>>>
 {
-  using result_type = std::pair<std::string, sdd::order_builder<sdd_conf>>;
+  using order_identifier = sdd::order_identifier<sdd_conf>;
+  using result_type = std::pair<order_identifier, sdd::order_builder<sdd_conf>>;
   using order_builder = sdd::order_builder<sdd_conf>;
 
   const conf::pnmc_configuration& conf;
+  mutable unsigned int artificial_id_counter;
 
   mk_order_visitor(const conf::pnmc_configuration& c)
-    : conf(c)
+    : conf(c), artificial_id_counter(0)
   {}
 
   // Place: base case of the recursion, there's no more possible nested hierarchies.
@@ -43,7 +45,7 @@ struct mk_order_visitor
   operator()(const pn::place* p)
   const noexcept
   {
-    return make_pair(p->id, order_builder());
+    return std::make_pair(order_identifier(p->id), order_builder());
   }
 
   // Hierarchy.
@@ -74,20 +76,18 @@ struct mk_order_visitor
       }
     }
 
-    sdd::order_builder<sdd_conf> ob;
+    order_builder ob;
     if (height <= conf.order_min_height)
     {
-      std::string id;
+      order_identifier id;
       for (const auto& p : tmp)
       {
         if (not p.second.empty())
         {
-          id += p.first;
           ob = p.second << ob;
         }
         else // place
         {
-          id += p.first;
           ob.push(p.first, p.second);
         }
       }
@@ -101,7 +101,7 @@ struct mk_order_visitor
       }
     }
 
-    return make_pair(m.id , ob);
+    return std::make_pair(order_identifier(m.id) , ob);
   }
 };
 
