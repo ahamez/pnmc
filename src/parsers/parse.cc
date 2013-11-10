@@ -13,8 +13,6 @@ namespace pnmc { namespace parsers {
 std::shared_ptr<pn::net>
 parse(const conf::pnmc_configuration& conf, std::istream& in)
 {
-  std::shared_ptr<pn::net> net_ptr;
-
   switch (conf.file_type)
   {
     case (conf::input_format::bpn)  : return parsers::bpn(in);
