@@ -11,7 +11,7 @@ PNMC INSTALLATION
   - libsdd (https://github.com/ahamez/libsdd)
     Note that the libsdd is header-only, and as such it does not need to be
     compiled.
-  - Boost >= 1.54
+  - Boost >= 1.55
 
   * Tools
   - cmake >= 2.8.10
