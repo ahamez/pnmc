@@ -19,6 +19,6 @@ PNMC INSTALLATION
 # Compilation
 
   $ mkdir build
-  $ cmake /path/to/pnmc -DLIBSDD=/path/to/libsdd -DCMAKE_BUILD_TYPE=Release
+  $ cmake /path/to/pnmc -DLIBSDD=/path/to/libsdd
   $ make
   $ make install
