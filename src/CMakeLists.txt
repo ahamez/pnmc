@@ -20,3 +20,4 @@ set(SOURCES
 
 add_executable(pnmc ${SOURCES})
 target_link_libraries(pnmc ${Boost_LIBRARIES})
+install(TARGETS pnmc DESTINATION bin)
