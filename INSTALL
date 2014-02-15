@@ -1,0 +1,24 @@
+PNMC INSTALLATION
+
+# Requirements
+
+  * C++ compiler
+  - clang >= 3.3
+  - gcc >= 4.8
+  - Other compilers might work, as long as they implement the C++11 standard
+
+  * Libraries
+  - libsdd (https://github.com/ahamez/libsdd)
+    Note that the libsdd is header-only, and as such it does not need to be
+    compiled.
+  - Boost >= 1.54
+
+  * Tools
+  - cmake >= 2.8.10
+
+# Compilation
+
+  $ mkdir build
+  $ cmake /path/to/pnmc -DLIBSDD=/path/to/libsdd -DCMAKE_BUILD_TYPE=Release
+  $ make
+  $ make install

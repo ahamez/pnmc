@@ -68,7 +68,7 @@ main(int argc, char** argv)
     const auto net_ptr = parsers::parse(conf, *in);
     if (conf.delete_file and not conf.read_stdin)
     {
-      std::remove(conf.file_name.c_str());
+      ::remove(conf.file_name.c_str());
     }
     mc::work(conf, *net_ptr);
   }

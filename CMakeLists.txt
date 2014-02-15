@@ -38,6 +38,11 @@ if (NO_COROUTINE)
   add_definitions("-DHAS_NO_BOOST_COROUTINE")
 endif ()
 
+if (NOT CMAKE_BUILD_TYPE)
+  message(STATUS "No build type selected, default to Release")
+  set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 add_definitions("-Wall")
 add_definitions("-std=c++11")
 add_definitions("-ftemplate-depth=256")
