@@ -98,6 +98,7 @@ fill_configuration(int argc, char** argv)
   po::options_description petri_options("Petri net options");
   petri_options.add_options()
     ("dead-transitions"         , "Compute dead transitions")
+    ("dead-states"              , "Compute dead states")
   ;
 
 
@@ -169,6 +170,7 @@ fill_configuration(int argc, char** argv)
   conf.show_hash_tables_stats = vm.count("show-hash-stats");
   conf.show_time = vm.count("show-time");
   conf.compute_dead_transitions = vm.count("dead-transitions");
+  conf.compute_dead_states = vm.count("dead-states");
   conf.export_to_lua = vm.count("export-to-lua");
   if (conf.export_to_lua)
   {

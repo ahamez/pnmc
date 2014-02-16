@@ -10,6 +10,7 @@
 #include <sdd/sdd.hh>
 #include <sdd/dd/lua.hh>
 
+#include "mc/dead.hh"
 #include "mc/live.hh"
 #include "mc/post.hh"
 #include "mc/pre.hh"
@@ -25,6 +26,7 @@ typedef sdd::homomorphism<sdd_conf> homomorphism;
 
 using sdd::Composition;
 using sdd::Fixpoint;
+using sdd::Intersection;
 using sdd::Sum;
 using sdd::ValuesFunction;
 
@@ -239,6 +241,55 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 
 /*------------------------------------------------------------------------------------------------*/
 
+SDD
+dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
+           , const SDD& state_space)
+{
+  chrono::time_point<chrono::system_clock> start;
+  chrono::time_point<chrono::system_clock> end;
+  std::size_t elapsed;
+
+  start = chrono::system_clock::now();
+
+  std::set<homomorphism> and_operands;
+  std::set<homomorphism> or_operands;
+
+  for (const auto& transition : net.transitions())
+  {
+    // We are only interested in pre actions.
+    for (const auto& arc : transition.pre)
+    {
+      const auto h = ValuesFunction<sdd_conf>(o, arc.first, dead(arc.second));
+      or_operands.insert(sdd::carrier(o, arc.first, h));
+    }
+
+    and_operands.insert(Sum(o, or_operands.cbegin(), or_operands.cend()));
+    or_operands.clear();
+  }
+  const auto h = Intersection(o, and_operands.cbegin(), and_operands.cend());
+  end = chrono::system_clock::now();
+  elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
+  if (conf.show_time)
+  {
+    std::cout << "Dead states relation time: " << elapsed << "s" << std::endl;
+  }
+
+  /* --------------------  */
+
+  start = chrono::system_clock::now();
+  const auto res = h(o, state_space);
+  end = chrono::system_clock::now();
+  elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
+  if (conf.show_time)
+  {
+    std::cout << "Dead states computation time: " << elapsed << "s" << std::endl;
+  }
+
+  return res;
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 void
 work(const conf::pnmc_configuration& conf, const pn::net& net)
 {
@@ -287,6 +338,38 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     else
     {
       std::cout << "No dead transitions" << std::endl;
+    }
+  }
+
+  if (conf.compute_dead_states)
+  {
+    const auto dead = dead_states(conf, o, net, m);
+    if (dead.empty())
+    {
+      std::cout << "No dead states" << std::endl;
+    }
+    else
+    {
+      std::cout << sdd::count_combinations(dead).template convert_to<long double>()
+                << " dead states" << std::endl;
+
+      if (not conf.order_force_flat)
+      {
+        std::cerr << "Can't display dead states for an hierarchical SDD. Coming soon." << std::endl;
+      }
+      else
+      {
+        for (const auto& path : dead.paths())
+        {
+          sdd::order<sdd_conf> loop = o;
+          for (const auto& values : path)
+          {
+            std::cout << loop.identifier() << " : " << values << ", ";
+            loop = loop.next();
+          }
+          std::cout << std::endl;
+        }
+      }
     }
   }
 
