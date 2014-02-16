@@ -1,8 +1,11 @@
+#include <algorithm> // random_shuffle, transform
 #include <cassert>
 #include <chrono>
+#include <fstream>
 #include <iostream>
+#include <random>
 #include <set>
-#include <utility> // pair
+#include <utility>  // pair
 
 #include <sdd/sdd.hh>
 
@@ -117,9 +120,26 @@ mk_order(const conf::pnmc_configuration& conf, const pn::net& net)
   else
   {
     sdd::order_builder<sdd_conf> ob;
-    for (const auto& place : net.places())
+    if (conf.order_random)
     {
-      ob.push(place.id);
+      std::vector<std::string> tmp;
+      tmp.reserve(net.places().size());
+      std::transform( net.places().cbegin(), net.places().cend(), std::back_inserter(tmp)
+                    , [](const pn::place& p){return p.id;});
+      std::random_device rd;
+      std::mt19937 g(rd());
+      std::shuffle(tmp.begin(), tmp.end(), g);
+      for (const auto& id : tmp)
+      {
+        ob.push(id);
+      }
+    }
+    else
+    {
+      for (const auto& place : net.places())
+      {
+        ob.push(place.id);
+      }
     }
     return sdd::order<sdd_conf>(ob);
   }

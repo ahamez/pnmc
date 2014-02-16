@@ -78,6 +78,7 @@ fill_configuration(int argc, char** argv)
   po::options_description order_options("Order options");
   order_options.add_options()
     ("show-order"             , "Show the order")
+    ("random-order"           , "Random order")
     ("flat"                   , "Don't use hierarchy informations")
     ("order-min-height"       , po::value<unsigned int>()->default_value(10)
                               , "Minimal number of variables at every level of the SDD")
@@ -160,6 +161,7 @@ fill_configuration(int argc, char** argv)
   conf.read_stdin = conf.file_name == "-";
   conf.delete_file = vm.count("delete-file");
   conf.order_show = vm.count("show-order");
+  conf.order_random = vm.count("random-order");
   conf.order_force_flat = vm.count("flat");
   conf.order_min_height = vm["order-min-height"].as<unsigned int>();
   conf.show_relation = vm.count("show-relation");
