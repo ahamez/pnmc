@@ -8,6 +8,7 @@
 #include <utility>  // pair
 
 #include <sdd/sdd.hh>
+#include <sdd/dd/lua.hh>
 
 #include "mc/live.hh"
 #include "mc/post.hh"
@@ -286,6 +287,15 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     else
     {
       std::cout << "No dead transitions" << std::endl;
+    }
+  }
+
+  if (conf.export_to_lua)
+  {
+    std::ofstream lua_file(conf.export_to_lua_file);
+    if (lua_file.is_open())
+    {
+      lua_file << sdd::lua(m) << std::endl;
     }
   }
 

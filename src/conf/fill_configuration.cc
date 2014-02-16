@@ -103,6 +103,7 @@ fill_configuration(int argc, char** argv)
 
   po::options_description hidden_options("Hidden options");
   hidden_options.add_options()
+    ("export-to-lua", po::value<std::string>(), "Export the final SDD to a Lua structure")
     ("input-file", po::value<std::string>(), "The Petri net file to analyse")
     ("delete-file", "Delete model file after reading it")
   ;
@@ -168,6 +169,11 @@ fill_configuration(int argc, char** argv)
   conf.show_hash_tables_stats = vm.count("show-hash-stats");
   conf.show_time = vm.count("show-time");
   conf.compute_dead_transitions = vm.count("dead-transitions");
+  conf.export_to_lua = vm.count("export-to-lua");
+  if (conf.export_to_lua)
+  {
+    conf.export_to_lua_file = vm["export-to-lua"].as<std::string>();
+  }
 
   return conf;
 }

@@ -17,6 +17,7 @@ struct pnmc_configuration
   bool read_stdin;
   bool delete_file;
 
+  bool order_random;
   bool order_show;
   bool order_force_flat;
   unsigned int order_min_height;
@@ -26,6 +27,9 @@ struct pnmc_configuration
   bool show_hash_tables_stats;
 
   bool compute_dead_transitions;
+
+  bool export_to_lua;
+  std::string export_to_lua_file;
 };
 
 /*------------------------------------------------------------------------------------------------*/
