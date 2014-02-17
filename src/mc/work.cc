@@ -220,7 +220,7 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
   }
 
   start = chrono::system_clock::now();
-  const auto res = sdd::rewrite(Fixpoint(Sum<sdd_conf>(o, operands.cbegin(), operands.cend())), o);
+  const auto res = sdd::rewrite(o, Fixpoint(Sum<sdd_conf>(o, operands.cbegin(), operands.cend())));
   end = chrono::system_clock::now();
   elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
 
@@ -276,7 +276,7 @@ dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
     and_operands.insert(Sum(o, or_operands.cbegin(), or_operands.cend()));
     or_operands.clear();
   }
-  const auto h = sdd::rewrite(Intersection(o, and_operands.cbegin(), and_operands.cend()), o);
+  const auto h = sdd::rewrite(o, Intersection(o, and_operands.cbegin(), and_operands.cend()));
   end = chrono::system_clock::now();
   elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
   if (conf.show_time)
