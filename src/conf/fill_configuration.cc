@@ -77,16 +77,16 @@ fill_configuration(int argc, char** argv)
 
   po::options_description order_options("Order options");
   order_options.add_options()
-    ("show-order"             , "Show the order")
-    ("random-order"           , "Random order")
-    ("flat"                   , "Don't use hierarchy informations")
+    ("order-show"             , "Show the order")
+    ("order-random"           , "Random order")
+    ("order-flat"             , "Don't use hierarchy informations")
     ("order-min-height"       , po::value<unsigned int>()->default_value(10)
                               , "Minimal number of variables at every level of the SDD")
   ;
 
   po::options_description hom_options("Homomorphisms options");
   hom_options.add_options()
-    ("show-relation"          , "Show the transition relation")
+    ("relation-show"          , "Show the transition relation")
   ;
 
   po::options_description stats_options("Statistics options");
