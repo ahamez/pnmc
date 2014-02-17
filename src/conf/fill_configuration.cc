@@ -99,6 +99,8 @@ fill_configuration(int argc, char** argv)
   petri_options.add_options()
     ("dead-transitions"         , "Compute dead transitions")
     ("dead-states"              , "Compute dead states")
+    ("marking-bound"            , po::value<unsigned int>()->default_value(0)
+                                , "Limit the marking")
   ;
 
 
@@ -172,6 +174,7 @@ fill_configuration(int argc, char** argv)
   conf.compute_dead_transitions = vm.count("dead-transitions");
   conf.compute_dead_states = vm.count("dead-states");
   conf.export_to_lua = vm.count("export-to-lua");
+  conf.marking_bound = vm["marking-bound"].as<unsigned int>();
   if (conf.export_to_lua)
   {
     conf.export_to_lua_file = vm["export-to-lua"].as<std::string>();

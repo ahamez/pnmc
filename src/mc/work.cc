@@ -10,6 +10,8 @@
 #include <sdd/sdd.hh>
 #include <sdd/dd/lua.hh>
 
+#include "mc/bound_error.hh"
+#include "mc/bounded_post.hh"
 #include "mc/dead.hh"
 #include "mc/live.hh"
 #include "mc/post.hh"
@@ -177,6 +179,8 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
   for (const auto& transition : net.transitions())
   {
     homomorphism h_t = sdd::Id<sdd_conf>();
+
+    // Add a "canary" to detect live transitions.
     if (conf.compute_dead_transitions)
     {
       if (not transition.post.empty())
@@ -186,13 +190,18 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
         h_t = sdd::carrier(o, transition.post.begin()->first, f);
       }
     }
-    // post actions.
+
+    // Post actions.
     for (const auto& arc : transition.post)
     {
-      homomorphism f = ValuesFunction<sdd_conf>(o, arc.first, post(arc.second));
+      homomorphism f = conf.marking_bound == 0
+                     ? ValuesFunction<sdd_conf>(o, arc.first, post(arc.second))
+                     : ValuesFunction<sdd_conf>(o, arc.first, bounded_post( arc.second
+                                                                          , conf.marking_bound));
       h_t = Composition(h_t, sdd::carrier(o, arc.first, f));
     }
-    // pre actions.
+
+    // Pre actions.
     for (const auto& arc : transition.pre)
     {
       homomorphism f = ValuesFunction<sdd_conf>(o, arc.first, pre(arc.second));
@@ -312,79 +321,87 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     std::cout << h << std::endl;
   }
 
-  const SDD m = state_space(conf, o, m0, h);
-
-  const auto n = sdd::count_combinations(m);
-  std::cout << n.template convert_to<long double>() << " states" << std::endl;
-
-  if (conf.compute_dead_transitions)
+  try
   {
-    std::deque<std::string> dead_transitions;
-    for (std::size_t i = 0; i < net.transitions().size(); ++i)
+    SDD m = sdd::zero<sdd_conf>();
+    m = state_space(conf, o, m0, h);
+    const auto n = sdd::count_combinations(m);
+    std::cout << n.template convert_to<long double>() << " states" << std::endl;
+
+    if (conf.compute_dead_transitions)
     {
-      if (not transitions_bitset[i])
+      std::deque<std::string> dead_transitions;
+      for (std::size_t i = 0; i < net.transitions().size(); ++i)
       {
-        dead_transitions.push_back(net.get_transition_by_index(i).id);
+        if (not transitions_bitset[i])
+        {
+          dead_transitions.push_back(net.get_transition_by_index(i).id);
+        }
       }
-    }
 
-    if (not dead_transitions.empty())
-    {
-      std::cout << dead_transitions.size() << " dead transition(s): ";
-      std::copy( dead_transitions.cbegin(), std::prev(dead_transitions.cend())
-               , std::ostream_iterator<std::string>(std::cout, ","));
-      std::cout << *std::prev(dead_transitions.cend()) << std::endl;
-    }
-    else
-    {
-      std::cout << "No dead transitions" << std::endl;
-    }
-  }
-
-  if (conf.compute_dead_states)
-  {
-    const auto dead = dead_states(conf, o, net, m);
-    if (dead.empty())
-    {
-      std::cout << "No dead states" << std::endl;
-    }
-    else
-    {
-      std::cout << sdd::count_combinations(dead).template convert_to<long double>()
-                << " dead states" << std::endl;
-
-      if (not conf.order_force_flat)
+      if (not dead_transitions.empty())
       {
-        std::cerr << "Can't display dead states for an hierarchical SDD. Coming soon." << std::endl;
+        std::cout << dead_transitions.size() << " dead transition(s): ";
+        std::copy( dead_transitions.cbegin(), std::prev(dead_transitions.cend())
+                 , std::ostream_iterator<std::string>(std::cout, ","));
+        std::cout << *std::prev(dead_transitions.cend()) << std::endl;
       }
       else
       {
-        for (const auto& path : dead.paths())
+        std::cout << "No dead transitions" << std::endl;
+      }
+    }
+
+    if (conf.compute_dead_states)
+    {
+      const auto dead = dead_states(conf, o, net, m);
+      if (dead.empty())
+      {
+        std::cout << "No dead states" << std::endl;
+      }
+      else
+      {
+        std::cout << sdd::count_combinations(dead).template convert_to<long double>()
+                  << " dead states" << std::endl;
+
+        if (not conf.order_force_flat)
         {
-          sdd::order<sdd_conf> loop = o;
-          for (const auto& values : path)
+          std::cerr << "Can't display dead states for an hierarchical SDD. Coming soon."
+                    << std::endl;
+        }
+        else
+        {
+          for (const auto& path : dead.paths())
           {
-            std::cout << loop.identifier() << " : " << values << ", ";
-            loop = loop.next();
+            sdd::order<sdd_conf> loop = o;
+            for (const auto& values : path)
+            {
+              std::cout << loop.identifier() << " : " << values << ", ";
+              loop = loop.next();
+            }
+            std::cout << std::endl;
           }
-          std::cout << std::endl;
         }
       }
     }
-  }
 
-  if (conf.export_to_lua)
-  {
-    std::ofstream lua_file(conf.export_to_lua_file);
-    if (lua_file.is_open())
+    if (conf.export_to_lua)
     {
-      lua_file << sdd::lua(m) << std::endl;
+      std::ofstream lua_file(conf.export_to_lua_file);
+      if (lua_file.is_open())
+      {
+        lua_file << sdd::lua(m) << std::endl;
+      }
+    }
+
+    if (conf.show_hash_tables_stats)
+    {
+      std::cout << manager << std::endl;
     }
   }
-
-  if (conf.show_hash_tables_stats)
+  catch (const bound_error&)
   {
-    std::cout << manager << std::endl;
+    std::cout << "Marking limit reached." << std::endl;
   }
 }
 

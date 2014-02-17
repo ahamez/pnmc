@@ -28,6 +28,7 @@ struct pnmc_configuration
 
   bool compute_dead_transitions;
   bool compute_dead_states;
+  unsigned int marking_bound;
 
   bool export_to_lua;
   std::string export_to_lua_file;
