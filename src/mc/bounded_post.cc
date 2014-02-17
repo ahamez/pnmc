@@ -9,8 +9,8 @@ namespace pnmc { namespace mc {
 
 /*------------------------------------------------------------------------------------------------*/
 
-bounded_post::bounded_post(unsigned int v, unsigned int b)
-  : valuation_(v), bound_(b)
+bounded_post::bounded_post(unsigned int v, unsigned int b, const std::string& p)
+  : valuation_(v), bound_(b), place_(p)
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -24,7 +24,7 @@ const
   {
     if (v > bound_)
     {
-      throw bound_error();
+      throw bound_error(place_);
     }
     builder.insert(v + valuation_);
   }

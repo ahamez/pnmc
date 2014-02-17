@@ -197,7 +197,8 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
       homomorphism f = conf.marking_bound == 0
                      ? ValuesFunction<sdd_conf>(o, arc.first, post(arc.second))
                      : ValuesFunction<sdd_conf>(o, arc.first, bounded_post( arc.second
-                                                                          , conf.marking_bound));
+                                                                          , conf.marking_bound
+                                                                          , arc.first));
       h_t = Composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
@@ -399,9 +400,9 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       std::cout << manager << std::endl;
     }
   }
-  catch (const bound_error&)
+  catch (const bound_error& be)
   {
-    std::cout << "Marking limit reached." << std::endl;
+    std::cout << "Marking limit reached for place " << be.place << std::endl;
   }
 }
 

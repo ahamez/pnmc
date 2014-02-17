@@ -15,8 +15,9 @@ struct bounded_post
 {
   const unsigned int valuation_;
   const unsigned int bound_;
+  const std::string& place_;
 
-  bounded_post(unsigned int valuation, unsigned int bound);
+  bounded_post(unsigned int valuation, unsigned int bound, const std::string& place);
 
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>&)
