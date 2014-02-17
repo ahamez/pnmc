@@ -18,17 +18,17 @@ sdd::values::flat_set<unsigned int>
 pre::operator()(const sdd::values::flat_set<unsigned int>& val)
 const
 {
+
+  sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+
   // Find the first entry in val that is greater or equal than valuation.
   // We can do that as values in val are sorted.
-  auto cit = val.lower_bound(valuation);
-  sdd::values::flat_set<unsigned int> new_val;
-
   // Will cut the path if cit == end.
-  for (; cit != val.cend(); ++cit)
+  for (auto cit = val.lower_bound(valuation); cit != val.cend(); ++cit)
   {
-    new_val.insert(*cit - valuation);
+    builder.insert(*cit - valuation);
   }
-  return new_val;
+  return std::move(builder);
 }
 
 /*------------------------------------------------------------------------------------------------*/

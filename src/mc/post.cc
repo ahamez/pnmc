@@ -18,12 +18,12 @@ sdd::values::flat_set<unsigned int>
 post::operator()(const sdd::values::flat_set<unsigned int>& val)
 const
 {
-  sdd::values::flat_set<unsigned int> new_val;
+  sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
   for (const auto& v : val)
   {
-    new_val.insert(v + valuation);
+    builder.insert(v + valuation);
   }
-  return new_val;
+  return std::move(builder);
 }
 
 /*------------------------------------------------------------------------------------------------*/
