@@ -365,23 +365,19 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
         std::cout << sdd::count_combinations(dead).template convert_to<long double>()
                   << " dead states" << std::endl;
 
-        if (not conf.order_force_flat)
+        // Get the identifier of each level (SDD::paths() doesn't give this information).
+        std::deque<const std::reference_wrapper<const std::string>> identifiers;
+        o.flat(std::back_inserter(identifiers));
+
+        for (const auto& path : dead.paths())
         {
-          std::cerr << "Can't display dead states for an hierarchical SDD. Coming soon."
-                    << std::endl;
-        }
-        else
-        {
-          for (const auto& path : dead.paths())
+          auto id_cit = identifiers.cbegin();
+          auto path_cit = path.cbegin();
+          for (; path_cit != std::prev(path.cend()); ++path_cit, ++id_cit)
           {
-            sdd::order<sdd_conf> loop = o;
-            for (const auto& values : path)
-            {
-              std::cout << loop.identifier() << " : " << values << ", ";
-              loop = loop.next();
-            }
-            std::cout << std::endl;
+            std::cout << id_cit->get() << " : " << *path_cit << ", ";
           }
+          std::cout << id_cit->get() << " : " << *path_cit << std::endl;
         }
       }
     }
