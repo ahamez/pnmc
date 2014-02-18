@@ -326,8 +326,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   {
     SDD m = sdd::zero<sdd_conf>();
     m = state_space(conf, o, m0, h);
-    const auto n = sdd::count_combinations(m);
-    std::cout << n.template convert_to<long double>() << " states" << std::endl;
+    std::cout << m.size().template convert_to<long double>() << " states" << std::endl;
 
     if (conf.compute_dead_transitions)
     {
@@ -362,8 +361,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       }
       else
       {
-        std::cout << sdd::count_combinations(dead).template convert_to<long double>()
-                  << " dead states" << std::endl;
+        std::cout << dead.size().template convert_to<long double>() << " dead states" << std::endl;
 
         // Get the identifier of each level (SDD::paths() doesn't give this information).
         std::deque<const std::reference_wrapper<const std::string>> identifiers;
