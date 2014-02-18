@@ -366,7 +366,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
                   << " dead states" << std::endl;
 
         // Get the identifier of each level (SDD::paths() doesn't give this information).
-        std::deque<const std::reference_wrapper<const std::string>> identifiers;
+        std::deque<std::reference_wrapper<const std::string>> identifiers;
         o.flat(std::back_inserter(identifiers));
 
         for (const auto& path : dead.paths())
