@@ -164,11 +164,11 @@ fill_configuration(int argc, char** argv)
   conf.file_type = file_type(vm);
   conf.read_stdin = conf.file_name == "-";
   conf.delete_file = vm.count("delete-file");
-  conf.order_show = vm.count("show-order");
-  conf.order_random = vm.count("random-order");
-  conf.order_force_flat = vm.count("flat");
+  conf.order_show = vm.count("order-show");
+  conf.order_random = vm.count("order-random");
+  conf.order_force_flat = vm.count("order-flat");
   conf.order_min_height = vm["order-min-height"].as<unsigned int>();
-  conf.show_relation = vm.count("show-relation");
+  conf.show_relation = vm.count("relation-show");
   conf.show_hash_tables_stats = vm.count("show-hash-stats");
   conf.show_time = vm.count("show-time");
   conf.compute_dead_transitions = vm.count("dead-transitions");
