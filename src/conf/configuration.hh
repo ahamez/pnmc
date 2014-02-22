@@ -17,6 +17,9 @@ struct pnmc_configuration
   bool read_stdin;
   bool delete_file;
 
+  bool sdd_export_state_space;
+  std::string sdd_export_state_space_file;
+
   bool order_random;
   bool order_show;
   bool order_force_flat;

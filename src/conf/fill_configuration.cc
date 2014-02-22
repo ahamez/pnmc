@@ -84,6 +84,12 @@ fill_configuration(int argc, char** argv)
                               , "Minimal number of variables at every level of the SDD")
   ;
 
+  po::options_description sdd_options("SDD options");
+  sdd_options.add_options()
+    ("sdd-export-state-space" , po::value<std::string>()
+                              , "Export the SDD state space to DOT file")
+  ;
+
   po::options_description hom_options("Homomorphisms options");
   hom_options.add_options()
     ("relation-show"          , "Show the transition relation")
@@ -119,6 +125,7 @@ fill_configuration(int argc, char** argv)
   	.add(general_options)
     .add(file_options)
     .add(order_options)
+    .add(sdd_options)
     .add(hom_options)
     .add(petri_options)
     .add(stats_options)
@@ -175,6 +182,11 @@ fill_configuration(int argc, char** argv)
   conf.compute_dead_states = vm.count("dead-states");
   conf.export_to_lua = vm.count("export-to-lua");
   conf.marking_bound = vm["marking-bound"].as<unsigned int>();
+  conf.sdd_export_state_space = vm.count("sdd-export-state-space");
+  if (conf.sdd_export_state_space)
+  {
+    conf.sdd_export_state_space_file = vm["sdd-export-state-space"].as<std::string>();
+  }
   if (conf.export_to_lua)
   {
     conf.export_to_lua_file = vm["export-to-lua"].as<std::string>();

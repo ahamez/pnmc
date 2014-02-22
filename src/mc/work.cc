@@ -8,7 +8,8 @@
 #include <utility>  // pair
 
 #include <sdd/sdd.hh>
-#include <sdd/dd/lua.hh>
+#include <sdd/tools/dot.hh>
+#include <sdd/tools/lua.hh>
 
 #include "mc/bound_error.hh"
 #include "mc/bounded_post.hh"
@@ -328,6 +329,20 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     m = state_space(conf, o, m0, h);
     std::cout << m.size().template convert_to<long double>() << " states" << std::endl;
 
+    if (conf.sdd_export_state_space)
+    {
+      std::ofstream dot_file(conf.sdd_export_state_space_file);
+      if (dot_file.is_open())
+      {
+        dot_file << sdd::tools::dot(m) << std::endl;
+      }
+      else
+      {
+        std::cerr << "Can't export state space's SDD to " << conf.sdd_export_state_space_file
+                  << std::endl;
+      }
+    }
+
     if (conf.compute_dead_transitions)
     {
       std::deque<std::string> dead_transitions;
@@ -385,7 +400,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       std::ofstream lua_file(conf.export_to_lua_file);
       if (lua_file.is_open())
       {
-        lua_file << sdd::lua(m) << std::endl;
+        lua_file << sdd::tools::lua(m) << std::endl;
       }
     }
 
