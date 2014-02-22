@@ -286,6 +286,16 @@ dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
   }
 
   /* --------------------  */
+  start = chrono::system_clock::now();
+  const auto h = sdd::rewrite(o, tmp);
+  end = chrono::system_clock::now();
+  elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
+  if (conf.show_time)
+  {
+    std::cout << "Dead states relation rewrite time: " << elapsed << "s" << std::endl;
+  }
+
+  /* --------------------  */
 
   start = chrono::system_clock::now();
   const auto res = h(o, state_space);
