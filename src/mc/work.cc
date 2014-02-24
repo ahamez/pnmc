@@ -277,7 +277,7 @@ dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
     and_operands.insert(Sum(o, or_operands.cbegin(), or_operands.cend()));
     or_operands.clear();
   }
-  const auto h = sdd::rewrite(o, Intersection(o, and_operands.cbegin(), and_operands.cend()));
+  const auto tmp = Intersection(o, and_operands.cbegin(), and_operands.cend());
   end = chrono::system_clock::now();
   elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
   if (conf.show_time)
