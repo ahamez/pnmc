@@ -99,6 +99,7 @@ fill_configuration(int argc, char** argv)
   stats_options.add_options()
     ("show-hash-stats"          , "Show the hash tables statistics")
     ("show-time"                , "Show miscellaneous execution times")
+    ("show-sdd-bytes"           , "Show the number of bytes used by the final state space")
   ;
 
   po::options_description petri_options("Petri net options");
@@ -183,6 +184,7 @@ fill_configuration(int argc, char** argv)
   conf.export_to_lua = vm.count("export-to-lua");
   conf.marking_bound = vm["marking-bound"].as<unsigned int>();
   conf.sdd_export_state_space = vm.count("sdd-export-state-space");
+  conf.show_state_space_bytes = vm.count("show-sdd-bytes");
   if (conf.sdd_export_state_space)
   {
     conf.sdd_export_state_space_file = vm["sdd-export-state-space"].as<std::string>();

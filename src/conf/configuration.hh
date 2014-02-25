@@ -20,6 +20,8 @@ struct pnmc_configuration
   bool sdd_export_state_space;
   std::string sdd_export_state_space_file;
 
+  bool show_state_space_bytes;
+
   bool order_random;
   bool order_show;
   bool order_force_flat;

@@ -10,6 +10,7 @@
 #include <sdd/sdd.hh>
 #include <sdd/tools/dot.hh>
 #include <sdd/tools/lua.hh>
+#include "sdd/tools/size.hh"
 
 #include "mc/bound_error.hh"
 #include "mc/bounded_post.hh"
@@ -412,6 +413,11 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       {
         lua_file << sdd::tools::lua(m) << std::endl;
       }
+    }
+
+    if (conf.show_state_space_bytes)
+    {
+      std::cout << "Final SDD size: " << sdd::tools::size(m) << " bytes" << std::endl;
     }
 
     if (conf.show_hash_tables_stats)
