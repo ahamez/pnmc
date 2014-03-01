@@ -28,11 +28,11 @@ typedef sdd::conf1 sdd_conf;
 typedef sdd::SDD<sdd_conf> SDD;
 typedef sdd::homomorphism<sdd_conf> homomorphism;
 
-using sdd::Composition;
-using sdd::Fixpoint;
-using sdd::Intersection;
-using sdd::Sum;
-using sdd::ValuesFunction;
+using sdd::composition;
+using sdd::fixpoint;
+using sdd::intersection;
+using sdd::sum;
+using sdd::function;
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -176,19 +176,19 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
 
   start = chrono::system_clock::now();
   std::set<homomorphism> operands;
-  operands.insert(sdd::Id<sdd_conf>());
+  operands.insert(sdd::id<sdd_conf>());
 
   for (const auto& transition : net.transitions())
   {
-    homomorphism h_t = sdd::Id<sdd_conf>();
+    homomorphism h_t = sdd::id<sdd_conf>();
 
     // Add a "canary" to detect live transitions.
     if (conf.compute_dead_transitions)
     {
       if (not transition.post.empty())
       {
-        const auto f = ValuesFunction<sdd_conf>( o, transition.post.begin()->first
-                                               , live(transition.index, transitions_bitset));
+        const auto f = function( o, transition.post.begin()->first
+                               , live(transition.index, transitions_bitset));
         h_t = sdd::carrier(o, transition.post.begin()->first, f);
       }
     }
@@ -197,18 +197,18 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     for (const auto& arc : transition.post)
     {
       homomorphism f = conf.marking_bound == 0
-                     ? ValuesFunction<sdd_conf>(o, arc.first, post(arc.second))
-                     : ValuesFunction<sdd_conf>(o, arc.first, bounded_post( arc.second
-                                                                          , conf.marking_bound
-                                                                          , arc.first));
-      h_t = Composition(h_t, sdd::carrier(o, arc.first, f));
+                     ? function(o, arc.first, post(arc.second))
+                     : function(o, arc.first, bounded_post( arc.second
+                                                                    , conf.marking_bound
+                                                                    , arc.first));
+      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
     // Pre actions.
     for (const auto& arc : transition.pre)
     {
-      homomorphism f = ValuesFunction<sdd_conf>(o, arc.first, pre(arc.second));
-      h_t = Composition(h_t, sdd::carrier(o, arc.first, f));
+      homomorphism f = function<sdd_conf>(o, arc.first, pre(arc.second));
+      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
     operands.insert(h_t);
@@ -222,7 +222,7 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
   }
 
   start = chrono::system_clock::now();
-  const auto res = sdd::rewrite(o, Fixpoint(Sum<sdd_conf>(o, operands.cbegin(), operands.cend())));
+  const auto res = sdd::rewrite(o, fixpoint(sum(o, operands.cbegin(), operands.cend())));
   end = chrono::system_clock::now();
   elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
 
@@ -271,14 +271,14 @@ dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
     // We are only interested in pre actions.
     for (const auto& arc : transition.pre)
     {
-      const auto h = ValuesFunction<sdd_conf>(o, arc.first, dead(arc.second));
+      const auto h = function(o, arc.first, dead(arc.second));
       or_operands.insert(sdd::carrier(o, arc.first, h));
     }
 
-    and_operands.insert(Sum(o, or_operands.cbegin(), or_operands.cend()));
+    and_operands.insert(sum(o, or_operands.cbegin(), or_operands.cend()));
     or_operands.clear();
   }
-  const auto tmp = Intersection(o, and_operands.cbegin(), and_operands.cend());
+  const auto tmp = intersection(o, and_operands.cbegin(), and_operands.cend());
   end = chrono::system_clock::now();
   elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
   if (conf.show_time)
