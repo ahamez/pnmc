@@ -72,6 +72,9 @@ const auto order_flat_str = "order-flat";
 const auto order_min_height_str = "order-min-height";
 const auto order_force_str = "order-force-heuristic";
 
+// Homomorphisms options
+const auto hom_show_relation_str = "hom-show-relation";
+
 // Advanced options
 const auto delete_input_file_str = "delete-input-file";
 const auto export_to_lua_str = "export-to-lua";
@@ -109,7 +112,7 @@ fill_configuration(int argc, char** argv)
 
   po::options_description hom_options("Homomorphisms options");
   hom_options.add_options()
-    ("relation-show"          , "Show the transition relation")
+    (hom_show_relation_str      , "Show the transition relation")
   ;
 
   po::options_description stats_options("Statistics options");
