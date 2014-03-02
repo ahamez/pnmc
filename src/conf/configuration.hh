@@ -17,10 +17,8 @@ struct pnmc_configuration
   bool read_stdin;
   bool delete_file;
 
-  bool sdd_export_state_space;
-  std::string sdd_export_state_space_file;
-
-  bool show_state_space_bytes;
+  bool export_final_sdd_dot;
+  std::string export_final_sdd_dot_file;
 
   bool order_random;
   bool order_show;
@@ -30,7 +28,6 @@ struct pnmc_configuration
 
   bool show_relation;
   bool show_time;
-  bool show_hash_tables_stats;
 
   bool compute_dead_transitions;
   bool compute_dead_states;
@@ -38,6 +35,13 @@ struct pnmc_configuration
 
   bool export_to_lua;
   std::string export_to_lua_file;
+
+  bool show_final_sdd_bytes;
+
+  bool final_sdd_stats_json;
+  std::string final_sdd_stats_json_file;
+  bool manager_stats_json;
+  std::string manager_stats_json_file;
 };
 
 /*------------------------------------------------------------------------------------------------*/
