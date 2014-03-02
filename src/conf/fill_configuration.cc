@@ -22,12 +22,17 @@ const std::string version
 
 /*------------------------------------------------------------------------------------------------*/
 
+const auto bpn_str = "bpn";
+const auto prod_str = "prod";
+const auto tina_str = "tina";
+const auto xml_str = "xml";
+
 input_format
 file_type(const po::variables_map& vm)
 {
-  const bool bpn = vm.count("bpn");
-  const bool prod = vm.count("prod");
-  const bool tina = vm.count("tina");
+  const bool bpn = vm.count(bpn_str);
+  const bool prod = vm.count(prod_str);
+  const bool tina = vm.count(tina_str);
 
   if (not (bpn or prod or tina))
   {
@@ -56,6 +61,24 @@ file_type(const po::variables_map& vm)
 
 /*------------------------------------------------------------------------------------------------*/
 
+// General options
+const auto help_str = "help";
+const auto version_str = "version";
+
+// Order options
+const auto order_show_str = "order-show";
+const auto order_random_str = "order-random";
+const auto order_flat_str = "order-flat";
+const auto order_min_height_str = "order-min-height";
+const auto order_force_str = "order-force-heuristic";
+
+// Advanced options
+const auto delete_input_file_str = "delete-input-file";
+const auto export_to_lua_str = "export-to-lua";
+const auto final_sdd_json_str = "final-sdd-json";
+const auto manager_json_str = "manager-json";
+const auto final_sdd_dot_export_str = "final-sdd-dot";
+
 boost::optional<pnmc_configuration>
 fill_configuration(int argc, char** argv)
 {
@@ -63,31 +86,25 @@ fill_configuration(int argc, char** argv)
 
   po::options_description general_options("General options");
   general_options.add_options()
-    ( "help"                  , "Show this help")
-    ( "version"               , "Show version")
+    (help_str     , "Show this help")
+    (version_str  , "Show version")
   ;
 
   po::options_description file_options("Input file options");
   file_options.add_options()
-    ("bpn"                      , "Parse BPN format")
-    ("prod"                     , "Parse PROD format")
-    ("tina"                     , "Parse TINA format")
-    ("xml"                      , "Parse pnmc's XML format (default)")
+    (bpn_str  , "Parse BPN format")
+    (prod_str , "Parse PROD format")
+    (tina_str , "Parse TINA format")
+    (xml_str  , "Parse pnmc's XML format (default)")
   ;
 
   po::options_description order_options("Order options");
   order_options.add_options()
-    ("order-show"             , "Show the order")
-    ("order-random"           , "Random order")
-    ("order-flat"             , "Don't use hierarchy informations")
-    ("order-min-height"       , po::value<unsigned int>()->default_value(10)
-                              , "Minimal number of variables at every level of the SDD")
-  ;
-
-  po::options_description sdd_options("SDD options");
-  sdd_options.add_options()
-    ("sdd-export-state-space" , po::value<std::string>()
-                              , "Export the SDD state space to DOT file")
+    (order_show_str             , "Show the order")
+    (order_random_str           , "Random order (not recommanded)")
+    (order_flat_str             , "Don't use hierarchy informations")
+    (order_min_height_str       , po::value<unsigned int>()->default_value(10)
+                                , "Minimal number of variables at every level of the SDD")
   ;
 
   po::options_description hom_options("Homomorphisms options");
@@ -97,25 +114,35 @@ fill_configuration(int argc, char** argv)
 
   po::options_description stats_options("Statistics options");
   stats_options.add_options()
-    ("show-hash-stats"          , "Show the hash tables statistics")
     ("show-time"                , "Show miscellaneous execution times")
-    ("show-sdd-bytes"           , "Show the number of bytes used by the final state space")
+    ("show-sdd-bytes"           , "Show the number of bytes used by the final state space's SDD")
   ;
 
   po::options_description petri_options("Petri net options");
   petri_options.add_options()
-    ("dead-transitions"         , "Compute dead transitions")
-    ("dead-states"              , "Compute dead states")
-    ("marking-bound"            , po::value<unsigned int>()->default_value(0)
+    ("pn-dead-transitions"      , "Compute dead transitions")
+    ("pn-dead-states"           , "Compute dead states")
+    ("pn-marking-bound"         , po::value<unsigned int>()->default_value(0)
                                 , "Limit the marking")
   ;
 
 
   po::options_description hidden_options("Hidden options");
   hidden_options.add_options()
-    ("export-to-lua", po::value<std::string>(), "Export the final SDD to a Lua structure")
     ("input-file", po::value<std::string>(), "The Petri net file to analyse")
-    ("delete-file", "Delete model file after reading it")
+  ;
+
+  po::options_description advanced_options("Advanced options");
+  advanced_options.add_options()
+    (delete_input_file_str      , "Delete input file after reading it")
+    (export_to_lua_str          , po::value<std::string>()
+                                , "Export the final SDD to a Lua structure")
+    (final_sdd_json_str         , po::value<std::string>()
+                                , "Export the final SDD's statistics to a JSON file")
+    (manager_json_str           , po::value<std::string>()
+                                , "Export the libsdd manager's statistics to a JSON file")
+    (final_sdd_dot_export_str   , po::value<std::string>()
+                                , "Export the SDD state space to DOT file")
   ;
 
   po::positional_options_description p;
@@ -126,26 +153,34 @@ fill_configuration(int argc, char** argv)
   	.add(general_options)
     .add(file_options)
     .add(order_options)
-    .add(sdd_options)
     .add(hom_options)
     .add(petri_options)
     .add(stats_options)
-  	.add(hidden_options);
+    .add(advanced_options)
+    .add(hidden_options);
   
   po::variables_map vm;
-  po::parsed_options parsed = po::command_line_parser(argc, argv)
-                                    .options(cmdline_options)
-                                    .positional(p)
-                                    .allow_unregistered()
-                                    .run();
+  po::parsed_options parsed
+    = po::command_line_parser(argc, argv).options(cmdline_options)
+                                         .positional(p)
+                                         .allow_unregistered()
+                                         .run();
   po::store(parsed, vm);
   po::notify(vm);
   
   std::vector<std::string> unrecognized
-    = po::collect_unrecognized(parsed.options,po::exclude_positional);
+    = po::collect_unrecognized(parsed.options, po::exclude_positional);
   
-  if (vm.count("help") or unrecognized.size() > 0)
+  if (vm.count(help_str) or unrecognized.size() > 0)
   {
+    if (unrecognized.size() > 0)
+    {
+      std::cout << "Unknown option(s):";
+      std::copy( unrecognized.cbegin(), unrecognized.cend()
+               , std::ostream_iterator<std::string>(std::cout, " "));
+      std::cout << std::endl;
+    }
+
     std::cout << version << std::endl;
     std::cout << "Usage: " << argv[0] << " [options] file " << std::endl << std::endl;
     std::cout << general_options << std::endl;
@@ -154,10 +189,11 @@ fill_configuration(int argc, char** argv)
     std::cout << hom_options << std::endl;
     std::cout << petri_options << std::endl;
     std::cout << stats_options << std::endl;
+    std::cout << advanced_options << std::endl;
     return boost::optional<pnmc_configuration>();
   }
   
-  if (vm.count("version"))
+  if (vm.count(version_str))
   {
     std::cout << version << std::endl;
     return boost::optional<pnmc_configuration>();
@@ -168,30 +204,50 @@ fill_configuration(int argc, char** argv)
     throw po::error("No file specified.");
   }
 
+  // Input options
   conf.file_name = vm["input-file"].as<std::string>();
   conf.file_type = file_type(vm);
   conf.read_stdin = conf.file_name == "-";
-  conf.delete_file = vm.count("delete-file");
-  conf.order_show = vm.count("order-show");
-  conf.order_random = vm.count("order-random");
-  conf.order_force_flat = vm.count("order-flat");
-  conf.order_min_height = vm["order-min-height"].as<unsigned int>();
+
+  // Order options
+  conf.order_show = vm.count(order_show_str);
+  conf.order_random = vm.count(order_random_str);
+  conf.order_force_flat = vm.count(order_flat_str);
+  conf.order_min_height = vm[order_min_height_str].as<unsigned int>();
+
+  // Hom options
   conf.show_relation = vm.count("relation-show");
-  conf.show_hash_tables_stats = vm.count("show-hash-stats");
+
+  // Statistics options
   conf.show_time = vm.count("show-time");
-  conf.compute_dead_transitions = vm.count("dead-transitions");
-  conf.compute_dead_states = vm.count("dead-states");
-  conf.export_to_lua = vm.count("export-to-lua");
-  conf.marking_bound = vm["marking-bound"].as<unsigned int>();
-  conf.sdd_export_state_space = vm.count("sdd-export-state-space");
-  conf.show_state_space_bytes = vm.count("show-sdd-bytes");
-  if (conf.sdd_export_state_space)
-  {
-    conf.sdd_export_state_space_file = vm["sdd-export-state-space"].as<std::string>();
-  }
+  conf.show_final_sdd_bytes = vm.count("show-sdd-bytes");
+
+  // Petri net options
+  conf.compute_dead_transitions = vm.count("pn-dead-transitions");
+  conf.compute_dead_states = vm.count("pn-dead-states");
+  conf.marking_bound = vm["pn-marking-bound"].as<unsigned int>();
+
+  // Advanced options
+  conf.delete_file = vm.count(delete_input_file_str);
+  conf.export_to_lua = vm.count(export_to_lua_str);
   if (conf.export_to_lua)
   {
-    conf.export_to_lua_file = vm["export-to-lua"].as<std::string>();
+    conf.export_to_lua_file = vm[export_to_lua_str].as<std::string>();
+  }
+  conf.export_final_sdd_dot = vm.count(final_sdd_dot_export_str);
+  if (conf.export_final_sdd_dot)
+  {
+    conf.export_final_sdd_dot_file = vm[final_sdd_dot_export_str].as<std::string>();
+  }
+  conf.final_sdd_stats_json = vm.count(final_sdd_json_str);
+  if (conf.final_sdd_stats_json)
+  {
+    conf.final_sdd_stats_json_file = vm[final_sdd_json_str].as<std::string>();
+  }
+  conf.manager_stats_json  = vm.count(manager_json_str);
+  if (conf.manager_stats_json)
+  {
+    conf.manager_stats_json_file = vm[manager_json_str].as<std::string>();
   }
 
   return conf;

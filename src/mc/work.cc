@@ -9,6 +9,7 @@
 
 #include <sdd/sdd.hh>
 #include <sdd/tools/dot.hh>
+#include <sdd/tools/json.hh>
 #include <sdd/tools/lua.hh>
 #include "sdd/tools/size.hh"
 
@@ -340,16 +341,16 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     m = state_space(conf, o, m0, h);
     std::cout << m.size().template convert_to<long double>() << " states" << std::endl;
 
-    if (conf.sdd_export_state_space)
+    if (conf.export_final_sdd_dot)
     {
-      std::ofstream dot_file(conf.sdd_export_state_space_file);
+      std::ofstream dot_file(conf.export_final_sdd_dot_file);
       if (dot_file.is_open())
       {
         dot_file << sdd::tools::dot(m) << std::endl;
       }
       else
       {
-        std::cerr << "Can't export state space's SDD to " << conf.sdd_export_state_space_file
+        std::cerr << "Can't export state space's SDD to " << conf.export_final_sdd_dot_file
                   << std::endl;
       }
     }
@@ -415,15 +416,29 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       }
     }
 
-    if (conf.show_state_space_bytes)
+    if (conf.show_final_sdd_bytes)
     {
       std::cout << "Final SDD size: " << sdd::tools::size(m) << " bytes" << std::endl;
     }
 
-    if (conf.show_hash_tables_stats)
+    if (conf.final_sdd_stats_json)
     {
-      std::cout << manager << std::endl;
+      std::ofstream file(conf.final_sdd_stats_json_file);
+      if (file.is_open())
+      {
+        sdd::tools::json(m, file);
+      }
     }
+
+    if (conf.manager_stats_json)
+    {
+      std::ofstream file(conf.manager_stats_json_file);
+      if (file.is_open())
+      {
+        sdd::tools::json(manager, file);
+      }
+    }
+
   }
   catch (const bound_error& be)
   {
