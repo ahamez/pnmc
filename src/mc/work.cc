@@ -10,7 +10,8 @@
 #include <sdd/sdd.hh>
 #include <sdd/tools/dot.hh>
 #include <sdd/tools/lua.hh>
-#include "sdd/tools/size.hh"
+#include <sdd/tools/size.hh>
+#include <sdd/order/strategies/force.hh>
 
 #include "mc/bound_error.hh"
 #include "mc/bounded_post.hh"
@@ -221,17 +222,23 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     std::cout << "Transition relation time: " << elapsed << "s" << std::endl;
   }
 
-  start = chrono::system_clock::now();
-  const auto res = sdd::rewrite(o, fixpoint(sum(o, operands.cbegin(), operands.cend())));
-  end = chrono::system_clock::now();
-  elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
+//  if (not conf.order_ordering_force)
+//  {
+    start = chrono::system_clock::now();
+    const auto res = sdd::rewrite(o, fixpoint(sum(o, operands.cbegin(), operands.cend())));
+    end = chrono::system_clock::now();
+    elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
 
-  if (conf.show_time)
-  {
-    std::cout << "Rewrite time: " << elapsed << "s" << std::endl;
-  }
-
-  return res;
+    if (conf.show_time)
+    {
+      std::cout << "Rewrite time: " << elapsed << "s" << std::endl;
+    }
+    return res;
+//  }
+//  else
+//  {
+//    return fixpoint(sum(o, operands.cbegin(), operands.cend()));
+//  }
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -319,20 +326,44 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
 
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
-  const sdd::order<sdd_conf>& o = mk_order(conf, net);
+  sdd::order<sdd_conf> o = mk_order(conf, net);
   assert(not o.empty() && "Empty order");
 
   if (conf.order_show)
   {
     std::cout << o << std::endl;
   }
-  const SDD m0 = initial_state(o, net);
 
-  const homomorphism h = transition_relation(conf, o, net, transitions_bitset);
+  homomorphism h = transition_relation(conf, o, net, transitions_bitset);
   if (conf.show_relation)
   {
     std::cout << h << std::endl;
   }
+
+  if (conf.order_ordering_force)
+  {
+    chrono::time_point<chrono::system_clock> start;
+    chrono::time_point<chrono::system_clock> end;
+    std::size_t elapsed;
+
+    start = chrono::system_clock::now();
+    o = sdd::force_ordering(o, h);
+    end = chrono::system_clock::now();
+    elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
+    if (conf.show_time)
+    {
+      std::cout << "FORCE ordering time: " << elapsed << "s" << std::endl;
+    }
+
+    h = transition_relation(conf, o, net, transitions_bitset);
+
+    if (conf.order_show)
+    {
+      std::cout << o << std::endl;
+    }
+  }
+
+  const SDD m0 = initial_state(o, net);
 
   try
   {

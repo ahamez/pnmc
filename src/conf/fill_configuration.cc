@@ -82,6 +82,7 @@ fill_configuration(int argc, char** argv)
     ("order-flat"             , "Don't use hierarchy informations")
     ("order-min-height"       , po::value<unsigned int>()->default_value(10)
                               , "Minimal number of variables at every level of the SDD")
+    ("order-force"            , "Use the FORCE ordering heuristic")
   ;
 
   po::options_description sdd_options("SDD options");
@@ -176,6 +177,7 @@ fill_configuration(int argc, char** argv)
   conf.order_random = vm.count("order-random");
   conf.order_force_flat = vm.count("order-flat");
   conf.order_min_height = vm["order-min-height"].as<unsigned int>();
+  conf.order_ordering_force = vm.count("order-force");
   conf.show_relation = vm.count("relation-show");
   conf.show_hash_tables_stats = vm.count("show-hash-stats");
   conf.show_time = vm.count("show-time");
@@ -193,7 +195,10 @@ fill_configuration(int argc, char** argv)
   {
     conf.export_to_lua_file = vm["export-to-lua"].as<std::string>();
   }
-
+  if (conf.order_ordering_force)
+  {
+    conf.order_force_flat = true;
+  }
   return conf;
 }
 
