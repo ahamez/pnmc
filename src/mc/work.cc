@@ -221,24 +221,27 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
   {
     std::cout << "Transition relation time: " << elapsed << "s" << std::endl;
   }
+  return fixpoint(sum(o, operands.cbegin(), operands.cend()));
+}
 
-//  if (not conf.order_ordering_force)
-//  {
-    start = chrono::system_clock::now();
-    const auto res = sdd::rewrite(o, fixpoint(sum(o, operands.cbegin(), operands.cend())));
-    end = chrono::system_clock::now();
+/*------------------------------------------------------------------------------------------------*/
+
+homomorphism
+rewrite( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
+       , const homomorphism& h)
+{
+  chrono::time_point<chrono::system_clock> start;
+  chrono::time_point<chrono::system_clock> end;
+  std::size_t elapsed;
+  start = chrono::system_clock::now();
+  const auto res = sdd::rewrite(o, h);
+  end = chrono::system_clock::now();
+  if (conf.show_time)
+  {
     elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-
-    if (conf.show_time)
-    {
-      std::cout << "Rewrite time: " << elapsed << "s" << std::endl;
-    }
-    return res;
-//  }
-//  else
-//  {
-//    return fixpoint(sum(o, operands.cbegin(), operands.cend()));
-//  }
+    std::cout << "Rewrite time: " << elapsed << "s" << std::endl;
+  }
+  return res;
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -362,6 +365,8 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       std::cout << o << std::endl;
     }
   }
+
+  h = rewrite(conf, o, h);
 
   const SDD m0 = initial_state(o, net);
 
