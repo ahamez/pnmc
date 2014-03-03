@@ -12,6 +12,8 @@ namespace pnmc { namespace mc {
 
 struct statistics
 {
+  const conf::pnmc_configuration& conf;
+
   std::chrono::duration<double> relation_duration;
   std::chrono::duration<double> rewrite_duration;
   std::chrono::duration<double> state_space_duration;
@@ -21,10 +23,12 @@ struct statistics
 
   long double nb_states;
 
-  const conf::pnmc_configuration& conf;
+  bool interrupted ;
 
   statistics(const conf::pnmc_configuration& c)
-    : conf(c)
+    : conf(c), relation_duration(), rewrite_duration(), state_space_duration()
+    , dead_states_relation_duration(), dead_states_rewrite_duration(), dead_states_duration()
+    , nb_states(0), interrupted(false)
   {}
 
   template<class Archive>
@@ -32,7 +36,8 @@ struct statistics
   save(Archive& archive)
   const
   {
-    archive( cereal::make_nvp("relation time", relation_duration.count())
+    archive( cereal::make_nvp("interrupted", interrupted)
+           , cereal::make_nvp("relation time", relation_duration.count())
            , cereal::make_nvp("rewrite time", rewrite_duration.count())
            , cereal::make_nvp("state space time", state_space_duration.count())
            );

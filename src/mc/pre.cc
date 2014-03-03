@@ -1,5 +1,7 @@
+#include <chrono>
 #include <ostream>
 
+#include <sdd/sdd.hh>
 #include <sdd/util/hash.hh>
 
 #include "mc/pre.hh"
@@ -8,8 +10,8 @@ namespace pnmc { namespace mc {
 
 /*------------------------------------------------------------------------------------------------*/
 
-pre::pre(unsigned int v)
-  : valuation(v)
+pre::pre(const conf::pnmc_configuration& c, unsigned int v)
+  : conf(c), valuation(v)
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -18,6 +20,10 @@ sdd::values::flat_set<unsigned int>
 pre::operator()(const sdd::values::flat_set<unsigned int>& val)
 const
 {
+  if (std::chrono::system_clock::now() - conf.beginning >= conf.max_time)
+  {
+    throw sdd::interrupt<sdd::SDD<sdd::conf1>>();
+  }
 
   sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
 

@@ -209,7 +209,7 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     // Pre actions.
     for (const auto& arc : transition.pre)
     {
-      homomorphism f = function<sdd_conf>(o, arc.first, pre(arc.second));
+      homomorphism f = function<sdd_conf>(o, arc.first, pre(conf, arc.second));
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
@@ -227,11 +227,23 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
-state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD m
+state_space( conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD m
            , homomorphism h, statistics& stats)
 {
+  SDD res;
+  conf.beginning = chrono::system_clock::now();
   chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
-  const auto res = h(o, m);
+  try
+  {
+    res = h(o, m);
+  }
+  catch (const sdd::interrupt<SDD>& i)
+  {
+    std::cout << "Interrupted state space computation after " << conf.max_time.count() << "s"
+               << std::endl;
+    stats.interrupted = true;
+    res = i.result();
+  }
   stats.state_space_duration = chrono::system_clock::now() - start;
   return res;
 }
@@ -279,7 +291,7 @@ dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 /*------------------------------------------------------------------------------------------------*/
 
 void
-work(const conf::pnmc_configuration& conf, const pn::net& net)
+work(conf::pnmc_configuration& conf, const pn::net& net)
 {
   auto manager = sdd::manager<sdd_conf>::init();
 

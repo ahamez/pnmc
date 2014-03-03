@@ -87,6 +87,7 @@ const auto mc_dead_transitions_str = "dead-transitions";
 const auto mc_dead_states_str = "dead-states";
 
 // Advanced options
+const auto limit_time_str = "limit-time";
 const auto delete_input_file_str = "delete-input-file";
 const auto export_to_lua_str = "export-to-lua";
 const auto final_sdd_json_str = "final-sdd-json";
@@ -164,6 +165,8 @@ fill_configuration(int argc, char** argv)
     (pnmc_json_str              , po::value<std::string>()
                                 , "Export PNMC's statistics to a JSON file")
     (show_time_str              , "Show a breakdown of all steps' times")
+    (limit_time_str             , po::value<unsigned int>()->default_value(0)
+                                , "Limit the execution time (s)")
   ;
 
   po::positional_options_description p;
@@ -279,6 +282,7 @@ fill_configuration(int argc, char** argv)
   {
     conf.pnmc_json_file = vm[pnmc_json_str].as<std::string>();
   }
+  conf.max_time = std::chrono::duration<double>(vm[limit_time_str].as<unsigned int>());
 
   return conf;
 }

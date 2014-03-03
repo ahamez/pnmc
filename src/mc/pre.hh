@@ -4,8 +4,10 @@
 #include <functional> // hash
 #include <iosfwd>
 
-#include "sdd/values/flat_set.hh"
-#include "sdd/values_manager.hh"
+#include <sdd/values/flat_set.hh>
+#include <sdd/values_manager.hh>
+
+#include "conf/configuration.hh"
 
 namespace pnmc { namespace mc {
 
@@ -13,9 +15,10 @@ namespace pnmc { namespace mc {
 
 struct pre
 {
+  const conf::pnmc_configuration& conf;
   const unsigned int valuation;
 
-  pre(unsigned int);
+  pre(const conf::pnmc_configuration&, unsigned int);
 
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>&) const;
