@@ -1,6 +1,7 @@
 #ifndef _PNMC_CONF_CONFIGURATION_HH_
 #define _PNMC_CONF_CONFIGURATION_HH_
 
+#include <chrono>
 #include <iosfwd>
 #include <string>
 
@@ -42,6 +43,11 @@ struct pnmc_configuration
   std::string final_sdd_stats_json_file;
   bool manager_stats_json;
   std::string manager_stats_json_file;
+  bool pnmc_json;
+  std::string pnmc_json_file;
+
+  std::chrono::time_point<std::chrono::system_clock> beginning;
+  std::chrono::duration<double> max_time;
 };
 
 /*------------------------------------------------------------------------------------------------*/

@@ -77,7 +77,6 @@ const auto order_force_str = "order-force-heuristic";
 const auto hom_show_relation_str = "hom-show-relation";
 
 // Statistics options
-const auto show_time_str = "show-time";
 const auto show_final_sdd_bytes_str = "show-final-sdd-bytes";
 
 // Petri net options
@@ -88,11 +87,14 @@ const auto mc_dead_transitions_str = "dead-transitions";
 const auto mc_dead_states_str = "dead-states";
 
 // Advanced options
+const auto limit_time_str = "limit-time";
 const auto delete_input_file_str = "delete-input-file";
 const auto export_to_lua_str = "export-to-lua";
 const auto final_sdd_json_str = "final-sdd-json";
 const auto manager_json_str = "manager-json";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
+const auto pnmc_json_str = "pnmc-json";
+const auto show_time_str = "show-time";
 
 boost::optional<pnmc_configuration>
 fill_configuration(int argc, char** argv)
@@ -130,7 +132,6 @@ fill_configuration(int argc, char** argv)
 
   po::options_description stats_options("Statistics options");
   stats_options.add_options()
-    (show_time_str                , "Show miscellaneous execution times")
     (show_final_sdd_bytes_str     , "Show the number of bytes used by the final state space's SDD")
   ;
 
@@ -162,6 +163,11 @@ fill_configuration(int argc, char** argv)
                                 , "Export the libsdd manager's statistics to a JSON file")
     (final_sdd_dot_export_str   , po::value<std::string>()
                                 , "Export the SDD state space to DOT file")
+    (pnmc_json_str              , po::value<std::string>()
+                                , "Export PNMC's statistics to a JSON file")
+    (show_time_str              , "Show a breakdown of all steps' times")
+    (limit_time_str             , po::value<unsigned int>()->default_value(0)
+                                , "Limit the execution time (s)")
   ;
 
   po::positional_options_description p;
@@ -174,6 +180,7 @@ fill_configuration(int argc, char** argv)
     .add(order_options)
     .add(hom_options)
     .add(petri_options)
+    .add(mc_options)
     .add(stats_options)
     .add(advanced_options)
     .add(hidden_options);
@@ -240,19 +247,19 @@ fill_configuration(int argc, char** argv)
   conf.show_relation = vm.count(hom_show_relation_str);
 
   // Statistics options
-  conf.show_time = vm.count(show_time_str);
   conf.show_final_sdd_bytes = vm.count(show_final_sdd_bytes_str);
 
   // Petri net options
   conf.marking_bound = vm[pn_marking_bound_str].as<unsigned int>();
 
   // Model checking options
-  conf.compute_dead_states = vm.count(mc_dead_transitions_str);
+  conf.compute_dead_states = vm.count(mc_dead_states_str);
   conf.compute_dead_transitions = vm.count(mc_dead_transitions_str);
 
   // Advanced options
   conf.delete_file = vm.count(delete_input_file_str);
   conf.export_to_lua = vm.count(export_to_lua_str);
+  conf.show_time = vm.count(show_time_str);
   if (conf.export_to_lua)
   {
     conf.export_to_lua_file = vm[export_to_lua_str].as<std::string>();
@@ -276,6 +283,13 @@ fill_configuration(int argc, char** argv)
   {
     conf.order_force_flat = true;
   }
+  conf.pnmc_json = vm.count(pnmc_json_str);
+  if (conf.pnmc_json)
+  {
+    conf.pnmc_json_file = vm[pnmc_json_str].as<std::string>();
+  }
+  conf.max_time = std::chrono::duration<double>(vm[limit_time_str].as<unsigned int>());
+
   return conf;
 }
 

@@ -7,6 +7,8 @@
 #include <set>
 #include <utility>  // pair
 
+#include <cereal/archives/json.hpp>
+
 #include <sdd/sdd.hh>
 #include <sdd/tools/dot.hh>
 #include <sdd/tools/json.hh>
@@ -20,6 +22,7 @@
 #include "mc/live.hh"
 #include "mc/post.hh"
 #include "mc/pre.hh"
+#include "mc/statistics.hh"
 #include "mc/work.hh"
 
 namespace pnmc { namespace mc {
@@ -170,13 +173,11 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 
 homomorphism
 transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
-                   , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset)
+                   , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
+                   , statistics& stats)
 {
-  chrono::time_point<chrono::system_clock> start;
-  chrono::time_point<chrono::system_clock> end;
-  std::size_t elapsed;
+  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
 
-  start = chrono::system_clock::now();
   std::set<homomorphism> operands;
   operands.insert(sdd::id<sdd_conf>());
 
@@ -207,21 +208,26 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     }
 
     // Pre actions.
-    for (const auto& arc : transition.pre)
+    if (conf.max_time > chrono::duration<double>(0))
     {
-      homomorphism f = function<sdd_conf>(o, arc.first, pre(arc.second));
-      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      for (const auto& arc : transition.pre)
+      {
+        homomorphism f = function<sdd_conf>(o, arc.first, timed_pre(conf, arc.second));
+        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      }
+    }
+    else
+    {
+      for (const auto& arc : transition.pre)
+      {
+        homomorphism f = function<sdd_conf>(o, arc.first, pre(arc.second));
+        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      }
     }
 
     operands.insert(h_t);
   }
-  end = chrono::system_clock::now();
-  elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-
-  if (conf.show_time)
-  {
-    std::cout << "Transition relation time: " << elapsed << "s" << std::endl;
-  }
+  stats.relation_duration = chrono::system_clock::now() - start;
   return fixpoint(sum(o, operands.cbegin(), operands.cend()));
 }
 
@@ -231,34 +237,33 @@ homomorphism
 rewrite( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
        , const homomorphism& h)
 {
-  chrono::time_point<chrono::system_clock> start;
-  chrono::time_point<chrono::system_clock> end;
-  std::size_t elapsed;
-  start = chrono::system_clock::now();
-  const auto res = sdd::rewrite(o, h);
-  end = chrono::system_clock::now();
-  if (conf.show_time)
-  {
-    elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-    std::cout << "Rewrite time: " << elapsed << "s" << std::endl;
-  }
+  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
+  const auto res = sdd::rewrite(o, fixpoint(sum(o, operands.cbegin(), operands.cend())));
+  stats.rewrite_duration = chrono::system_clock::now() - start;
   return res;
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
-state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD m
-           , homomorphism h)
+state_space( conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD m
+           , homomorphism h, statistics& stats)
 {
+  SDD res;
+  conf.beginning = chrono::system_clock::now();
   chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
-  const auto res = h(o, m);
-  chrono::time_point<chrono::system_clock> end = chrono::system_clock::now();
-  const std::size_t elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-  if (conf.show_time)
+  try
   {
-    std::cout << "State space computation time: " << elapsed << "s" << std::endl;
+    res = h(o, m);
   }
+  catch (const sdd::interrupt<SDD>& i)
+  {
+    std::cout << "Interrupted state space computation after " << conf.max_time.count() << "s"
+               << std::endl;
+    stats.interrupted = true;
+    res = i.result();
+  }
+  stats.state_space_duration = chrono::system_clock::now() - start;
   return res;
 }
 
@@ -266,17 +271,14 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 
 SDD
 dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
-           , const SDD& state_space)
+           , const SDD& state_space, statistics& stats)
 {
-  chrono::time_point<chrono::system_clock> start;
-  chrono::time_point<chrono::system_clock> end;
-  std::size_t elapsed;
-
-  start = chrono::system_clock::now();
-
   std::set<homomorphism> and_operands;
   std::set<homomorphism> or_operands;
 
+  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
+
+  // Get relation
   for (const auto& transition : net.transitions())
   {
     // We are only interested in pre actions.
@@ -290,33 +292,17 @@ dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
     or_operands.clear();
   }
   const auto tmp = intersection(o, and_operands.cbegin(), and_operands.cend());
-  end = chrono::system_clock::now();
-  elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-  if (conf.show_time)
-  {
-    std::cout << "Dead states relation time: " << elapsed << "s" << std::endl;
-  }
+  stats.dead_states_relation_duration = chrono::system_clock::now() - start;
 
-  /* --------------------  */
+  // Rewrite the relation
   start = chrono::system_clock::now();
   const auto h = sdd::rewrite(o, tmp);
-  end = chrono::system_clock::now();
-  elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-  if (conf.show_time)
-  {
-    std::cout << "Dead states relation rewrite time: " << elapsed << "s" << std::endl;
-  }
+  stats.dead_states_rewrite_duration = chrono::system_clock::now() - start;
 
-  /* --------------------  */
-
+  // Compute the dead states
   start = chrono::system_clock::now();
   const auto res = h(o, state_space);
-  end = chrono::system_clock::now();
-  elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-  if (conf.show_time)
-  {
-    std::cout << "Dead states computation time: " << elapsed << "s" << std::endl;
-  }
+  stats.dead_states_duration = chrono::system_clock::now() - start;
 
   return res;
 }
@@ -324,9 +310,11 @@ dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 /*------------------------------------------------------------------------------------------------*/
 
 void
-work(const conf::pnmc_configuration& conf, const pn::net& net)
+work(conf::pnmc_configuration& conf, const pn::net& net)
 {
   auto manager = sdd::manager<sdd_conf>::init();
+
+  statistics stats(conf);
 
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
@@ -338,7 +326,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     std::cout << o << std::endl;
   }
 
-  homomorphism h = transition_relation(conf, o, net, transitions_bitset);
+  homomorphism h = transition_relation(conf, o, net, transitions_bitset, stats);
   if (conf.show_relation)
   {
     std::cout << h << std::endl;
@@ -374,8 +362,9 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   try
   {
     SDD m = sdd::zero<sdd_conf>();
-    m = state_space(conf, o, m0, h);
-    std::cout << m.size().template convert_to<long double>() << " states" << std::endl;
+    m = state_space(conf, o, m0, h, stats);
+    stats.nb_states = m.size().template convert_to<long double>();
+    std::cout << stats.nb_states << " states" << std::endl;
 
     if (conf.export_final_sdd_dot)
     {
@@ -417,14 +406,15 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
 
     if (conf.compute_dead_states)
     {
-      const auto dead = dead_states(conf, o, net, m);
+      const auto dead = dead_states(conf, o, net, m, stats);
       if (dead.empty())
       {
         std::cout << "No dead states" << std::endl;
       }
       else
       {
-        std::cout << dead.size().template convert_to<long double>() << " dead states" << std::endl;
+        std::cout << dead.size().template convert_to<long double>() << " dead state(s):"
+                  << std::endl;
 
         // Get the identifier of each level (SDD::paths() doesn't give this information).
         std::deque<std::reference_wrapper<const std::string>> identifiers;
@@ -443,6 +433,34 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       }
     }
 
+    const auto total = stats.relation_duration + stats.rewrite_duration
+                     + stats.state_space_duration + stats.dead_states_duration;
+    std::cout << total.count() << "s" << std::endl;
+
+    if (conf.show_time)
+    {
+      std::cout << "Relation             : " << stats.relation_duration.count() << "s"
+                << std::endl
+                << "Rewrite              : " << stats.rewrite_duration.count() << "s"
+                << std::endl
+                << "State space          : " << stats.state_space_duration.count() << "s"
+                << std::endl;
+      if (conf.compute_dead_states)
+      {
+        std::cout << "Dead states relation : " << stats.dead_states_relation_duration.count()
+                  << "s" << std::endl
+                  << "Dead states rewrite  : " << stats.dead_states_rewrite_duration.count()
+                  << "s" << std::endl
+                  << "Dead states          ; " << stats.dead_states_duration.count()
+                  << "s" << std::endl;
+      }
+    }
+
+    if (conf.show_final_sdd_bytes)
+    {
+      std::cout << "Final SDD size: " << sdd::tools::size(m) << " bytes" << std::endl;
+    }
+
     if (conf.export_to_lua)
     {
       std::ofstream lua_file(conf.export_to_lua_file);
@@ -450,11 +468,6 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       {
         lua_file << sdd::tools::lua(m) << std::endl;
       }
-    }
-
-    if (conf.show_final_sdd_bytes)
-    {
-      std::cout << "Final SDD size: " << sdd::tools::size(m) << " bytes" << std::endl;
     }
 
     if (conf.final_sdd_stats_json)
@@ -475,6 +488,15 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       }
     }
 
+    if (conf.pnmc_json)
+    {
+      std::ofstream file(conf.pnmc_json_file);
+      if (file.is_open())
+      {
+        cereal::JSONOutputArchive archive(file);
+        archive(cereal::make_nvp("pnmc", stats));
+      }
+    }
   }
   catch (const bound_error& be)
   {
