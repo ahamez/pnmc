@@ -41,6 +41,8 @@ struct pnmc_configuration
   std::string final_sdd_stats_json_file;
   bool manager_stats_json;
   std::string manager_stats_json_file;
+  bool pnmc_json;
+  std::string pnmc_json_file;
 };
 
 /*------------------------------------------------------------------------------------------------*/

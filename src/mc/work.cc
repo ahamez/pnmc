@@ -7,6 +7,8 @@
 #include <set>
 #include <utility>  // pair
 
+#include <cereal/archives/json.hpp>
+
 #include <sdd/sdd.hh>
 #include <sdd/tools/dot.hh>
 #include <sdd/tools/json.hh>
@@ -281,7 +283,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
 {
   auto manager = sdd::manager<sdd_conf>::init();
 
-  statistics stats;
+  statistics stats(conf);
 
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
@@ -429,6 +431,15 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
       }
     }
 
+    if (conf.pnmc_json)
+    {
+      std::ofstream file(conf.pnmc_json_file);
+      if (file.is_open())
+      {
+        cereal::JSONOutputArchive archive(file);
+        archive(cereal::make_nvp("pnmc", stats));
+      }
+    }
   }
   catch (const bound_error& be)
   {

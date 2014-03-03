@@ -92,6 +92,8 @@ const auto export_to_lua_str = "export-to-lua";
 const auto final_sdd_json_str = "final-sdd-json";
 const auto manager_json_str = "manager-json";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
+const auto pnmc_json_str = "pnmc-json";
+const auto show_time_str = "show-time";
 
 boost::optional<pnmc_configuration>
 fill_configuration(int argc, char** argv)
@@ -128,7 +130,6 @@ fill_configuration(int argc, char** argv)
 
   po::options_description stats_options("Statistics options");
   stats_options.add_options()
-    (show_time_str                , "Show miscellaneous execution times")
     (show_final_sdd_bytes_str     , "Show the number of bytes used by the final state space's SDD")
   ;
 
@@ -160,6 +161,9 @@ fill_configuration(int argc, char** argv)
                                 , "Export the libsdd manager's statistics to a JSON file")
     (final_sdd_dot_export_str   , po::value<std::string>()
                                 , "Export the SDD state space to DOT file")
+    (pnmc_json_str              , po::value<std::string>()
+                                , "Export PNMC's statistics to a JSON file")
+    (show_time_str              , "Show a breakdown of all steps' times")
   ;
 
   po::positional_options_description p;
@@ -269,6 +273,11 @@ fill_configuration(int argc, char** argv)
   if (conf.manager_stats_json)
   {
     conf.manager_stats_json_file = vm[manager_json_str].as<std::string>();
+  }
+  conf.pnmc_json = vm.count(pnmc_json_str);
+  if (conf.pnmc_json)
+  {
+    conf.pnmc_json_file = vm[pnmc_json_str].as<std::string>();
   }
 
   return conf;
