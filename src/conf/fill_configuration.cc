@@ -77,7 +77,6 @@ const auto order_force_str = "order-force-heuristic";
 const auto hom_show_relation_str = "hom-show-relation";
 
 // Statistics options
-const auto show_time_str = "show-time";
 const auto show_final_sdd_bytes_str = "show-final-sdd-bytes";
 
 // Petri net options
@@ -173,6 +172,7 @@ fill_configuration(int argc, char** argv)
     .add(order_options)
     .add(hom_options)
     .add(petri_options)
+    .add(mc_options)
     .add(stats_options)
     .add(advanced_options)
     .add(hidden_options);
@@ -238,19 +238,19 @@ fill_configuration(int argc, char** argv)
   conf.show_relation = vm.count(hom_show_relation_str);
 
   // Statistics options
-  conf.show_time = vm.count(show_time_str);
   conf.show_final_sdd_bytes = vm.count(show_final_sdd_bytes_str);
 
   // Petri net options
   conf.marking_bound = vm[pn_marking_bound_str].as<unsigned int>();
 
   // Model checking options
-  conf.compute_dead_states = vm.count(mc_dead_transitions_str);
+  conf.compute_dead_states = vm.count(mc_dead_states_str);
   conf.compute_dead_transitions = vm.count(mc_dead_transitions_str);
 
   // Advanced options
   conf.delete_file = vm.count(delete_input_file_str);
   conf.export_to_lua = vm.count(export_to_lua_str);
+  conf.show_time = vm.count(show_time_str);
   if (conf.export_to_lua)
   {
     conf.export_to_lua_file = vm[export_to_lua_str].as<std::string>();
