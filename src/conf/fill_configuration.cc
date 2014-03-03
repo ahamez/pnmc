@@ -22,6 +22,7 @@ const std::string version
 
 /*------------------------------------------------------------------------------------------------*/
 
+// Input format options.
 const auto bpn_str = "bpn";
 const auto prod_str = "prod";
 const auto tina_str = "tina";
@@ -75,6 +76,17 @@ const auto order_force_str = "order-force-heuristic";
 // Homomorphisms options
 const auto hom_show_relation_str = "hom-show-relation";
 
+// Statistics options
+const auto show_time_str = "show-time";
+const auto show_final_sdd_bytes_str = "show-final-sdd-bytes";
+
+// Petri net options
+const auto pn_marking_bound_str = "pn-marking-bound";
+
+// Model checking options
+const auto mc_dead_transitions_str = "dead-transitions";
+const auto mc_dead_states_str = "dead-states";
+
 // Advanced options
 const auto delete_input_file_str = "delete-input-file";
 const auto export_to_lua_str = "export-to-lua";
@@ -117,18 +129,21 @@ fill_configuration(int argc, char** argv)
 
   po::options_description stats_options("Statistics options");
   stats_options.add_options()
-    ("show-time"                , "Show miscellaneous execution times")
-    ("show-sdd-bytes"           , "Show the number of bytes used by the final state space's SDD")
+    (show_time_str                , "Show miscellaneous execution times")
+    (show_final_sdd_bytes_str     , "Show the number of bytes used by the final state space's SDD")
   ;
 
   po::options_description petri_options("Petri net options");
   petri_options.add_options()
-    ("pn-dead-transitions"      , "Compute dead transitions")
-    ("pn-dead-states"           , "Compute dead states")
-    ("pn-marking-bound"         , po::value<unsigned int>()->default_value(0)
-                                , "Limit the marking")
+    (pn_marking_bound_str      , po::value<unsigned int>()->default_value(0)
+                               , "Limit the marking")
   ;
 
+  po::options_description mc_options("Model checking options");
+  mc_options.add_options()
+    (mc_dead_transitions_str      , "Compute dead transitions")
+    (mc_dead_states_str           , "Compute dead states")
+  ;
 
   po::options_description hidden_options("Hidden options");
   hidden_options.add_options()
@@ -181,7 +196,7 @@ fill_configuration(int argc, char** argv)
       std::cout << "Unknown option(s):";
       std::copy( unrecognized.cbegin(), unrecognized.cend()
                , std::ostream_iterator<std::string>(std::cout, " "));
-      std::cout << std::endl;
+      std::cout << std::endl << std::endl;
     }
 
     std::cout << version << std::endl;
@@ -191,6 +206,7 @@ fill_configuration(int argc, char** argv)
     std::cout << order_options << std::endl;
     std::cout << hom_options << std::endl;
     std::cout << petri_options << std::endl;
+    std::cout << mc_options << std::endl;
     std::cout << stats_options << std::endl;
     std::cout << advanced_options << std::endl;
     return boost::optional<pnmc_configuration>();
@@ -219,16 +235,18 @@ fill_configuration(int argc, char** argv)
   conf.order_min_height = vm[order_min_height_str].as<unsigned int>();
 
   // Hom options
-  conf.show_relation = vm.count("relation-show");
+  conf.show_relation = vm.count(hom_show_relation_str);
 
   // Statistics options
-  conf.show_time = vm.count("show-time");
-  conf.show_final_sdd_bytes = vm.count("show-sdd-bytes");
+  conf.show_time = vm.count(show_time_str);
+  conf.show_final_sdd_bytes = vm.count(show_final_sdd_bytes_str);
 
   // Petri net options
-  conf.compute_dead_transitions = vm.count("pn-dead-transitions");
-  conf.compute_dead_states = vm.count("pn-dead-states");
-  conf.marking_bound = vm["pn-marking-bound"].as<unsigned int>();
+  conf.marking_bound = vm[pn_marking_bound_str].as<unsigned int>();
+
+  // Model checking options
+  conf.compute_dead_states = vm.count(mc_dead_transitions_str);
+  conf.compute_dead_transitions = vm.count(mc_dead_transitions_str);
 
   // Advanced options
   conf.delete_file = vm.count(delete_input_file_str);
