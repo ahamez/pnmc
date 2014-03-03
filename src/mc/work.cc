@@ -5,6 +5,7 @@
 #include <iostream>
 #include <random>
 #include <set>
+#include <unordered_map>
 #include <utility>  // pair
 
 #include <cereal/archives/json.hpp>
@@ -15,6 +16,7 @@
 #include <sdd/tools/lua.hh>
 #include <sdd/tools/size.hh>
 #include <sdd/order/strategies/force.hh>
+#include <sdd/order/strategies/force2.hh>
 
 #include "mc/bound_error.hh"
 #include "mc/bounded_post.hh"
@@ -125,6 +127,55 @@ struct mk_order_visitor
 sdd::order<sdd_conf>
 mk_order(const conf::pnmc_configuration& conf, const pn::net& net)
 {
+  if (conf.order_ordering_force_pn)
+  {
+    using id_type = sdd_conf::Identifier;
+    using vertex = sdd::force::vertex<id_type>;
+    using hyperedge = sdd::force::hyperedge<id_type>;
+
+    // Rapidly find the vertex associated to an identifier.
+    std::unordered_map<id_type, vertex*> map;
+
+    // Construct all vertices.
+    std::vector<vertex> vertices;
+    vertices.reserve(net.places().size());
+    unsigned int location = 0;
+    for (const auto& place : net.places())
+    {
+      vertices.emplace_back(place.id, location++);
+      map.emplace(place.id, &vertices.back());
+    }
+
+    // Construct all hyperedges.
+    std::vector<hyperedge> hyperedges;
+    hyperedges.reserve(net.transitions().size());
+    for (const auto& transition : net.transitions())
+    {
+      std::vector<vertex*> local_vertices;
+
+      for (const auto& arc : transition.pre)
+      {
+        assert(map.find(arc.first) != map.end());
+        local_vertices.emplace_back(map[arc.first]);
+      }
+
+      for (const auto& arc : transition.post)
+      {
+        assert(map.find(arc.first) != map.end());
+        local_vertices.emplace_back(map[arc.first]);
+      }
+
+      // Create the new hyperedge.
+      hyperedges.emplace_back(std::move(local_vertices));
+
+      // Update vertices.
+      for (auto v_ptr : hyperedges.back().vertices)
+      {
+        v_ptr->hyperedges.emplace_back(&hyperedges.back());
+      }
+    }
+    return sdd::force_ordering2<sdd_conf>(std::move(vertices), std::move(hyperedges));
+  } else
   if (not conf.order_force_flat and net.modules)
   {
     return sdd::order<sdd_conf>(boost::apply_visitor(mk_order_visitor(conf), *net.modules).second);
