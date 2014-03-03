@@ -235,10 +235,10 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
 
 homomorphism
 rewrite( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
-       , const homomorphism& h)
+       , const homomorphism& h, statistics& stats)
 {
   chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
-  const auto res = sdd::rewrite(o, fixpoint(sum(o, operands.cbegin(), operands.cend())));
+  const auto res = sdd::rewrite(o, h);
   stats.rewrite_duration = chrono::system_clock::now() - start;
   return res;
 }
@@ -334,20 +334,11 @@ work(conf::pnmc_configuration& conf, const pn::net& net)
 
   if (conf.order_ordering_force)
   {
-    chrono::time_point<chrono::system_clock> start;
-    chrono::time_point<chrono::system_clock> end;
-    std::size_t elapsed;
-
-    start = chrono::system_clock::now();
+    chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
     o = sdd::force_ordering(o, h);
-    end = chrono::system_clock::now();
-    elapsed = chrono::duration_cast<chrono::seconds>(end-start).count();
-    if (conf.show_time)
-    {
-      std::cout << "FORCE ordering time: " << elapsed << "s" << std::endl;
-    }
+    stats.force_duration = chrono::system_clock::now() - start;
 
-    h = transition_relation(conf, o, net, transitions_bitset);
+    h = transition_relation(conf, o, net, transitions_bitset, stats);
 
     if (conf.order_show)
     {
@@ -355,7 +346,7 @@ work(conf::pnmc_configuration& conf, const pn::net& net)
     }
   }
 
-  h = rewrite(conf, o, h);
+  h = rewrite(conf, o, h, stats);
 
   const SDD m0 = initial_state(o, net);
 
@@ -445,6 +436,10 @@ work(conf::pnmc_configuration& conf, const pn::net& net)
                 << std::endl
                 << "State space          : " << stats.state_space_duration.count() << "s"
                 << std::endl;
+      if (conf.order_ordering_force)
+      {
+        std::cout << "FORCE                : " << stats.force_duration.count() << "s" << std::endl;
+      }
       if (conf.compute_dead_states)
       {
         std::cout << "Dead states relation : " << stats.dead_states_relation_duration.count()
