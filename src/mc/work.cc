@@ -207,10 +207,21 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     }
 
     // Pre actions.
-    for (const auto& arc : transition.pre)
+    if (conf.max_time > chrono::duration<double>(0))
     {
-      homomorphism f = function<sdd_conf>(o, arc.first, pre(conf, arc.second));
-      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      for (const auto& arc : transition.pre)
+      {
+        homomorphism f = function<sdd_conf>(o, arc.first, timed_pre(conf, arc.second));
+        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      }
+    }
+    else
+    {
+      for (const auto& arc : transition.pre)
+      {
+        homomorphism f = function<sdd_conf>(o, arc.first, pre(arc.second));
+        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      }
     }
 
     operands.insert(h_t);
