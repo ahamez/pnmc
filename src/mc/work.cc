@@ -13,7 +13,6 @@
 
 #include <sdd/sdd.hh>
 #include <sdd/order/strategies/force.hh>
-#include <sdd/order/strategies/force2.hh>
 #include <sdd/tools/dot.hh>
 #include <sdd/tools/lua.hh>
 #include "sdd/tools/sdd_statistics.hh"
@@ -130,7 +129,7 @@ struct mk_order_visitor
 sdd::order<sdd_conf>
 mk_order(const conf::pnmc_configuration& conf, const pn::net& net, statistics& stats)
 {
-  if (conf.order_ordering_force_pn)
+  if (conf.order_ordering_force)
   {
     chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
     using id_type = sdd_conf::Identifier;
@@ -178,8 +177,8 @@ mk_order(const conf::pnmc_configuration& conf, const pn::net& net, statistics& s
         v_ptr->hyperedges().emplace_back(&hyperedges.back());
       }
     }
-    const auto o = sdd::force_ordering2<sdd_conf>(std::move(vertices), std::move(hyperedges));
-    stats.force_pn_duration = chrono::system_clock::now() - start;
+    const auto o = sdd::force_ordering<sdd_conf>(std::move(vertices), std::move(hyperedges));
+    stats.force_duration = chrono::system_clock::now() - start;
     return o;
   } else
   if (not conf.order_force_flat and net.modules)
@@ -447,32 +446,21 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   const SDD m0 = initial_state(o, net);
 
   // Compute the transition relation.
-  homomorphism h = transition_relation(conf, o, net, transitions_bitset, stats, stop);
+  const auto h_classic = transition_relation(conf, o, net, transitions_bitset, stats, stop);
+  if (conf.show_relation)
+  {
+    std::cout << h_classic << std::endl;
+  }
 
+  // Rewrite
+  const auto h = rewrite(conf, o, h_classic, stats);
   if (conf.show_relation)
   {
     std::cout << h << std::endl;
   }
 
-  if (conf.order_ordering_force)
-  {
-    chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
-    o = sdd::force_ordering(o, h);
-    stats.force_duration = chrono::system_clock::now() - start;
-
-    h = transition_relation(conf, o, net, transitions_bitset, stats, stop);
-
-    if (conf.order_show)
-    {
-      std::cout << o << std::endl;
-    }
-  }
-
-  h = rewrite(conf, o, h, stats);
-
   // Compute the state space.
-  SDD m = sdd::zero<sdd_conf>();
-  m = state_space(conf, o, m0, h, stats, stop);
+  const auto m = state_space(conf, o, m0, h, stats, stop);
   stats.nb_states = m.size().template convert_to<long double>();
   std::cout << stats.nb_states << " states" << std::endl;
 
@@ -567,10 +555,6 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     if (conf.order_ordering_force)
     {
       std::cout << "FORCE                : " << stats.force_duration.count() << "s" << std::endl;
-    }
-    if (conf.order_ordering_force_pn)
-    {
-      std::cout << "FORCE PN             : " << stats.force_pn_duration.count() << "s" << std::endl;
     }
   }
 
