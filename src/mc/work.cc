@@ -453,6 +453,10 @@ work(conf::pnmc_configuration& conf, const pn::net& net)
         const sdd::tools::sdd_statistics<sdd_conf> final_sdd_stats(m);
 
         cereal::JSONOutputArchive archive(file);
+        if (not conf.read_stdin)
+        {
+          archive(cereal::make_nvp("file", conf.file_name));
+        }
         archive(cereal::make_nvp("pnmc", stats));
         archive(cereal::make_nvp("libsdd", manager));
         archive(cereal::make_nvp("final sdd", final_sdd_stats));
