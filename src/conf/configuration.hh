@@ -38,12 +38,8 @@ struct pnmc_configuration
 
   bool show_final_sdd_bytes;
 
-  bool final_sdd_stats_json;
-  std::string final_sdd_stats_json_file;
-  bool manager_stats_json;
-  std::string manager_stats_json_file;
-  bool pnmc_json;
-  std::string pnmc_json_file;
+  bool json;
+  std::string json_file;
 
   std::chrono::time_point<std::chrono::system_clock> beginning;
   std::chrono::duration<double> max_time;

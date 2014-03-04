@@ -90,10 +90,8 @@ const auto mc_dead_states_str = "dead-states";
 const auto limit_time_str = "limit-time";
 const auto delete_input_file_str = "delete-input-file";
 const auto export_to_lua_str = "export-to-lua";
-const auto final_sdd_json_str = "final-sdd-json";
-const auto manager_json_str = "manager-json";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
-const auto pnmc_json_str = "pnmc-json";
+const auto json_str = "json";
 const auto show_time_str = "show-time";
 
 boost::optional<pnmc_configuration>
@@ -156,13 +154,9 @@ fill_configuration(int argc, char** argv)
     (delete_input_file_str      , "Delete input file after reading it")
     (export_to_lua_str          , po::value<std::string>()
                                 , "Export the final SDD to a Lua structure")
-    (final_sdd_json_str         , po::value<std::string>()
-                                , "Export the final SDD's statistics to a JSON file")
-    (manager_json_str           , po::value<std::string>()
-                                , "Export the libsdd manager's statistics to a JSON file")
     (final_sdd_dot_export_str   , po::value<std::string>()
                                 , "Export the SDD state space to DOT file")
-    (pnmc_json_str              , po::value<std::string>()
+    (json_str                   , po::value<std::string>()
                                 , "Export PNMC's statistics to a JSON file")
     (show_time_str              , "Show a breakdown of all steps' times")
     (limit_time_str             , po::value<unsigned int>()->default_value(0)
@@ -267,20 +261,10 @@ fill_configuration(int argc, char** argv)
   {
     conf.export_final_sdd_dot_file = vm[final_sdd_dot_export_str].as<std::string>();
   }
-  conf.final_sdd_stats_json = vm.count(final_sdd_json_str);
-  if (conf.final_sdd_stats_json)
+  conf.json = vm.count(json_str);
+  if (conf.json)
   {
-    conf.final_sdd_stats_json_file = vm[final_sdd_json_str].as<std::string>();
-  }
-  conf.manager_stats_json  = vm.count(manager_json_str);
-  if (conf.manager_stats_json)
-  {
-    conf.manager_stats_json_file = vm[manager_json_str].as<std::string>();
-  }
-  conf.pnmc_json = vm.count(pnmc_json_str);
-  if (conf.pnmc_json)
-  {
-    conf.pnmc_json_file = vm[pnmc_json_str].as<std::string>();
+    conf.json_file = vm[json_str].as<std::string>();
   }
   conf.max_time = std::chrono::duration<double>(vm[limit_time_str].as<unsigned int>());
 
