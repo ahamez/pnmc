@@ -173,9 +173,9 @@ mk_order(const conf::pnmc_configuration& conf, const pn::net& net, statistics& s
       hyperedges.emplace_back(std::move(local_vertices));
 
       // Update vertices.
-      for (auto v_ptr : hyperedges.back().vertices)
+      for (auto v_ptr : hyperedges.back().vertices())
       {
-        v_ptr->hyperedges.emplace_back(&hyperedges.back());
+        v_ptr->hyperedges().emplace_back(&hyperedges.back());
       }
     }
     const auto o = sdd::force_ordering2<sdd_conf>(std::move(vertices), std::move(hyperedges));
