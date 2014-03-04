@@ -233,7 +233,7 @@ mk_fun( const conf::pnmc_configuration& conf, const bool& stop, const sdd::order
 {
   if (conf.max_time > chrono::duration<double>(0))
   {
-    return function(o, id, timed<Fun>(stop, std::forward<Args>(args)...));
+    return function(o, id, timed<sdd_conf, Fun>(stop, std::forward<Args>(args)...));
   }
   else
   {
@@ -272,10 +272,11 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     // Post actions.
     for (const auto& arc : transition.post)
     {
+      // Is the maximal marking limited?
       homomorphism f = conf.marking_bound == 0
                      ? mk_fun<post>(conf, stop, o, arc.first, arc.second)
-                     : mk_fun<bounded_post>( conf, stop, o, arc.first, arc.second
-                                           , conf.marking_bound, arc.first);
+                     : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second
+                                                     , conf.marking_bound, arc.first);
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
@@ -331,7 +332,8 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
                             if (std::chrono::system_clock::now() - beginning >= conf.max_time)
                             {
                               stop = true;
-                              std::cout << "Will stop the state space computation." << std::endl;
+                              std::cout << "Time limit exceeded,";
+                              std::cout << " it may take a while to completely stop." << std::endl;
                               break;
                             }
                           }
@@ -344,16 +346,27 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
   {
     res = h(o, m);
   }
-  catch (const sdd::interrupt<SDD>& i)
+  catch (const bound_error<sdd_conf>& b)
   {
-    std::cout << "State space computation interrupted after "
-              << std::chrono::duration<double>(std::chrono::system_clock::now() - beginning).count()
-              << "s." << std::endl;
+    std::cout << "Marking limit (" << conf.marking_bound << ") reached for place " << b.place << "."
+              << std::endl;
+    stats.interrupted = true;
+    res = b.result();
+  }
+  catch (const sdd::interrupt<sdd_conf>& i)
+  {
     stats.interrupted = true;
     res = i.result();
   }
   finished = true;
   stats.state_space_duration = chrono::system_clock::now() - start;
+
+  if (stats.interrupted)
+  {
+    std::cout << "State space computation interrupted after "
+              << std::chrono::duration<double>(std::chrono::system_clock::now() - beginning).count()
+              << "s." << std::endl;
+  }
 
   if (conf.max_time > chrono::duration<double>(0))
   {
@@ -427,7 +440,12 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     std::cout << o << std::endl;
   }
 
+  // Get the initial state.
+  const SDD m0 = initial_state(o, net);
+
+  // Compute the transition relation.
   homomorphism h = transition_relation(conf, o, net, transitions_bitset, stats, stop);
+
   if (conf.show_relation)
   {
     std::cout << h << std::endl;
@@ -449,87 +467,92 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
 
   h = rewrite(conf, o, h, stats);
 
-  const SDD m0 = initial_state(o, net);
+  // Compute the state space.
+  SDD m = sdd::zero<sdd_conf>();
+  m = state_space(conf, o, m0, h, stats, stop);
+  stats.nb_states = m.size().template convert_to<long double>();
+  std::cout << stats.nb_states << " states" << std::endl;
 
-  try
+  if (conf.export_final_sdd_dot)
   {
-    SDD m = sdd::zero<sdd_conf>();
-    m = state_space(conf, o, m0, h, stats, stop);
-    stats.nb_states = m.size().template convert_to<long double>();
-    std::cout << stats.nb_states << " states" << std::endl;
-
-    if (conf.export_final_sdd_dot)
+    std::ofstream dot_file(conf.export_final_sdd_dot_file);
+    if (dot_file.is_open())
     {
-      std::ofstream dot_file(conf.export_final_sdd_dot_file);
-      if (dot_file.is_open())
+      dot_file << sdd::tools::dot(m) << std::endl;
+    }
+    else
+    {
+      std::cerr << "Can't export state space's SDD to " << conf.export_final_sdd_dot_file
+                << std::endl;
+    }
+  }
+
+  if (conf.compute_dead_transitions)
+  {
+    std::deque<std::string> dead_transitions;
+    for (std::size_t i = 0; i < net.transitions().size(); ++i)
+    {
+      if (not transitions_bitset[i])
       {
-        dot_file << sdd::tools::dot(m) << std::endl;
-      }
-      else
-      {
-        std::cerr << "Can't export state space's SDD to " << conf.export_final_sdd_dot_file
-                  << std::endl;
+        dead_transitions.push_back(net.get_transition_by_index(i).id);
       }
     }
 
-    if (conf.compute_dead_transitions)
+    if (not dead_transitions.empty())
     {
-      std::deque<std::string> dead_transitions;
-      for (std::size_t i = 0; i < net.transitions().size(); ++i)
+      std::cout << dead_transitions.size() << " dead transition(s): ";
+      std::copy( dead_transitions.cbegin(), std::prev(dead_transitions.cend())
+               , std::ostream_iterator<std::string>(std::cout, ","));
+      std::cout << *std::prev(dead_transitions.cend()) << std::endl;
+    }
+    else
+    {
+      std::cout << "No dead transitions" << std::endl;
+    }
+  }
+
+  if (conf.compute_dead_states)
+  {
+    const auto dead = dead_states(conf, o, net, m, stats);
+    if (dead.empty())
+    {
+      std::cout << "No dead states" << std::endl;
+    }
+    else
+    {
+      std::cout << dead.size().template convert_to<long double>() << " dead state(s):"
+                << std::endl;
+
+      // Get the identifier of each level (SDD::paths() doesn't give this information).
+      std::deque<std::reference_wrapper<const std::string>> identifiers;
+      o.flat(std::back_inserter(identifiers));
+
+      for (const auto& path : dead.paths())
       {
-        if (not transitions_bitset[i])
+        auto id_cit = identifiers.cbegin();
+        auto path_cit = path.cbegin();
+        for (; path_cit != std::prev(path.cend()); ++path_cit, ++id_cit)
         {
-          dead_transitions.push_back(net.get_transition_by_index(i).id);
+          std::cout << id_cit->get() << " : " << *path_cit << ", ";
         }
-      }
-
-      if (not dead_transitions.empty())
-      {
-        std::cout << dead_transitions.size() << " dead transition(s): ";
-        std::copy( dead_transitions.cbegin(), std::prev(dead_transitions.cend())
-                 , std::ostream_iterator<std::string>(std::cout, ","));
-        std::cout << *std::prev(dead_transitions.cend()) << std::endl;
-      }
-      else
-      {
-        std::cout << "No dead transitions" << std::endl;
+        std::cout << id_cit->get() << " : " << *path_cit << std::endl;
       }
     }
+  }
 
+  const auto total = stats.relation_duration + stats.rewrite_duration
+                   + stats.state_space_duration + stats.dead_states_duration;
+  std::cout << total.count() << "s" << std::endl;
+
+  if (conf.show_time)
+  {
+    std::cout << "Relation             : " << stats.relation_duration.count() << "s"
+              << std::endl
+              << "Rewrite              : " << stats.rewrite_duration.count() << "s"
+              << std::endl
+              << "State space          : " << stats.state_space_duration.count() << "s"
+              << std::endl;
     if (conf.compute_dead_states)
-    {
-      const auto dead = dead_states(conf, o, net, m, stats);
-      if (dead.empty())
-      {
-        std::cout << "No dead states" << std::endl;
-      }
-      else
-      {
-        std::cout << dead.size().template convert_to<long double>() << " dead state(s):"
-                  << std::endl;
-
-        // Get the identifier of each level (SDD::paths() doesn't give this information).
-        std::deque<std::reference_wrapper<const std::string>> identifiers;
-        o.flat(std::back_inserter(identifiers));
-
-        for (const auto& path : dead.paths())
-        {
-          auto id_cit = identifiers.cbegin();
-          auto path_cit = path.cbegin();
-          for (; path_cit != std::prev(path.cend()); ++path_cit, ++id_cit)
-          {
-            std::cout << id_cit->get() << " : " << *path_cit << ", ";
-          }
-          std::cout << id_cit->get() << " : " << *path_cit << std::endl;
-        }
-      }
-    }
-
-    const auto total = stats.relation_duration + stats.rewrite_duration
-                     + stats.state_space_duration + stats.dead_states_duration;
-    std::cout << total.count() << "s" << std::endl;
-
-    if (conf.show_time)
     {
       std::cout << "Relation             : " << stats.relation_duration.count() << "s"
                 << std::endl
@@ -551,42 +574,38 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
                   << "s" << std::endl;
       }
     }
+  }
 
-    if (conf.show_final_sdd_bytes)
+  if (conf.show_final_sdd_bytes)
+  {
+    std::cout << "Final SDD size: " << sdd::tools::size(m) << " bytes" << std::endl;
+  }
+
+  if (conf.export_to_lua)
+  {
+    std::ofstream lua_file(conf.export_to_lua_file);
+    if (lua_file.is_open())
     {
-      std::cout << "Final SDD size: " << sdd::tools::size(m) << " bytes" << std::endl;
-    }
-
-    if (conf.export_to_lua)
-    {
-      std::ofstream lua_file(conf.export_to_lua_file);
-      if (lua_file.is_open())
-      {
-        lua_file << sdd::tools::lua(m) << std::endl;
-      }
-    }
-
-    if (conf.json)
-    {
-      std::ofstream file(conf.json_file);
-      if (file.is_open())
-      {
-        const sdd::tools::sdd_statistics<sdd_conf> final_sdd_stats(m);
-
-        cereal::JSONOutputArchive archive(file);
-        if (not conf.read_stdin)
-        {
-          archive(cereal::make_nvp("file", conf.file_name));
-        }
-        archive(cereal::make_nvp("pnmc", stats));
-        archive(cereal::make_nvp("libsdd", manager));
-        archive(cereal::make_nvp("final sdd", final_sdd_stats));
-      }
+      lua_file << sdd::tools::lua(m) << std::endl;
     }
   }
-  catch (const bound_error& be)
+
+  if (conf.json)
   {
-    std::cout << "Marking limit reached for place " << be.place << std::endl;
+    std::ofstream file(conf.json_file);
+    if (file.is_open())
+    {
+      const sdd::tools::sdd_statistics<sdd_conf> final_sdd_stats(m);
+
+      cereal::JSONOutputArchive archive(file);
+      if (not conf.read_stdin)
+      {
+        archive(cereal::make_nvp("file", conf.file_name));
+      }
+      archive(cereal::make_nvp("pnmc", stats));
+      archive(cereal::make_nvp("libsdd", manager));
+      archive(cereal::make_nvp("final sdd", final_sdd_stats));
+    }
   }
 }
 
