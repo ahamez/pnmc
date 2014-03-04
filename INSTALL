@@ -9,9 +9,8 @@ PNMC INSTALLATION
 
   * Libraries
     - libsdd (https://github.com/ahamez/libsdd)
-      Note that the libsdd is header-only, and as such it does not need to be
-      compiled.
     - Boost >= 1.55
+    - cereal >= 0.9.1 (http://uscilab.github.io/cereal)
 
   * Tools
     - cmake >= 2.8.10
