@@ -9,7 +9,7 @@ namespace pnmc { namespace mc {
 /*------------------------------------------------------------------------------------------------*/
 
 void
-work(conf::pnmc_configuration&, const pn::net&);
+work(const conf::pnmc_configuration&, const pn::net&);
 
 /*------------------------------------------------------------------------------------------------*/
 

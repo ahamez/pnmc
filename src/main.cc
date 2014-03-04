@@ -61,7 +61,7 @@ main(int argc, char** argv)
     return 0;
   }
 
-  auto& conf = *conf_opt;
+  const auto& conf = *conf_opt;
   try
   {
     auto in = file_or_cin(conf);
