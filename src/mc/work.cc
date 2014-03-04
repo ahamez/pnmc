@@ -11,12 +11,13 @@
 #include <cereal/archives/json.hpp>
 
 #include <sdd/sdd.hh>
-#include <sdd/tools/dot.hh>
-#include <sdd/tools/json.hh>
-#include <sdd/tools/lua.hh>
-#include <sdd/tools/size.hh>
 #include <sdd/order/strategies/force.hh>
 #include <sdd/order/strategies/force2.hh>
+#include <sdd/tools/dot.hh>
+#include <sdd/tools/lua.hh>
+#include "sdd/tools/sdd_statistics.hh"
+#include <sdd/tools/serialization.hh>
+#include "sdd/tools/size.hh"
 
 #include "mc/bound_error.hh"
 #include "mc/bounded_post.hh"
@@ -524,31 +525,21 @@ work(conf::pnmc_configuration& conf, const pn::net& net)
       }
     }
 
-    if (conf.final_sdd_stats_json)
+    if (conf.json)
     {
-      std::ofstream file(conf.final_sdd_stats_json_file);
+      std::ofstream file(conf.json_file);
       if (file.is_open())
       {
-        sdd::tools::json(m, file);
-      }
-    }
+        const sdd::tools::sdd_statistics<sdd_conf> final_sdd_stats(m);
 
-    if (conf.manager_stats_json)
-    {
-      std::ofstream file(conf.manager_stats_json_file);
-      if (file.is_open())
-      {
-        sdd::tools::json(manager, file);
-      }
-    }
-
-    if (conf.pnmc_json)
-    {
-      std::ofstream file(conf.pnmc_json_file);
-      if (file.is_open())
-      {
         cereal::JSONOutputArchive archive(file);
+        if (not conf.read_stdin)
+        {
+          archive(cereal::make_nvp("file", conf.file_name));
+        }
         archive(cereal::make_nvp("pnmc", stats));
+        archive(cereal::make_nvp("libsdd", manager));
+        archive(cereal::make_nvp("final sdd", final_sdd_stats));
       }
     }
   }
