@@ -132,56 +132,32 @@ mk_order(const conf::pnmc_configuration& conf, const pn::net& net, statistics& s
   if (conf.order_ordering_force)
   {
     chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
-    using id_type = sdd_conf::Identifier;
-    using vertex = sdd::force::vertex<id_type>;
-    using hyperedge = sdd::force::hyperedge<id_type>;
+    using identifier_type = sdd_conf::Identifier;
+    using vertex = sdd::force::vertex<identifier_type>;
+    using hyperedge = sdd::force::hyperedge<identifier_type>;
 
-    // Rapidly find the vertex associated to an identifier.
-    std::unordered_map<id_type, vertex*> map;
-
-    // Construct all vertices.
-    std::vector<vertex> vertices;
-    vertices.reserve(net.places().size());
-    unsigned int location = 0;
-    for (const auto& place : net.places())
-    {
-      vertices.emplace_back(place.id, location++);
-      map.emplace(place.id, &vertices.back());
-    }
-
-    // Construct all hyperedges.
-    std::vector<hyperedge> hyperedges;
-    hyperedges.reserve(net.transitions().size());
+    sdd::force::hypergraph<sdd_conf> graph;
+    std::vector<identifier_type> identifiers;
     for (const auto& transition : net.transitions())
     {
-      std::vector<vertex*> local_vertices;
-
       for (const auto& arc : transition.pre)
       {
-        assert(map.find(arc.first) != map.end());
-        local_vertices.emplace_back(map[arc.first]);
+        identifiers.emplace_back(arc.first);
       }
 
       for (const auto& arc : transition.post)
       {
-        assert(map.find(arc.first) != map.end());
-        local_vertices.emplace_back(map[arc.first]);
+        identifiers.emplace_back(arc.first);
       }
-
-      // Create the new hyperedge.
-      hyperedges.emplace_back(std::move(local_vertices));
-
-      // Update vertices.
-      for (auto v_ptr : hyperedges.back().vertices())
-      {
-        v_ptr->hyperedges().emplace_back(&hyperedges.back());
-      }
+      graph.add_hyperedge(identifiers.cbegin(), identifiers.cend());
+      identifiers.clear();
     }
-    const auto o = sdd::force_ordering<sdd_conf>(std::move(vertices), std::move(hyperedges));
+    force_ordering(graph);
+    const auto o = sdd::order<sdd_conf>(sdd::order_builder<sdd_conf>(graph.cbegin(), graph.cend()));
     stats.force_duration = chrono::system_clock::now() - start;
     return o;
-  } else
-  if (not conf.order_force_flat and net.modules)
+  }
+  else if (not conf.order_force_flat and net.modules)
   {
     return sdd::order<sdd_conf>(boost::apply_visitor(mk_order_visitor(conf), *net.modules).second);
   }
