@@ -25,6 +25,7 @@
 #include "mc/post.hh"
 #include "mc/pre.hh"
 #include "mc/statistics.hh"
+#include "mc/timed.hh"
 #include "mc/work.hh"
 
 namespace pnmc { namespace mc {
@@ -222,6 +223,25 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Create a timed function if required by the configuration, a normal function otherwise.
+template <typename Fun, typename... Args>
+homomorphism
+mk_fun( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
+      , const sdd_conf::Identifier& id, Args&&... args)
+{
+  if (conf.max_time > chrono::duration<double>(0))
+  {
+    return function(o, id, timed<Fun>(conf, std::forward<Args>(args)...));
+  }
+  else
+  {
+    return function(o, id, Fun(std::forward<Args>(args)...));;
+  }
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+/// @brief Compute the transition relation corresponding to a petri net.
 homomorphism
 transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
                    , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
@@ -241,8 +261,8 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     {
       if (not transition.post.empty())
       {
-        const auto f = function( o, transition.post.begin()->first
-                               , live(transition.index, transitions_bitset));
+        const auto f = mk_fun<live>( conf, o, transition.post.begin()->first, transition.index
+                                   , transitions_bitset);
         h_t = sdd::carrier(o, transition.post.begin()->first, f);
       }
     }
@@ -251,29 +271,17 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     for (const auto& arc : transition.post)
     {
       homomorphism f = conf.marking_bound == 0
-                     ? function(o, arc.first, post(arc.second))
-                     : function(o, arc.first, bounded_post( arc.second
-                                                                    , conf.marking_bound
-                                                                    , arc.first));
+                     ? mk_fun<post>(conf, o, arc.first, arc.second)
+                     : mk_fun<bounded_post>( conf, o, arc.first, arc.second, conf.marking_bound
+                                           , arc.first);
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
     // Pre actions.
-    if (conf.max_time > chrono::duration<double>(0))
+    for (const auto& arc : transition.pre)
     {
-      for (const auto& arc : transition.pre)
-      {
-        homomorphism f = function<sdd_conf>(o, arc.first, timed_pre(conf, arc.second));
-        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
-      }
-    }
-    else
-    {
-      for (const auto& arc : transition.pre)
-      {
-        homomorphism f = function<sdd_conf>(o, arc.first, pre(arc.second));
-        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
-      }
+      homomorphism f = mk_fun<pre>(conf, o, arc.first, arc.second);
+      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
     operands.insert(h_t);
