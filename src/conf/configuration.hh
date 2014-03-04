@@ -43,7 +43,6 @@ struct pnmc_configuration
   bool json;
   std::string json_file;
 
-  std::chrono::time_point<std::chrono::system_clock> beginning;
   std::chrono::duration<double> max_time;
 };
 

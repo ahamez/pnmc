@@ -1,7 +1,6 @@
 #ifndef _PNMC_MC_TIMED_HH_
 #define _PNMC_MC_TIMED_HH_
 
-#include <chrono>
 #include <functional> // hash
 #include <iosfwd>
 
@@ -19,7 +18,7 @@ template <typename Fun>
 struct timed
 {
   /// @brief The configuration keeps the timing informations.
-  const conf::pnmc_configuration& conf;
+  const bool& stop;
 
   /// @brief The real function to apply
   const Fun fun;
@@ -28,8 +27,8 @@ struct timed
   ///
   /// Delegates to the contained function.
   template <typename... Args>
-  timed(const conf::pnmc_configuration& c, Args&&... args)
-    : conf(c), fun(std::forward<Args>(args)...)
+  timed(const bool& stop, Args&&... args)
+    : stop(stop), fun(std::forward<Args>(args)...)
   {}
 
   /// @brief Function application
@@ -38,7 +37,7 @@ struct timed
   operator()(const T& x)
   const
   {
-    if (std::chrono::system_clock::now() - conf.beginning >= conf.max_time)
+    if (stop)
     {
       throw sdd::interrupt<sdd::SDD<sdd::conf1>>();
     }

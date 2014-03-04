@@ -5,6 +5,7 @@
 #include <iostream>
 #include <random>
 #include <set>
+#include <thread>
 #include <unordered_map>
 #include <utility>  // pair
 
@@ -227,12 +228,12 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 /// @brief Create a timed function if required by the configuration, a normal function otherwise.
 template <typename Fun, typename... Args>
 homomorphism
-mk_fun( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
+mk_fun( const conf::pnmc_configuration& conf, const bool& stop, const sdd::order<sdd_conf>& o
       , const sdd_conf::Identifier& id, Args&&... args)
 {
   if (conf.max_time > chrono::duration<double>(0))
   {
-    return function(o, id, timed<Fun>(conf, std::forward<Args>(args)...));
+    return function(o, id, timed<Fun>(stop, std::forward<Args>(args)...));
   }
   else
   {
@@ -246,7 +247,7 @@ mk_fun( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 homomorphism
 transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
                    , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-                   , statistics& stats)
+                   , statistics& stats, const bool& stop)
 {
   chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
 
@@ -262,7 +263,7 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     {
       if (not transition.post.empty())
       {
-        const auto f = mk_fun<live>( conf, o, transition.post.begin()->first, transition.index
+        const auto f = mk_fun<live>( conf, stop, o, transition.post.begin()->first, transition.index
                                    , transitions_bitset);
         h_t = sdd::carrier(o, transition.post.begin()->first, f);
       }
@@ -272,16 +273,16 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     for (const auto& arc : transition.post)
     {
       homomorphism f = conf.marking_bound == 0
-                     ? mk_fun<post>(conf, o, arc.first, arc.second)
-                     : mk_fun<bounded_post>( conf, o, arc.first, arc.second, conf.marking_bound
-                                           , arc.first);
+                     ? mk_fun<post>(conf, stop, o, arc.first, arc.second)
+                     : mk_fun<bounded_post>( conf, stop, o, arc.first, arc.second
+                                           , conf.marking_bound, arc.first);
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
     // Pre actions.
     for (const auto& arc : transition.pre)
     {
-      homomorphism f = mk_fun<pre>(conf, o, arc.first, arc.second);
+      homomorphism f = mk_fun<pre>(conf, stop, o, arc.first, arc.second);
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
@@ -306,11 +307,38 @@ rewrite( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
-state_space( conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD m
-           , homomorphism h, statistics& stats)
+state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD m
+           , homomorphism h, statistics& stats, bool& stop)
 {
   SDD res;
-  conf.beginning = chrono::system_clock::now();
+
+  // To stop the clock thread.
+  bool finished(false);
+
+  // The reference time;
+  const std::chrono::time_point<std::chrono::system_clock>
+    beginning(std::chrono::system_clock::now());
+
+  // Limited time mode?
+  std::thread clock;
+  if (conf.max_time > chrono::duration<double>(0))
+  {
+    clock = std::thread([&]
+                        {
+                          while (not finished)
+                          {
+                            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                            if (std::chrono::system_clock::now() - beginning >= conf.max_time)
+                            {
+                              stop = true;
+                              std::cout << "Will stop the state space computation." << std::endl;
+                              break;
+                            }
+                          }
+                        });
+  }
+
+
   chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
   try
   {
@@ -318,12 +346,20 @@ state_space( conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD 
   }
   catch (const sdd::interrupt<SDD>& i)
   {
-    std::cout << "Interrupted state space computation after " << conf.max_time.count() << "s"
-               << std::endl;
+    std::cout << "State space computation interrupted after "
+              << std::chrono::duration<double>(std::chrono::system_clock::now() - beginning).count()
+              << "s." << std::endl;
     stats.interrupted = true;
     res = i.result();
   }
+  finished = true;
   stats.state_space_duration = chrono::system_clock::now() - start;
+
+  if (conf.max_time > chrono::duration<double>(0))
+  {
+    clock.join();
+  }
+
   return res;
 }
 
@@ -370,12 +406,17 @@ dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 /*------------------------------------------------------------------------------------------------*/
 
 void
-work(conf::pnmc_configuration& conf, const pn::net& net)
+work(const conf::pnmc_configuration& conf, const pn::net& net)
 {
+  // Initialize the libsdd.
   auto manager = sdd::manager<sdd_conf>::init();
 
   statistics stats(conf);
 
+  // Used in limited time mode.
+  bool stop(false);
+
+  // Map of live transitions.
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
   sdd::order<sdd_conf> o = mk_order(conf, net);
@@ -386,7 +427,7 @@ work(conf::pnmc_configuration& conf, const pn::net& net)
     std::cout << o << std::endl;
   }
 
-  homomorphism h = transition_relation(conf, o, net, transitions_bitset, stats);
+  homomorphism h = transition_relation(conf, o, net, transitions_bitset, stats, stop);
   if (conf.show_relation)
   {
     std::cout << h << std::endl;
@@ -398,7 +439,7 @@ work(conf::pnmc_configuration& conf, const pn::net& net)
     o = sdd::force_ordering(o, h);
     stats.force_duration = chrono::system_clock::now() - start;
 
-    h = transition_relation(conf, o, net, transitions_bitset, stats);
+    h = transition_relation(conf, o, net, transitions_bitset, stats, stop);
 
     if (conf.order_show)
     {
@@ -413,7 +454,7 @@ work(conf::pnmc_configuration& conf, const pn::net& net)
   try
   {
     SDD m = sdd::zero<sdd_conf>();
-    m = state_space(conf, o, m0, h, stats);
+    m = state_space(conf, o, m0, h, stats, stop);
     stats.nb_states = m.size().template convert_to<long double>();
     std::cout << stats.nb_states << " states" << std::endl;
 
