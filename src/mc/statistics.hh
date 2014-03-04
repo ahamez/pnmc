@@ -18,6 +18,7 @@ struct statistics
   std::chrono::duration<double> rewrite_duration;
   std::chrono::duration<double> state_space_duration;
   std::chrono::duration<double> force_duration;
+  std::chrono::duration<double> force_pn_duration;
   std::chrono::duration<double> dead_states_relation_duration;
   std::chrono::duration<double> dead_states_rewrite_duration;
   std::chrono::duration<double> dead_states_duration;
@@ -28,8 +29,8 @@ struct statistics
 
   statistics(const conf::pnmc_configuration& c)
     : conf(c), relation_duration(), rewrite_duration(), state_space_duration(), force_duration()
-    , dead_states_relation_duration(), dead_states_rewrite_duration(), dead_states_duration()
-    , nb_states(0), interrupted(false)
+    , force_pn_duration(), dead_states_relation_duration(), dead_states_rewrite_duration()
+    , dead_states_duration(), nb_states(0), interrupted(false)
   {}
 
   template<class Archive>
@@ -46,6 +47,11 @@ struct statistics
     if (conf.order_ordering_force)
     {
       archive(cereal::make_nvp("FORCE time", force_duration.count()));
+    }
+
+    if (conf.order_ordering_force_pn)
+    {
+      archive(cereal::make_nvp("FORCE PN time", force_pn_duration.count()));
     }
 
     if (conf.compute_dead_states)

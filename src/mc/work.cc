@@ -128,10 +128,11 @@ struct mk_order_visitor
 /*------------------------------------------------------------------------------------------------*/
 
 sdd::order<sdd_conf>
-mk_order(const conf::pnmc_configuration& conf, const pn::net& net)
+mk_order(const conf::pnmc_configuration& conf, const pn::net& net, statistics& stats)
 {
   if (conf.order_ordering_force_pn)
   {
+    chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
     using id_type = sdd_conf::Identifier;
     using vertex = sdd::force::vertex<id_type>;
     using hyperedge = sdd::force::hyperedge<id_type>;
@@ -177,7 +178,9 @@ mk_order(const conf::pnmc_configuration& conf, const pn::net& net)
         v_ptr->hyperedges.emplace_back(&hyperedges.back());
       }
     }
-    return sdd::force_ordering2<sdd_conf>(std::move(vertices), std::move(hyperedges));
+    const auto o = sdd::force_ordering2<sdd_conf>(std::move(vertices), std::move(hyperedges));
+    stats.force_pn_duration = chrono::system_clock::now() - start;
+    return o;
   } else
   if (not conf.order_force_flat and net.modules)
   {
@@ -432,7 +435,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   // Map of live transitions.
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
-  sdd::order<sdd_conf> o = mk_order(conf, net);
+  sdd::order<sdd_conf> o = mk_order(conf, net, stats);
   assert(not o.empty() && "Empty order");
 
   if (conf.order_show)
@@ -564,6 +567,10 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     if (conf.order_ordering_force)
     {
       std::cout << "FORCE                : " << stats.force_duration.count() << "s" << std::endl;
+    }
+    if (conf.order_ordering_force_pn)
+    {
+      std::cout << "FORCE PN             : " << stats.force_pn_duration.count() << "s" << std::endl;
     }
   }
 
