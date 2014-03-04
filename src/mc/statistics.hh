@@ -25,7 +25,7 @@ struct statistics
 
   long double nb_states;
 
-  bool interrupted ;
+  bool interrupted;
 
   statistics(const conf::pnmc_configuration& c)
     : conf(c), relation_duration(), rewrite_duration(), state_space_duration(), force_duration()
@@ -39,6 +39,8 @@ struct statistics
   const
   {
     archive( cereal::make_nvp("interrupted", interrupted)
+           , cereal::make_nvp("states", nb_states)
+           , cereal::make_nvp("states as string", std::to_string(nb_states))
            , cereal::make_nvp("relation time", relation_duration.count())
            , cereal::make_nvp("rewrite time", rewrite_duration.count())
            , cereal::make_nvp("state space time", state_space_duration.count())
