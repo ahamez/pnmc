@@ -560,19 +560,10 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
                 << std::endl
                 << "State space          : " << stats.state_space_duration.count() << "s"
                 << std::endl;
-      if (conf.order_ordering_force)
-      {
-        std::cout << "FORCE                : " << stats.force_duration.count() << "s" << std::endl;
-      }
-      if (conf.compute_dead_states)
-      {
-        std::cout << "Dead states relation : " << stats.dead_states_relation_duration.count()
-                  << "s" << std::endl
-                  << "Dead states rewrite  : " << stats.dead_states_rewrite_duration.count()
-                  << "s" << std::endl
-                  << "Dead states          ; " << stats.dead_states_duration.count()
-                  << "s" << std::endl;
-      }
+    }
+    if (conf.order_ordering_force)
+    {
+      std::cout << "FORCE                : " << stats.force_duration.count() << "s" << std::endl;
     }
   }
 
