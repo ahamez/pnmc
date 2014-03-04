@@ -181,7 +181,7 @@ mk_fun( const conf::pnmc_configuration& conf, const bool& stop, const sdd::order
 {
   if (conf.max_time > chrono::duration<double>(0))
   {
-    return function(o, id, timed<Fun>(stop, std::forward<Args>(args)...));
+    return function(o, id, timed<sdd_conf, Fun>(stop, std::forward<Args>(args)...));
   }
   else
   {
@@ -220,6 +220,7 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
     // Post actions.
     for (const auto& arc : transition.post)
     {
+      // Is the maximal marking limited?
       homomorphism f = conf.marking_bound == 0
                      ? mk_fun<post>(conf, stop, o, arc.first, arc.second)
                      : mk_fun<bounded_post>( conf, stop, o, arc.first, arc.second
@@ -285,7 +286,7 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
   {
     res = h(o, m);
   }
-  catch (const sdd::interrupt<SDD>& i)
+  catch (const sdd::interrupt<sdd_conf>& i)
   {
     std::cout << "State space computation interrupted after "
               << std::chrono::duration<double>(std::chrono::system_clock::now() - beginning).count()

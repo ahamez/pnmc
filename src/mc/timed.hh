@@ -4,7 +4,7 @@
 #include <functional> // hash
 #include <iosfwd>
 
-#include <sdd/sdd.hh>
+#include <sdd/hom/interrupt.hh>
 
 #include "conf/configuration.hh"
 
@@ -14,7 +14,7 @@ namespace pnmc { namespace mc {
 
 /// @brief A generic function which throws an sdd::interrupt when a given ammount of time has been
 /// reached.
-template <typename Fun>
+template <typename C, typename Fun>
 struct timed
 {
   /// @brief The configuration keeps the timing informations.
@@ -39,25 +39,25 @@ struct timed
   {
     if (stop)
     {
-      throw sdd::interrupt<sdd::SDD<sdd::conf1>>();
+      throw sdd::interrupt<C>();
     }
     return fun(x);
   }
 };
 
 /// @brief Equality of two timed.
-template <typename Fun>
+template <typename C, typename Fun>
 bool
-operator==(const timed<Fun>& lhs, const timed<Fun>& rhs)
+operator==(const timed<C, Fun>& lhs, const timed<C, Fun>& rhs)
 noexcept
 {
   return lhs.fun == rhs.fun;
 }
 
 /// @brief Textual output of a timed.
-template <typename Fun>
+template <typename C, typename Fun>
 std::ostream&
-operator<<(std::ostream& os, const timed<Fun>& t)
+operator<<(std::ostream& os, const timed<C, Fun>& t)
 {
   return os << "timed(" << t.fun << ")";
 }
@@ -70,11 +70,11 @@ namespace std {
 
 /*------------------------------------------------------------------------------------------------*/
 
-template <typename Fun>
-struct hash<pnmc::mc::timed<Fun>>
+template <typename C, typename Fun>
+struct hash<pnmc::mc::timed<C, Fun>>
 {
   std::size_t
-  operator()(const pnmc::mc::timed<Fun>& t)
+  operator()(const pnmc::mc::timed<C, Fun>& t)
   const noexcept
   {
     return std::hash<Fun>()(t.fun);
