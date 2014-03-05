@@ -4,7 +4,7 @@
 #include <random>
 #include <utility>  // pair
 
-//#include <sdd/sdd.hh>
+#include <sdd/order/order.hh>
 #include <sdd/order/strategies/force.hh>
 
 #include "mc/make_order.hh"
@@ -122,10 +122,9 @@ make_order(const conf::pnmc_configuration& conf, statistics& stats, const pn::ne
       graph.add_hyperedge(identifiers.cbegin(), identifiers.cend());
       identifiers.clear();
     }
-    force_ordering(graph);
-    const auto o = sdd::order<sdd_conf>(sdd::order_builder<sdd_conf>(graph.cbegin(), graph.cend()));
+    const auto o = force_ordering(graph);
     stats.force_duration = std::chrono::system_clock::now() - start;
-    return o;
+    return sdd::order<sdd_conf>(o);
   }
   else if (not conf.order_force_flat and net.modules)
   {
