@@ -3,6 +3,7 @@ set(SOURCES
     conf/fill_configuration.cc
     mc/dead.cc
     mc/live.cc
+    mc/make_order.cc
     mc/post.cc
     mc/pre.cc
     mc/work.cc
