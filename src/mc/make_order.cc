@@ -107,8 +107,13 @@ make_order(const conf::pnmc_configuration& conf, statistics& stats, const pn::ne
     using vertex = sdd::force::vertex<identifier_type>;
     using hyperedge = sdd::force::hyperedge<identifier_type>;
 
+    // The hypergraph that stores connections between the places of the Petri net.
     sdd::force::hypergraph<sdd_conf> graph;
+
+    // Temporary placeholder for identifiers of an hyperedge.
     std::vector<identifier_type> identifiers;
+
+    // A new connection is created for each transition of the Petri net.
     for (const auto& transition : net.transitions())
     {
       for (const auto& arc : transition.pre)
@@ -121,10 +126,15 @@ make_order(const conf::pnmc_configuration& conf, statistics& stats, const pn::ne
         identifiers.emplace_back(arc.first);
       }
       graph.add_hyperedge(identifiers.cbegin(), identifiers.cend());
+
+      // We use this container again in the next loop.
       identifiers.clear();
     }
+    // Apply the FORCE ordering strategy.
     const auto o = force_ordering(graph);
     stats.force_duration = std::chrono::system_clock::now() - start;
+
+    // Dump the hypergraph to a DOT file if required by the configuration.
     dump_hypergraph_dot(conf, graph);
     return sdd::order<sdd_conf>(o);
   }
