@@ -26,6 +26,7 @@
 #include "mc/post.hh"
 #include "mc/pre.hh"
 #include "mc/statistics.hh"
+#include "mc/statistics_serialize.hh"
 #include "mc/timed.hh"
 #include "mc/work.hh"
 
