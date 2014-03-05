@@ -1,18 +1,14 @@
-#include <algorithm> // random_shuffle, transform
 #include <cassert>
 #include <chrono>
 #include <fstream>
 #include <iostream>
-#include <random>
 #include <set>
 #include <thread>
-#include <unordered_map>
 #include <utility>  // pair
 
 #include <cereal/archives/json.hpp>
 
 #include <sdd/sdd.hh>
-#include <sdd/order/strategies/force.hh>
 #include <sdd/tools/dot.hh>
 #include <sdd/tools/lua.hh>
 #include "sdd/tools/sdd_statistics.hh"
@@ -23,6 +19,7 @@
 #include "mc/bounded_post.hh"
 #include "mc/dead.hh"
 #include "mc/live.hh"
+#include "mc/make_order.hh"
 #include "mc/post.hh"
 #include "mc/pre.hh"
 #include "mc/statistics.hh"
@@ -34,9 +31,9 @@ namespace pnmc { namespace mc {
 
 namespace chrono = std::chrono;
 
-typedef sdd::conf1 sdd_conf;
-typedef sdd::SDD<sdd_conf> SDD;
-typedef sdd::homomorphism<sdd_conf> homomorphism;
+using sdd_conf = sdd::conf1 ;
+using SDD = sdd::SDD<sdd_conf>;
+using homomorphism = sdd::homomorphism<sdd_conf>;
 
 using sdd::composition;
 using sdd::fixpoint;
@@ -127,68 +124,68 @@ struct mk_order_visitor
 
 /*------------------------------------------------------------------------------------------------*/
 
-sdd::order<sdd_conf>
-mk_order(const conf::pnmc_configuration& conf, const pn::net& net, statistics& stats)
-{
-  if (conf.order_ordering_force)
-  {
-    chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
-    using identifier_type = sdd_conf::Identifier;
-    using vertex = sdd::force::vertex<identifier_type>;
-    using hyperedge = sdd::force::hyperedge<identifier_type>;
-
-    sdd::force::hypergraph<sdd_conf> graph;
-    std::vector<identifier_type> identifiers;
-    for (const auto& transition : net.transitions())
-    {
-      for (const auto& arc : transition.pre)
-      {
-        identifiers.emplace_back(arc.first);
-      }
-
-      for (const auto& arc : transition.post)
-      {
-        identifiers.emplace_back(arc.first);
-      }
-      graph.add_hyperedge(identifiers.cbegin(), identifiers.cend());
-      identifiers.clear();
-    }
-    force_ordering(graph);
-    const auto o = sdd::order<sdd_conf>(sdd::order_builder<sdd_conf>(graph.cbegin(), graph.cend()));
-    stats.force_duration = chrono::system_clock::now() - start;
-    return o;
-  }
-  else if (not conf.order_force_flat and net.modules)
-  {
-    return sdd::order<sdd_conf>(boost::apply_visitor(mk_order_visitor(conf), *net.modules).second);
-  }
-  else
-  {
-    sdd::order_builder<sdd_conf> ob;
-    if (conf.order_random)
-    {
-      std::vector<std::string> tmp;
-      tmp.reserve(net.places().size());
-      std::transform( net.places().cbegin(), net.places().cend(), std::back_inserter(tmp)
-                    , [](const pn::place& p){return p.id;});
-      std::random_device rd;
-      std::mt19937 g(rd());
-      std::shuffle(tmp.begin(), tmp.end(), g);
-      for (const auto& id : tmp)
-      {
-        ob.push(id);
-      }
-    }
-    else
-    {
-      for (const auto& place : net.places())
-      {
-        ob.push(place.id);
-      }
-    }
-    return sdd::order<sdd_conf>(ob);
-  }
-}
+//sdd::order<sdd_conf>
+//mk_order(const conf::pnmc_configuration& conf, const pn::net& net, statistics& stats)
+//{
+//  if (conf.order_ordering_force)
+//  {
+//    chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
+//    using identifier_type = sdd_conf::Identifier;
+//    using vertex = sdd::force::vertex<identifier_type>;
+//    using hyperedge = sdd::force::hyperedge<identifier_type>;
+//
+//    sdd::force::hypergraph<sdd_conf> graph;
+//    std::vector<identifier_type> identifiers;
+//    for (const auto& transition : net.transitions())
+//    {
+//      for (const auto& arc : transition.pre)
+//      {
+//        identifiers.emplace_back(arc.first);
+//      }
+//
+//      for (const auto& arc : transition.post)
+//      {
+//        identifiers.emplace_back(arc.first);
+//      }
+//      graph.add_hyperedge(identifiers.cbegin(), identifiers.cend());
+//      identifiers.clear();
+//    }
+//    force_ordering(graph);
+//    const auto o = sdd::order<sdd_conf>(sdd::order_builder<sdd_conf>(graph.cbegin(), graph.cend()));
+//    stats.force_duration = chrono::system_clock::now() - start;
+//    return o;
+//  }
+//  else if (not conf.order_force_flat and net.modules)
+//  {
+//    return sdd::order<sdd_conf>(boost::apply_visitor(mk_order_visitor(conf), *net.modules).second);
+//  }
+//  else
+//  {
+//    sdd::order_builder<sdd_conf> ob;
+//    if (conf.order_random)
+//    {
+//      std::vector<std::string> tmp;
+//      tmp.reserve(net.places().size());
+//      std::transform( net.places().cbegin(), net.places().cend(), std::back_inserter(tmp)
+//                    , [](const pn::place& p){return p.id;});
+//      std::random_device rd;
+//      std::mt19937 g(rd());
+//      std::shuffle(tmp.begin(), tmp.end(), g);
+//      for (const auto& id : tmp)
+//      {
+//        ob.push(id);
+//      }
+//    }
+//    else
+//    {
+//      for (const auto& place : net.places())
+//      {
+//        ob.push(place.id);
+//      }
+//    }
+//    return sdd::order<sdd_conf>(ob);
+//  }
+//}
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -293,7 +290,7 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
   SDD res;
 
   // To stop the clock thread.
-  bool finished(false);
+  bool finished = false;
 
   // The reference time;
   const std::chrono::time_point<std::chrono::system_clock>
@@ -337,6 +334,7 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
     stats.interrupted = true;
     res = i.result();
   }
+  // Tell the clock thread to stop on next wakeup.
   finished = true;
   stats.state_space_duration = chrono::system_clock::now() - start;
 
@@ -406,14 +404,11 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   statistics stats(conf);
 
   // Used in limited time mode.
-  bool stop(false);
+  bool stop = false;
 
-  // Map of live transitions.
-  boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
-
-  sdd::order<sdd_conf> o = mk_order(conf, net, stats);
+  // Build the order.
+  sdd::order<sdd_conf> o = make_order(conf, stats, net);
   assert(not o.empty() && "Empty order");
-
   if (conf.order_show)
   {
     std::cout << o << std::endl;
@@ -422,6 +417,9 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   // Get the initial state.
   const SDD m0 = initial_state(o, net);
 
+  // Map of live transitions.
+  boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
+
   // Compute the transition relation.
   const auto h_classic = transition_relation(conf, o, net, transitions_bitset, stats, stop);
   if (conf.show_relation)
@@ -429,7 +427,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     std::cout << h_classic << std::endl;
   }
 
-  // Rewrite
+  // Rewrite the transition relation.
   const auto h = rewrite(conf, o, h_classic, stats);
   if (conf.show_relation)
   {
