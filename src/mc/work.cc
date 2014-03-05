@@ -1,29 +1,21 @@
 #include <cassert>
 #include <chrono>
-#include <fstream>
 #include <iostream>
 #include <set>
 #include <thread>
-#include <utility>  // pair
-
-#include <cereal/archives/json.hpp>
 
 #include <sdd/sdd.hh>
-#include <sdd/tools/dot.hh>
-#include <sdd/tools/lua.hh>
-#include "sdd/tools/sdd_statistics.hh"
-#include <sdd/tools/serialization.hh>
-#include "sdd/tools/size.hh"
+#include <sdd/tools/size.hh>
 
 #include "mc/bound_error.hh"
 #include "mc/bounded_post.hh"
 #include "mc/dead.hh"
+#include "mc/dump.hh"
 #include "mc/live.hh"
 #include "mc/make_order.hh"
 #include "mc/post.hh"
 #include "mc/pre.hh"
 #include "mc/statistics.hh"
-#include "mc/statistics_serialize.hh"
 #include "mc/timed.hh"
 #include "mc/work.hh"
 
@@ -293,20 +285,6 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   stats.nb_states = m.size().template convert_to<long double>();
   std::cout << stats.nb_states << " states" << std::endl;
 
-  if (conf.export_final_sdd_dot)
-  {
-    std::ofstream dot_file(conf.export_final_sdd_dot_file);
-    if (dot_file.is_open())
-    {
-      dot_file << sdd::tools::dot(m) << std::endl;
-    }
-    else
-    {
-      std::cerr << "Can't export state space's SDD to " << conf.export_final_sdd_dot_file
-                << std::endl;
-    }
-  }
-
   if (conf.compute_dead_transitions)
   {
     std::deque<std::string> dead_transitions;
@@ -392,32 +370,9 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
     std::cout << "Final SDD size: " << sdd::tools::size(m) << " bytes" << std::endl;
   }
 
-  if (conf.export_to_lua)
-  {
-    std::ofstream lua_file(conf.export_to_lua_file);
-    if (lua_file.is_open())
-    {
-      lua_file << sdd::tools::lua(m) << std::endl;
-    }
-  }
-
-  if (conf.json)
-  {
-    std::ofstream file(conf.json_file);
-    if (file.is_open())
-    {
-      const sdd::tools::sdd_statistics<sdd_conf> final_sdd_stats(m);
-
-      cereal::JSONOutputArchive archive(file);
-      if (not conf.read_stdin)
-      {
-        archive(cereal::make_nvp("file", conf.file_name));
-      }
-      archive(cereal::make_nvp("pnmc", stats));
-      archive(cereal::make_nvp("libsdd", manager));
-      archive(cereal::make_nvp("final sdd", final_sdd_stats));
-    }
-  }
+  dump_sdd_dot(conf, m);
+  dump_lua(conf, m);
+  dump_json(conf, stats, manager, m);
 }
 
 /*------------------------------------------------------------------------------------------------*/
