@@ -42,6 +42,9 @@ struct pnmc_configuration
   bool json;
   std::string json_file;
 
+  bool hypergraph_dot;
+  std::string hypergraph_dot_file;
+
   std::chrono::duration<double> max_time;
 };
 

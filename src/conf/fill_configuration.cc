@@ -93,6 +93,7 @@ const auto export_to_lua_str = "export-to-lua";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
 const auto show_time_str = "show-time";
+const auto hypergraph_dot_str = "force-hypergraph-dot";
 
 boost::optional<pnmc_configuration>
 fill_configuration(int argc, char** argv)
@@ -156,12 +157,14 @@ fill_configuration(int argc, char** argv)
     (export_to_lua_str          , po::value<std::string>()
                                 , "Export the final SDD to a Lua structure")
     (final_sdd_dot_export_str   , po::value<std::string>()
-                                , "Export the SDD state space to DOT file")
+                                , "Export the SDD state space to a DOT file")
     (json_str                   , po::value<std::string>()
                                 , "Export PNMC's statistics to a JSON file")
     (show_time_str              , "Show a breakdown of all steps' times")
     (limit_time_str             , po::value<unsigned int>()->default_value(0)
                                 , "Limit the execution time (s)")
+    (hypergraph_dot_str         , po::value<std::string>()
+                                , "Export FORCE's hypergraph to a DOT file")
   ;
 
   po::positional_options_description p;
@@ -273,6 +276,11 @@ fill_configuration(int argc, char** argv)
     conf.order_force_flat = true;
   }
   conf.max_time = std::chrono::duration<double>(vm[limit_time_str].as<unsigned int>());
+  conf.hypergraph_dot = vm.count(hypergraph_dot_str);
+  if (conf.hypergraph_dot)
+  {
+    conf.hypergraph_dot_file = vm[hypergraph_dot_str].as<std::string>();
+  }
 
   return conf;
 }

@@ -1,6 +1,7 @@
 #include <fstream>
 
 #include <sdd/tools/dot/sdd.hh>
+#include <sdd/tools/dot/force_hypergraph.hh>
 #include <sdd/tools/lua.hh>
 #include <sdd/tools/sdd_statistics.hh>
 #include <sdd/tools/serialization.hh>
@@ -19,10 +20,10 @@ dump_sdd_dot(const conf::pnmc_configuration& conf, const sdd::SDD<sdd::conf1>& s
 {
   if (conf.export_final_sdd_dot)
   {
-    std::ofstream dot_file(conf.export_final_sdd_dot_file);
-    if (dot_file.is_open())
+    std::ofstream file(conf.export_final_sdd_dot_file);
+    if (file.is_open())
     {
-      dot_file << sdd::tools::dot(s) << std::endl;
+      file << sdd::tools::dot(s) << std::endl;
     }
     else
     {
@@ -38,10 +39,10 @@ dump_lua(const conf::pnmc_configuration& conf, const sdd::SDD<sdd::conf1>& s)
 {
   if (conf.export_to_lua)
   {
-    std::ofstream lua_file(conf.export_to_lua_file);
-    if (lua_file.is_open())
+    std::ofstream file(conf.export_to_lua_file);
+    if (file.is_open())
     {
-      lua_file << sdd::tools::lua(s) << std::endl;
+      file << sdd::tools::lua(s) << std::endl;
     }
     else
     {
@@ -81,5 +82,24 @@ dump_json( const conf::pnmc_configuration& conf, const statistics& stats
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+void
+dump_hypergraph_dot( const conf::pnmc_configuration& conf
+                   , const sdd::force::hypergraph<sdd::conf1>& graph)
+{
+  if (conf.hypergraph_dot)
+  {
+    std::ofstream file(conf.hypergraph_dot_file);
+    if (file.is_open())
+    {
+      file << sdd::tools::dot(graph) << std::endl;
+    }
+    else
+    {
+      std::cerr << "Can't export FORCE hypergraph to " << conf.hypergraph_dot_file << std::endl;
+    }
+  }
+}
 
+/*------------------------------------------------------------------------------------------------*/
+
+}} // namespace pnmc::mc

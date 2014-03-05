@@ -8,6 +8,7 @@
 #include <sdd/order/strategies/force.hh>
 
 #include "mc/make_order.hh"
+#include "mc/dump.hh"
 
 namespace pnmc { namespace mc {
 
@@ -124,6 +125,7 @@ make_order(const conf::pnmc_configuration& conf, statistics& stats, const pn::ne
     }
     const auto o = force_ordering(graph);
     stats.force_duration = std::chrono::system_clock::now() - start;
+    dump_hypergraph_dot(conf, graph);
     return sdd::order<sdd_conf>(o);
   }
   else if (not conf.order_force_flat and net.modules)
