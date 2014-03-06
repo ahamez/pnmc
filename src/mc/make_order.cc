@@ -1,5 +1,6 @@
 #include <algorithm> // random_shuffle, transform
 #include <cassert>
+#include <deque>
 #include <chrono>
 #include <random>
 #include <utility>  // pair
