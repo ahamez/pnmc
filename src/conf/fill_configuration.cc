@@ -87,7 +87,7 @@ const auto mc_dead_transitions_str = "dead-transitions";
 const auto mc_dead_states_str = "dead-states";
 
 // Advanced options
-const auto limit_time_str = "limit-time";
+const auto limit_time_str = "time-limit";
 const auto delete_input_file_str = "delete-input-file";
 const auto export_to_lua_str = "export-to-lua";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
