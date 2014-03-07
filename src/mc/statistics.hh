@@ -2,6 +2,7 @@
 #define _PNMC_MC_STATISTICS_HH_
 
 #include <chrono>
+#include <deque>
 
 #include "conf/configuration.hh"
 
@@ -25,10 +26,12 @@ struct statistics
 
   bool interrupted;
 
+  std::deque<unsigned int> sdd_ut_size;
+
   statistics(const conf::pnmc_configuration& c)
     : conf(c), relation_duration(), rewrite_duration(), state_space_duration(), force_duration()
     , dead_states_relation_duration(), dead_states_rewrite_duration()
-    , dead_states_duration(), nb_states(0), interrupted(false)
+    , dead_states_duration(), nb_states(0), interrupted(false), sdd_ut_size()
   {}
 };
 

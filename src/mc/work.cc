@@ -131,7 +131,7 @@ rewrite( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 
 SDD
 state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD m
-           , homomorphism h, statistics& stats, bool& stop)
+           , homomorphism h, statistics& stats, bool& stop, const sdd::manager<sdd_conf>& manager)
 {
   SDD res;
 
@@ -162,6 +162,22 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
                         });
   }
 
+  auto sdd_ut_thread_size
+    = std::thread([&]
+                  {
+                    const auto sample_time = std::chrono::milliseconds(500);
+                    auto last = std::chrono::system_clock::now();
+                    while (not finished)
+                    {
+                      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                      auto now = std::chrono::system_clock::now();
+                      if ((now - last) >= sample_time)
+                      {
+                        stats.sdd_ut_size.emplace_back(manager.sdd_stats().size);
+                        last = now;
+                      }
+                    }
+                  });
 
   chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
   try
@@ -195,6 +211,7 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
   {
     clock.join();
   }
+  sdd_ut_thread_size.join();
 
   return res;
 }
@@ -281,7 +298,7 @@ work(const conf::pnmc_configuration& conf, const pn::net& net)
   }
 
   // Compute the state space.
-  const auto m = state_space(conf, o, m0, h, stats, stop);
+  const auto m = state_space(conf, o, m0, h, stats, stop, manager);
   stats.nb_states = m.size().template convert_to<long double>();
   std::cout << stats.nb_states << " states" << std::endl;
 
