@@ -16,6 +16,7 @@ void
 save(Archive& archive, const statistics& s)
 {
   archive( cereal::make_nvp("interrupted", s.interrupted)
+         , cereal::make_nvp("time limit", s.conf.max_time.count())
          , cereal::make_nvp("states", s.nb_states)
          , cereal::make_nvp("states as string", std::to_string(s.nb_states))
          , cereal::make_nvp("relation time", s.relation_duration.count())
