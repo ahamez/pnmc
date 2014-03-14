@@ -5,7 +5,7 @@
 #include <boost/program_options/errors.hpp>
 
 #include "conf/fill_configuration.hh"
-#include "mc/work.hh"
+#include "mc/mc.hh"
 #include "parsers/parse.hh"
 #include "parsers/parse_error.hh"
 
@@ -72,7 +72,8 @@ main(int argc, char** argv)
       {
         ::remove(conf.file_name.c_str());
       }
-      mc::work(conf, *net_ptr);
+      mc::mc worker(conf);
+      worker(*net_ptr);
     }
     catch (const unreadable_file&)
     {
