@@ -50,7 +50,7 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 /// @brief Create a timed function if required by the configuration, a normal function otherwise.
 template <typename Fun, typename... Args>
 homomorphism
-mk_fun( const conf::pnmc_configuration& conf, const bool& stop, const sdd::order<sdd_conf>& o
+mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_conf>& o
       , const sdd_conf::Identifier& id, Args&&... args)
 {
   if (conf.max_time > chrono::duration<double>(0))
@@ -67,7 +67,7 @@ mk_fun( const conf::pnmc_configuration& conf, const bool& stop, const sdd::order
 
 /// @brief Compute the transition relation corresponding to a petri net.
 homomorphism
-transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
+transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>& o
                    , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
                    , statistics& stats, const bool& stop)
 {
@@ -118,7 +118,7 @@ transition_relation( const conf::pnmc_configuration& conf, const sdd::order<sdd_
 /*------------------------------------------------------------------------------------------------*/
 
 homomorphism
-rewrite( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
+rewrite( const conf::configuration& conf, const sdd::order<sdd_conf>& o
        , const homomorphism& h, statistics& stats)
 {
   chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
@@ -130,7 +130,7 @@ rewrite( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
-state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, SDD m
+state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD m
            , homomorphism h, statistics& stats, bool& stop, const sdd::manager<sdd_conf>& manager)
 {
   SDD res;
@@ -219,7 +219,7 @@ state_space( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
-dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
+dead_states( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
            , const SDD& state_space, statistics& stats)
 {
   std::set<homomorphism> and_operands;
@@ -259,7 +259,7 @@ dead_states( const conf::pnmc_configuration& conf, const sdd::order<sdd_conf>& o
 /*------------------------------------------------------------------------------------------------*/
 
 void
-work(const conf::pnmc_configuration& conf, const pn::net& net)
+work(const conf::configuration& conf, const pn::net& net)
 {
   // Initialize the libsdd.
   auto manager = sdd::manager<sdd_conf>::init();

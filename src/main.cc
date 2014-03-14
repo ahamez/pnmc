@@ -18,7 +18,7 @@ struct unreadable_file
 {};
 
 std::shared_ptr<std::istream>
-file_or_cin(const conf::pnmc_configuration& conf)
+file_or_cin(const conf::configuration& conf)
 {
   if (conf.read_stdin)
   {
@@ -47,7 +47,7 @@ main(int argc, char** argv)
 
   try
   {
-    boost::optional<conf::pnmc_configuration> conf_opt;
+    boost::optional<conf::configuration> conf_opt;
     try
     {
       conf_opt = conf::fill_configuration(argc, argv);

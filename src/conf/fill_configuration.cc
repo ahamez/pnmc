@@ -95,10 +95,10 @@ const auto json_str = "json";
 const auto show_time_str = "show-time";
 const auto hypergraph_dot_str = "force-hypergraph-dot";
 
-boost::optional<pnmc_configuration>
+boost::optional<configuration>
 fill_configuration(int argc, char** argv)
 {
-  pnmc_configuration conf;
+  configuration conf;
 
   po::options_description general_options("General options");
   general_options.add_options()
@@ -214,13 +214,13 @@ fill_configuration(int argc, char** argv)
     std::cout << mc_options << std::endl;
     std::cout << stats_options << std::endl;
     std::cout << advanced_options << std::endl;
-    return boost::optional<pnmc_configuration>();
+    return boost::optional<configuration>();
   }
   
   if (vm.count(version_str))
   {
     std::cout << version << std::endl;
-    return boost::optional<pnmc_configuration>();
+    return boost::optional<configuration>();
   }
 
   if (not vm.count("input-file"))

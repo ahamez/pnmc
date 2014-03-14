@@ -16,7 +16,7 @@ namespace pnmc { namespace mc {
 /*------------------------------------------------------------------------------------------------*/
 
 void
-dump_sdd_dot(const conf::pnmc_configuration& conf, const sdd::SDD<sdd::conf1>& s)
+dump_sdd_dot(const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s)
 {
   if (conf.export_final_sdd_dot_file)
   {
@@ -35,7 +35,7 @@ dump_sdd_dot(const conf::pnmc_configuration& conf, const sdd::SDD<sdd::conf1>& s
 /*------------------------------------------------------------------------------------------------*/
 
 void
-dump_lua(const conf::pnmc_configuration& conf, const sdd::SDD<sdd::conf1>& s)
+dump_lua(const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s)
 {
   if (conf.export_to_lua_file)
   {
@@ -54,7 +54,7 @@ dump_lua(const conf::pnmc_configuration& conf, const sdd::SDD<sdd::conf1>& s)
 /*------------------------------------------------------------------------------------------------*/
 
 void
-dump_json( const conf::pnmc_configuration& conf, const statistics& stats
+dump_json( const conf::configuration& conf, const statistics& stats
          , const sdd::manager<sdd::conf1>& manager, const sdd::SDD<sdd::conf1>& s)
 {
   if (conf.json_file)
@@ -83,7 +83,7 @@ dump_json( const conf::pnmc_configuration& conf, const statistics& stats
 /*------------------------------------------------------------------------------------------------*/
 
 void
-dump_hypergraph_dot( const conf::pnmc_configuration& conf
+dump_hypergraph_dot( const conf::configuration& conf
                    , const sdd::force::hypergraph<sdd::conf1>& graph)
 {
   if (conf.hypergraph_dot_file)

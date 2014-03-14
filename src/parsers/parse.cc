@@ -11,7 +11,7 @@ namespace pnmc { namespace parsers {
 /*------------------------------------------------------------------------------------------------*/
 
 std::shared_ptr<pn::net>
-parse(const conf::pnmc_configuration& conf, std::istream& in)
+parse(const conf::configuration& conf, std::istream& in)
 {
   switch (conf.file_type)
   {

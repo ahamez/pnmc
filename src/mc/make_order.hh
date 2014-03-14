@@ -13,7 +13,7 @@ namespace pnmc { namespace mc {
 /*------------------------------------------------------------------------------------------------*/
 
 sdd::order<sdd::conf1>
-make_order(const conf::pnmc_configuration&, statistics&, const pn::net&);
+make_order(const conf::configuration&, statistics&, const pn::net&);
 
 /*------------------------------------------------------------------------------------------------*/
 

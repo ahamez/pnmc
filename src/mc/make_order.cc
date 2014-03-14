@@ -24,10 +24,10 @@ struct mk_order_visitor
   using result_type = std::pair<order_identifier, sdd::order_builder<sdd_conf>>;
   using order_builder = sdd::order_builder<sdd_conf>;
 
-  const conf::pnmc_configuration& conf;
+  const conf::configuration& conf;
   mutable unsigned int artificial_id_counter;
 
-  mk_order_visitor(const conf::pnmc_configuration& c)
+  mk_order_visitor(const conf::configuration& c)
     : conf(c), artificial_id_counter(0)
   {}
 
@@ -99,7 +99,7 @@ struct mk_order_visitor
 /*------------------------------------------------------------------------------------------------*/
 
 sdd::order<sdd_conf>
-make_order(const conf::pnmc_configuration& conf, statistics& stats, const pn::net& net)
+make_order(const conf::configuration& conf, statistics& stats, const pn::net& net)
 {
   if (conf.order_ordering_force)
   {

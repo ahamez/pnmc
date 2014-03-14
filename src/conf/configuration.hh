@@ -17,7 +17,7 @@ enum class input_format {bpn, prod, tina, xml};
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief The configuration of pnmc at runtime.
-struct pnmc_configuration
+struct configuration
 {
   /// @brief The model's file to process.
   std::string file_name;

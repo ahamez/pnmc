@@ -15,20 +15,20 @@ namespace pnmc { namespace mc {
 
 /// @brief Export SDD to the DOT format when required by the configuration.
 void
-dump_sdd_dot(const conf::pnmc_configuration&, const sdd::SDD<sdd::conf1>&);
+dump_sdd_dot(const conf::configuration&, const sdd::SDD<sdd::conf1>&);
 
 /// @brief Export SDD as a Lua data structure when required by the configuration.
 void
-dump_lua(const conf::pnmc_configuration&, const sdd::SDD<sdd::conf1>&);
+dump_lua(const conf::configuration&, const sdd::SDD<sdd::conf1>&);
 
 /// @brief Export statistics to a JSON file when required by the configuration.
 void
-dump_json( const conf::pnmc_configuration&, const statistics&, const sdd::manager<sdd::conf1>&
+dump_json( const conf::configuration&, const statistics&, const sdd::manager<sdd::conf1>&
          , const sdd::SDD<sdd::conf1>&);
 
 /// @brief Export the FORCE's hypergraph to the DOT format when required by the configuration.
 void
-dump_hypergraph_dot(const conf::pnmc_configuration&, const sdd::force::hypergraph<sdd::conf1>&);
+dump_hypergraph_dot(const conf::configuration&, const sdd::force::hypergraph<sdd::conf1>&);
 
 /*------------------------------------------------------------------------------------------------*/
 
