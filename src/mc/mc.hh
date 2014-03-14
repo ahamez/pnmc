@@ -19,7 +19,7 @@ private:
 
 public:
 
-  mc(const conf::pnmc_configuration&);
+  mc(const conf::configuration&);
 
   void
   operator()(const pn::net&)
@@ -29,7 +29,7 @@ private:
 
   static
   std::unique_ptr<mc_impl>
-  mk_impl(const conf::pnmc_configuration&);
+  mk_impl(const conf::configuration&);
 };
 
 /*------------------------------------------------------------------------------------------------*/

@@ -8,7 +8,7 @@
 
 #include "conf/configuration.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -64,17 +64,17 @@ operator<<(std::ostream& os, const timed<C, Fun>& t)
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 namespace std {
 
 /*------------------------------------------------------------------------------------------------*/
 
 template <typename C, typename Fun>
-struct hash<pnmc::mc::timed<C, Fun>>
+struct hash<pnmc::mc::classic::timed<C, Fun>>
 {
   std::size_t
-  operator()(const pnmc::mc::timed<C, Fun>& t)
+  operator()(const pnmc::mc::classic::timed<C, Fun>& t)
   const noexcept
   {
     return std::hash<Fun>()(t.fun);

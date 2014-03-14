@@ -2,9 +2,9 @@
 
 #include <sdd/util/hash.hh>
 
-#include "mc/post.hh"
+#include "mc/classic/post.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -45,7 +45,7 @@ operator<<(std::ostream& os, const post& p)
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 namespace std
 {
@@ -53,7 +53,7 @@ namespace std
 /*------------------------------------------------------------------------------------------------*/
 
 std::size_t
-hash<pnmc::mc::post>::operator()(const pnmc::mc::post& p)
+hash<pnmc::mc::classic::post>::operator()(const pnmc::mc::classic::post& p)
 const noexcept
 {
   std::size_t seed = 2564450027;

@@ -8,10 +8,10 @@
 #include <sdd/order/order.hh>
 #include <sdd/order/strategies/force.hh>
 
-#include "mc/make_order.hh"
-#include "mc/dump.hh"
+#include "mc/classic/dump.hh"
+#include "mc/classic/make_order.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 using sdd_conf = sdd::conf1;
 
@@ -173,4 +173,4 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic

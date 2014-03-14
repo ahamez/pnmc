@@ -5,9 +5,9 @@
 #include <cereal/types/deque.hpp>
 
 #include "conf/configuration.hh"
-#include "mc/statistics.hh"
+#include "mc/classic/statistics.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -39,6 +39,6 @@ save(Archive& archive, const statistics& s)
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 #endif // _PNMC_MC_STATISTICS_SERIALIZE_HH_

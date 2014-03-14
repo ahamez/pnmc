@@ -7,9 +7,9 @@
 #include <sdd/values/flat_set.hh>
 #include <sdd/values_manager.hh>
 
-#include "mc/bound_error.hh"
+#include "mc/classic/bound_error.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -60,7 +60,7 @@ operator<<(std::ostream& os, const bounded_post<C>& p)
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 namespace std
 {
@@ -68,10 +68,10 @@ namespace std
 /*------------------------------------------------------------------------------------------------*/
 
 template <typename C>
-struct hash<pnmc::mc::bounded_post<C>>
+struct hash<pnmc::mc::classic::bounded_post<C>>
 {
   std::size_t
-  operator()(const pnmc::mc::bounded_post<C>& p)
+  operator()(const pnmc::mc::classic::bounded_post<C>& p)
   const noexcept
   {
     std::size_t seed = 98678683;

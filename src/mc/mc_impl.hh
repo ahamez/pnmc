@@ -11,7 +11,7 @@ class mc_impl
 {
 public:
 
-  virtual ~mc_impl();
+  virtual ~mc_impl() {}
 
   virtual
   void

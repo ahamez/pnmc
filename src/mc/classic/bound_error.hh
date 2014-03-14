@@ -6,7 +6,7 @@
 
 #include <sdd/hom/interrupt.hh>
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -23,6 +23,6 @@ struct bound_error final
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 #endif // _PNMC_MC_BOUNDED_ERROR_HH_

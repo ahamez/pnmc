@@ -8,10 +8,10 @@
 
 #include <cereal/archives/json.hpp>
 
-#include "mc/dump.hh"
-#include "mc/statistics_serialize.hh"
+#include "mc/classic/dump.hh"
+#include "mc/classic/statistics_serialize.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -102,4 +102,4 @@ dump_hypergraph_dot( const conf::configuration& conf
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic

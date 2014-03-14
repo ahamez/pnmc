@@ -6,7 +6,7 @@
 
 #include "conf/configuration.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -37,6 +37,6 @@ struct statistics
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 #endif // _PNMC_MC_STATISTICS_HH_

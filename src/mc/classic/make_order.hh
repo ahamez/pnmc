@@ -5,10 +5,10 @@
 #include <sdd/order/order.hh>
 
 #include "conf/configuration.hh"
-#include "mc/statistics.hh"
+#include "mc/classic/statistics.hh"
 #include "pn/net.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -17,6 +17,6 @@ make_order(const conf::configuration&, statistics&, const pn::net&);
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 #endif // _PNMC_MC_MAKE_ORDER_HH_

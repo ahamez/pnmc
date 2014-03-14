@@ -4,22 +4,24 @@
 #include <set>
 #include <thread>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include <sdd/sdd.hh>
 #include <sdd/tools/size.hh>
 
-#include "mc/bound_error.hh"
-#include "mc/bounded_post.hh"
-#include "mc/dead.hh"
-#include "mc/dump.hh"
-#include "mc/live.hh"
-#include "mc/make_order.hh"
-#include "mc/post.hh"
-#include "mc/pre.hh"
-#include "mc/statistics.hh"
-#include "mc/timed.hh"
-#include "mc/work.hh"
+#include "mc/classic/bound_error.hh"
+#include "mc/classic/bounded_post.hh"
+#include "mc/classic/dead.hh"
+#include "mc/classic/dump.hh"
+#include "mc/classic/live.hh"
+#include "mc/classic/make_order.hh"
+#include "mc/classic/post.hh"
+#include "mc/classic/pre.hh"
+#include "mc/classic/statistics.hh"
+#include "mc/classic/timed.hh"
+#include "mc/classic/worker.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 namespace chrono = std::chrono;
 
@@ -258,8 +260,15 @@ dead_states( const conf::configuration& conf, const sdd::order<sdd_conf>& o, con
 
 /*------------------------------------------------------------------------------------------------*/
 
+worker::worker(const conf::configuration& c)
+  : conf(c)
+{}
+
+/*------------------------------------------------------------------------------------------------*/
+
 void
-work(const conf::configuration& conf, const pn::net& net)
+worker::operator()(const pn::net& net)
+const
 {
   // Initialize the libsdd.
   auto manager = sdd::manager<sdd_conf>::init();
@@ -394,4 +403,4 @@ work(const conf::configuration& conf, const pn::net& net)
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic

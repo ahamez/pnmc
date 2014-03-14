@@ -9,7 +9,7 @@
 
 #include "conf/configuration.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -34,16 +34,16 @@ operator<<(std::ostream&, const pre&);
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 namespace std {
 
 /*------------------------------------------------------------------------------------------------*/
 
 template <>
-struct hash<pnmc::mc::pre>
+struct hash<pnmc::mc::classic::pre>
 {
-  std::size_t operator()(const pnmc::mc::pre&) const noexcept;
+  std::size_t operator()(const pnmc::mc::classic::pre&) const noexcept;
 };
 
 /*------------------------------------------------------------------------------------------------*/

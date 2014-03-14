@@ -9,7 +9,7 @@
 #include "sdd/values/flat_set.hh"
 #include "sdd/values_manager.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -36,7 +36,7 @@ operator<<(std::ostream&, const live&);
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 namespace std
 {
@@ -44,9 +44,9 @@ namespace std
 /*------------------------------------------------------------------------------------------------*/
 
 template <>
-struct hash<pnmc::mc::live>
+struct hash<pnmc::mc::classic::live>
 {
-  std::size_t operator()(const pnmc::mc::live&) const noexcept;
+  std::size_t operator()(const pnmc::mc::classic::live&) const noexcept;
 };
 
 /*------------------------------------------------------------------------------------------------*/

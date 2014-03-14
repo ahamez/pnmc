@@ -3,9 +3,9 @@
 
 #include <sdd/util/hash.hh>
 
-#include "mc/dead.hh"
+#include "mc/classic/dead.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -49,14 +49,14 @@ operator<<(std::ostream& os, const dead& p)
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 namespace std {
 
 /*------------------------------------------------------------------------------------------------*/
 
 std::size_t
-hash<pnmc::mc::dead>::operator()(const pnmc::mc::dead& p)
+hash<pnmc::mc::classic::dead>::operator()(const pnmc::mc::classic::dead& p)
 const noexcept
 {
   return sdd::util::hash(p.valuation);

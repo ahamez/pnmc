@@ -2,9 +2,9 @@
 
 #include <sdd/util/hash.hh>
 
-#include "mc/live.hh"
+#include "mc/classic/live.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -41,7 +41,7 @@ operator<<(std::ostream& os, const live& l)
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 namespace std
 {
@@ -49,7 +49,7 @@ namespace std
 /*------------------------------------------------------------------------------------------------*/
 
 std::size_t
-hash<pnmc::mc::live>::operator()(const pnmc::mc::live& l)
+hash<pnmc::mc::classic::live>::operator()(const pnmc::mc::classic::live& l)
 const noexcept
 {
   std::size_t seed = 49979687;

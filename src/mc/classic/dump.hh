@@ -7,9 +7,9 @@
 #include "sdd/order/strategies/force_hypergraph.hh"
 
 #include "conf/configuration.hh"
-#include "mc/statistics.hh"
+#include "mc/classic/statistics.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -32,6 +32,6 @@ dump_hypergraph_dot(const conf::configuration&, const sdd::force::hypergraph<sdd
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}}} // namespace pnmc::mc::classic
 
 #endif // _PNMC_MC_DUMP_HH_
