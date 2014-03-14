@@ -1,13 +1,14 @@
 set(SOURCES
     main.cc
     conf/fill_configuration.cc
-    mc/dead.cc
-    mc/dump.cc
-    mc/live.cc
-    mc/make_order.cc
-    mc/post.cc
-    mc/pre.cc
-    mc/work.cc
+    mc/classic/dead.cc
+    mc/classic/dump.cc
+    mc/classic/live.cc
+    mc/classic/make_order.cc
+    mc/classic/post.cc
+    mc/classic/pre.cc
+    mc/classic/worker.cc
+    mc/mc.cc
     parsers/bpn.cc
     parsers/helpers.cc
     parsers/parse_error.cc
