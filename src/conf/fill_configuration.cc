@@ -255,19 +255,16 @@ fill_configuration(int argc, char** argv)
 
   // Advanced options
   conf.delete_file = vm.count(delete_input_file_str);
-  conf.export_to_lua = vm.count(export_to_lua_str);
   conf.show_time = vm.count(show_time_str);
-  if (conf.export_to_lua)
+  if (vm.count(export_to_lua_str))
   {
     conf.export_to_lua_file = vm[export_to_lua_str].as<std::string>();
   }
-  conf.export_final_sdd_dot = vm.count(final_sdd_dot_export_str);
-  if (conf.export_final_sdd_dot)
+  if (vm.count(final_sdd_dot_export_str))
   {
     conf.export_final_sdd_dot_file = vm[final_sdd_dot_export_str].as<std::string>();
   }
-  conf.json = vm.count(json_str);
-  if (conf.json)
+  if (vm.count(json_str))
   {
     conf.json_file = vm[json_str].as<std::string>();
   }
@@ -276,8 +273,7 @@ fill_configuration(int argc, char** argv)
     conf.order_force_flat = true;
   }
   conf.max_time = std::chrono::duration<double>(vm[limit_time_str].as<unsigned int>());
-  conf.hypergraph_dot = vm.count(hypergraph_dot_str);
-  if (conf.hypergraph_dot)
+  if (vm.count(hypergraph_dot_str))
   {
     conf.hypergraph_dot_file = vm[hypergraph_dot_str].as<std::string>();
   }

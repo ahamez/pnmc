@@ -5,6 +5,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <boost/optional.hpp>
+
 namespace pnmc { namespace conf {
   
 /*------------------------------------------------------------------------------------------------*/
@@ -17,9 +19,6 @@ struct pnmc_configuration
   input_format file_type;
   bool read_stdin;
   bool delete_file;
-
-  bool export_final_sdd_dot;
-  std::string export_final_sdd_dot_file;
 
   bool order_random;
   bool order_show;
@@ -34,16 +33,12 @@ struct pnmc_configuration
   bool compute_dead_states;
   unsigned int marking_bound;
 
-  bool export_to_lua;
-  std::string export_to_lua_file;
-
   bool show_final_sdd_bytes;
 
-  bool json;
-  std::string json_file;
-
-  bool hypergraph_dot;
-  std::string hypergraph_dot_file;
+  boost::optional<std::string> export_final_sdd_dot_file;
+  boost::optional<std::string> export_to_lua_file;
+  boost::optional<std::string> json_file;
+  boost::optional<std::string> hypergraph_dot_file;
 
   std::chrono::duration<double> max_time;
 };

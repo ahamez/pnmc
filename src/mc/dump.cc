@@ -18,16 +18,16 @@ namespace pnmc { namespace mc {
 void
 dump_sdd_dot(const conf::pnmc_configuration& conf, const sdd::SDD<sdd::conf1>& s)
 {
-  if (conf.export_final_sdd_dot)
+  if (conf.export_final_sdd_dot_file)
   {
-    std::ofstream file(conf.export_final_sdd_dot_file);
+    std::ofstream file(*conf.export_final_sdd_dot_file);
     if (file.is_open())
     {
       file << sdd::tools::dot(s) << std::endl;
     }
     else
     {
-      std::cerr << "Can't export state space to " << conf.export_final_sdd_dot_file << std::endl;
+      std::cerr << "Can't export state space to " << *conf.export_final_sdd_dot_file << std::endl;
     }
   }
 }
@@ -37,16 +37,16 @@ dump_sdd_dot(const conf::pnmc_configuration& conf, const sdd::SDD<sdd::conf1>& s
 void
 dump_lua(const conf::pnmc_configuration& conf, const sdd::SDD<sdd::conf1>& s)
 {
-  if (conf.export_to_lua)
+  if (conf.export_to_lua_file)
   {
-    std::ofstream file(conf.export_to_lua_file);
+    std::ofstream file(*conf.export_to_lua_file);
     if (file.is_open())
     {
       file << sdd::tools::lua(s) << std::endl;
     }
     else
     {
-      std::cerr << "Can't export Lua data structure to " << conf.export_to_lua_file << std::endl;
+      std::cerr << "Can't export Lua data structure to " << *conf.export_to_lua_file << std::endl;
     }
   }
 }
@@ -57,9 +57,9 @@ void
 dump_json( const conf::pnmc_configuration& conf, const statistics& stats
          , const sdd::manager<sdd::conf1>& manager, const sdd::SDD<sdd::conf1>& s)
 {
-  if (conf.json)
+  if (conf.json_file)
   {
-    std::ofstream file(conf.json_file);
+    std::ofstream file(*conf.json_file);
     if (file.is_open())
     {
       const sdd::tools::sdd_statistics<sdd::conf1> final_sdd_stats(s);
@@ -75,7 +75,7 @@ dump_json( const conf::pnmc_configuration& conf, const statistics& stats
     }
     else
     {
-      std::cerr << "Can't export statistics to " << conf.json_file << std::endl;
+      std::cerr << "Can't export statistics to " << *conf.json_file << std::endl;
     }
   }
 }
@@ -86,16 +86,16 @@ void
 dump_hypergraph_dot( const conf::pnmc_configuration& conf
                    , const sdd::force::hypergraph<sdd::conf1>& graph)
 {
-  if (conf.hypergraph_dot)
+  if (conf.hypergraph_dot_file)
   {
-    std::ofstream file(conf.hypergraph_dot_file);
+    std::ofstream file(*conf.hypergraph_dot_file);
     if (file.is_open())
     {
       file << sdd::tools::dot(graph) << std::endl;
     }
     else
     {
-      std::cerr << "Can't export FORCE hypergraph to " << conf.hypergraph_dot_file << std::endl;
+      std::cerr << "Can't export FORCE hypergraph to " << *conf.hypergraph_dot_file << std::endl;
     }
   }
 }
