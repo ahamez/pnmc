@@ -108,13 +108,18 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     using vertex = sdd::force::vertex<identifier_type>;
     using hyperedge = sdd::force::hyperedge<identifier_type>;
 
-    // Temporary placeholder for identifiers of an hyperedge.
+    // Temporary placeholder for identifiers.
     std::vector<identifier_type> identifiers;
 
     // Collect identifiers.
     identifiers.reserve(net.places().size());
-    std::transform( net.places().begin(), net.places().end(), std::back_inserter(identifiers)
-                  , [](const pn::place& p){return p.id;});
+    for (const auto& place : net.places())
+    {
+      if (place.connected())
+      {
+        identifiers.emplace_back(place.id);
+      }
+    }
 
     // The hypergraph that stores connections between the places of the Petri net.
     sdd::force::hypergraph<sdd_conf> graph(identifiers.cbegin(), identifiers.cend());
@@ -158,8 +163,13 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     {
       std::vector<std::string> tmp;
       tmp.reserve(net.places().size());
-      std::transform( net.places().cbegin(), net.places().cend(), std::back_inserter(tmp)
-                    , [](const pn::place& p){return p.id;});
+      for (const auto& place : net.places())
+      {
+        if (place.connected())
+        {
+          tmp.emplace_back(place.id);
+        }
+      }
       std::random_device rd;
       std::mt19937 g(rd());
       std::shuffle(tmp.begin(), tmp.end(), g);
@@ -172,7 +182,10 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     {
       for (const auto& place : net.places())
       {
-        ob.push(place.id);
+        if (place.connected())
+        {
+          ob.push(place.id);
+        }
       }
     }
     return sdd::order<sdd_conf>(ob);
