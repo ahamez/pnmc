@@ -47,6 +47,46 @@ struct add_pre_place_to_transition
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief Used by Boost.MultiIndex.
+struct add_post_transition_to_place
+{
+  const unsigned int new_valuation;
+  const std::string new_place_id;
+
+  add_post_transition_to_place(unsigned int valuation, const std::string& id)
+	  : new_valuation(valuation), new_place_id(id)
+  {}
+
+  void
+  operator()(place& p)
+  const
+  {
+    p.post.insert(std::make_pair(new_place_id , new_valuation));
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+/// @brief Used by Boost.MultiIndex.
+struct add_pre_transition_to_place
+{
+  const unsigned int new_valuation;
+  const std::string new_place_id;
+
+  add_pre_transition_to_place(unsigned int valuation, const std::string& id)
+  	: new_valuation(valuation), new_place_id(id)
+  {}
+
+  void
+  operator()(place& p)
+  const
+  {
+    p.pre.insert(std::make_pair(new_place_id, new_valuation));
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+/// @brief Used by Boost.MultiIndex.
 struct update_place
 {
   const unsigned int marking;
@@ -116,6 +156,9 @@ net::add_post_place(const std::string& tid, const std::string& post, unsigned in
   {
     add_place(post, 0);
   }
+  /// @todo Only one lookup.
+  const auto place_cit = places_by_id().find(post);
+  places_set.get<id_index>().modify(place_cit, add_pre_transition_to_place(valuation, tid));
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -129,6 +172,9 @@ net::add_pre_place(const std::string& tid, const std::string& pre, unsigned int 
   {
     add_place(pre, 0);
   }
+  /// @todo Only one lookup.
+  const auto place_cit = places_by_id().find(pre);
+  places_set.get<id_index>().modify(place_cit, add_post_transition_to_place(valuation, tid));
 }
 
 /*------------------------------------------------------------------------------------------------*/
