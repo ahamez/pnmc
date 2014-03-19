@@ -108,11 +108,19 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     using vertex = sdd::force::vertex<identifier_type>;
     using hyperedge = sdd::force::hyperedge<identifier_type>;
 
-    // The hypergraph that stores connections between the places of the Petri net.
-    sdd::force::hypergraph<sdd_conf> graph;
-
     // Temporary placeholder for identifiers of an hyperedge.
     std::vector<identifier_type> identifiers;
+
+    // Collect identifiers.
+    identifiers.reserve(net.places().size());
+    std::transform( net.places().begin(), net.places().end(), std::back_inserter(identifiers)
+                  , [](const pn::place& p){return p.id;});
+
+    // The hypergraph that stores connections between the places of the Petri net.
+    sdd::force::hypergraph<sdd_conf> graph(identifiers.cbegin(), identifiers.cend());
+
+    // This container will be used again.
+    identifiers.clear();
 
     // A new connection is created for each transition of the Petri net.
     for (const auto& transition : net.transitions())
