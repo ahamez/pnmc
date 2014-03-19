@@ -50,7 +50,8 @@ add_definitions("-ftemplate-depth=256")
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_definitions("-stdlib=libc++")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -std=c++11 -stdlib=libc++")
-  set(CMAKE_CXX_FLAGS_RELEASE "-O4")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 endif ()
 
 set( CMAKE_CXX_FLAGS_RELEASE
