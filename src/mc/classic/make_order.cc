@@ -101,6 +101,14 @@ struct mk_order_visitor
 sdd::order<sdd_conf>
 make_order(const conf::configuration& conf, statistics& stats, const pn::net& net)
 {
+  for (const auto& place : net.places())
+  {
+    if (not place.connected())
+    {
+      std::cerr << "Warning: place " << place.id << " is not connected." << std::endl;
+    }
+  }
+
   if (conf.order_ordering_force)
   {
     std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
