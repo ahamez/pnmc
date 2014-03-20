@@ -10,6 +10,8 @@
 
 #include "mc/classic/dump.hh"
 #include "mc/classic/statistics_serialize.hh"
+#include "pn/statistics.hh"
+#include "pn/statistics_serialize.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -55,7 +57,8 @@ dump_lua(const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s)
 
 void
 dump_json( const conf::configuration& conf, const statistics& stats
-         , const sdd::manager<sdd::conf1>& manager, const sdd::SDD<sdd::conf1>& s)
+         , const sdd::manager<sdd::conf1>& manager, const sdd::SDD<sdd::conf1>& s
+         , const pn::net& net)
 {
   if (conf.json_file)
   {
@@ -63,15 +66,17 @@ dump_json( const conf::configuration& conf, const statistics& stats
     if (file.is_open())
     {
       const sdd::tools::sdd_statistics<sdd::conf1> final_sdd_stats(s);
+      const pn::statistics pn_stats(net);
 
       cereal::JSONOutputArchive archive(file);
       if (not conf.read_stdin)
       {
         archive(cereal::make_nvp("file", conf.file_name));
       }
-      archive(cereal::make_nvp("pnmc", stats));
-      archive(cereal::make_nvp("libsdd", manager));
-      archive(cereal::make_nvp("final sdd", final_sdd_stats));
+      archive( cereal::make_nvp("pnmc", stats)
+             , cereal::make_nvp("libsdd", manager)
+             , cereal::make_nvp("final sdd", final_sdd_stats)
+             , cereal::make_nvp("Petri net", pn_stats));
     }
     else
     {

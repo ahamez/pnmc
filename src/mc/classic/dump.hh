@@ -8,6 +8,7 @@
 
 #include "conf/configuration.hh"
 #include "mc/classic/statistics.hh"
+#include "pn/net.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -24,7 +25,7 @@ dump_lua(const conf::configuration&, const sdd::SDD<sdd::conf1>&);
 /// @brief Export statistics to a JSON file when required by the configuration.
 void
 dump_json( const conf::configuration&, const statistics&, const sdd::manager<sdd::conf1>&
-         , const sdd::SDD<sdd::conf1>&);
+         , const sdd::SDD<sdd::conf1>&, const pn::net&);
 
 /// @brief Export the FORCE's hypergraph to the DOT format when required by the configuration.
 void

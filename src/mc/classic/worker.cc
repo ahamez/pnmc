@@ -288,7 +288,7 @@ const
 
   if (conf.order_only)
   {
-    dump_json(conf, stats, manager, sdd::zero<sdd_conf>());
+    dump_json(conf, stats, manager, sdd::zero<sdd_conf>(), net);
     return;
   }
 
@@ -404,7 +404,7 @@ const
 
   dump_sdd_dot(conf, m);
   dump_lua(conf, m);
-  dump_json(conf, stats, manager, m);
+  dump_json(conf, stats, manager, m, net);
 }
 
 /*------------------------------------------------------------------------------------------------*/

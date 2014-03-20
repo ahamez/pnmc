@@ -20,8 +20,8 @@ save(Archive& archive, const statistics& s)
     archive(cereal::make_nvp("order only", true));
     if (s.conf.order_ordering_force)
     {
-      archive(cereal::make_nvp("FORCE time", s.force_duration.count()));
-      archive(cereal::make_nvp("FORCE spans", s.force_spans));
+      archive( cereal::make_nvp("FORCE time", s.force_duration.count())
+             , cereal::make_nvp("FORCE spans", s.force_spans));
     }
     return;
   }
@@ -33,8 +33,7 @@ save(Archive& archive, const statistics& s)
          , cereal::make_nvp("relation time", s.relation_duration.count())
          , cereal::make_nvp("rewrite time", s.rewrite_duration.count())
          , cereal::make_nvp("state space time", s.state_space_duration.count())
-         , cereal::make_nvp("sdd samples", s.sdd_ut_size)
-         );
+         , cereal::make_nvp("sdd samples", s.sdd_ut_size));
   if (s.conf.order_ordering_force)
   {
     archive(cereal::make_nvp("FORCE time", s.force_duration.count()));
@@ -43,8 +42,7 @@ save(Archive& archive, const statistics& s)
   {
     archive( cereal::make_nvp("dead states relation time", s.dead_states_relation_duration.count())
            , cereal::make_nvp("dead states rewrite time", s.dead_states_rewrite_duration.count())
-           , cereal::make_nvp("dead states time", s.dead_states_duration.count())
-           );
+           , cereal::make_nvp("dead states time", s.dead_states_duration.count()));
   }
 }
 
