@@ -286,6 +286,12 @@ const
     std::cout << o << std::endl;
   }
 
+  if (conf.order_only)
+  {
+    dump_json(conf, stats, manager, sdd::zero<sdd_conf>());
+    return;
+  }
+
   // Get the initial state.
   const SDD m0 = initial_state(o, net);
 

@@ -15,7 +15,18 @@ template<class Archive>
 void
 save(Archive& archive, const statistics& s)
 {
-  archive( cereal::make_nvp("interrupted", s.interrupted)
+  if (s.conf.order_only)
+  {
+    archive(cereal::make_nvp("order only", true));
+    if (s.conf.order_ordering_force)
+    {
+      archive(cereal::make_nvp("FORCE time", s.force_duration.count()));
+      archive(cereal::make_nvp("FORCE spans", s.force_spans));
+    }
+    return;
+  }
+  archive( cereal::make_nvp("order only", false)
+         , cereal::make_nvp("interrupted", s.interrupted)
          , cereal::make_nvp("time limit", s.conf.max_time.count())
          , cereal::make_nvp("states", s.nb_states)
          , cereal::make_nvp("states as string", std::to_string(s.nb_states))

@@ -145,8 +145,10 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       identifiers.clear();
     }
     // Apply the FORCE ordering strategy.
-    const auto o = force_ordering(graph);
+    auto force = sdd::force::worker<sdd_conf>(graph);
+    const auto o = force(conf.order_force_iterations);
     stats.force_duration = std::chrono::system_clock::now() - start;
+    stats.force_spans = force.spans();
 
     // Dump the hypergraph to a DOT file if required by the configuration.
     dump_hypergraph_dot(conf, graph);

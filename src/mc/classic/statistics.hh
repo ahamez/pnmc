@@ -28,10 +28,12 @@ struct statistics
 
   std::deque<unsigned int> sdd_ut_size;
 
+  std::deque<double> force_spans;
+
   statistics(const conf::configuration& c)
     : conf(c), relation_duration(), rewrite_duration(), state_space_duration(), force_duration()
     , dead_states_relation_duration(), dead_states_rewrite_duration()
-    , dead_states_duration(), nb_states(0), interrupted(false), sdd_ut_size()
+    , dead_states_duration(), nb_states(0), interrupted(false), sdd_ut_size(), force_spans()
   {}
 };
 

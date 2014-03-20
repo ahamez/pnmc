@@ -42,6 +42,11 @@ struct configuration
 
   /// @brief Use the FORCE ordering heuristic.
   bool order_ordering_force;
+  unsigned int order_force_iterations;
+
+  /// @brief Stop after order computation.
+  bool order_only;
+
   unsigned int order_min_height;
 
   /// @brief Show the homomorphism of the transition relation.
