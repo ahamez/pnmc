@@ -96,6 +96,7 @@ const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
 const auto show_time_str = "show-time";
 const auto hypergraph_dot_str = "force-hypergraph-dot";
+const auto fast_exit_str = "fast-exit";
 
 boost::optional<configuration>
 fill_configuration(int argc, char** argv)
@@ -170,6 +171,7 @@ fill_configuration(int argc, char** argv)
                                 , "Limit the execution time (s)")
     (hypergraph_dot_str         , po::value<std::string>()
                                 , "Export FORCE's hypergraph to a DOT file")
+    (fast_exit_str              , "Don't cleanup memory on exit")
   ;
 
   po::positional_options_description p;
@@ -263,6 +265,7 @@ fill_configuration(int argc, char** argv)
   // Advanced options
   conf.delete_file = vm.count(delete_input_file_str);
   conf.show_time = vm.count(show_time_str);
+  conf.fast_exit = vm.count(fast_exit_str);
   if (vm.count(export_to_lua_str))
   {
     conf.export_to_lua_file = vm[export_to_lua_str].as<std::string>();

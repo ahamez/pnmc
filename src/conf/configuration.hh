@@ -67,6 +67,9 @@ struct configuration
   /// @brief Display the memory usage of the state space's SDD.
   bool show_final_sdd_bytes;
 
+  /// @brief Don't cleanup memory on exit.
+  bool fast_exit;
+
   boost::optional<std::string> export_final_sdd_dot_file;
   boost::optional<std::string> export_to_lua_file;
   boost::optional<std::string> json_file;
