@@ -8,8 +8,8 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-live::live(std::size_t index, boost::dynamic_bitset<>& bitset)
-  : index(index), bitset(bitset)
+live::live(std::size_t i, boost::dynamic_bitset<>& b)
+  : index(i), bitset(b)
 {}
 
 /*------------------------------------------------------------------------------------------------*/

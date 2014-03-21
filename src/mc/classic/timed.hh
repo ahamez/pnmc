@@ -18,17 +18,17 @@ template <typename C, typename Fun>
 struct timed
 {
   /// @brief The configuration keeps the timing informations.
-  const bool& stop;
+  const bool& stop_;
 
   /// @brief The real function to apply
-  const Fun fun;
+  const Fun fun_;
 
   /// @brief Constructor.
   ///
   /// Delegates to the contained function.
   template <typename... Args>
   timed(const bool& stop, Args&&... args)
-    : stop(stop), fun(std::forward<Args>(args)...)
+    : stop_(stop), fun_(std::forward<Args>(args)...)
   {}
 
   /// @brief Function application
@@ -37,11 +37,11 @@ struct timed
   operator()(const T& x)
   const
   {
-    if (stop)
+    if (stop_)
     {
       throw sdd::interrupt<C>();
     }
-    return fun(x);
+    return fun_(x);
   }
 };
 
@@ -51,7 +51,7 @@ bool
 operator==(const timed<C, Fun>& lhs, const timed<C, Fun>& rhs)
 noexcept
 {
-  return lhs.fun == rhs.fun;
+  return lhs.fun_ == rhs.fun_;
 }
 
 /// @brief Textual output of a timed.
@@ -59,7 +59,7 @@ template <typename C, typename Fun>
 std::ostream&
 operator<<(std::ostream& os, const timed<C, Fun>& t)
 {
-  return os << "timed(" << t.fun << ")";
+  return os << "timed(" << t.fun_ << ")";
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -77,7 +77,7 @@ struct hash<pnmc::mc::classic::timed<C, Fun>>
   operator()(const pnmc::mc::classic::timed<C, Fun>& t)
   const noexcept
   {
-    return std::hash<Fun>()(t.fun);
+    return std::hash<Fun>()(t.fun_);
   }
 };
 

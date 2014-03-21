@@ -120,7 +120,7 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
 /*------------------------------------------------------------------------------------------------*/
 
 homomorphism
-rewrite( const conf::configuration& conf, const sdd::order<sdd_conf>& o
+rewrite( const conf::configuration&, const sdd::order<sdd_conf>& o
        , const homomorphism& h, statistics& stats)
 {
   chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
@@ -221,7 +221,7 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
-dead_states( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
+dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn::net& net
            , const SDD& state_space, statistics& stats)
 {
   std::set<homomorphism> and_operands;
