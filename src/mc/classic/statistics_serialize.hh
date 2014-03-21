@@ -36,7 +36,8 @@ save(Archive& archive, const statistics& s)
          , cereal::make_nvp("sdd samples", s.sdd_ut_size));
   if (s.conf.order_ordering_force)
   {
-    archive(cereal::make_nvp("FORCE time", s.force_duration.count()));
+    archive( cereal::make_nvp("FORCE time", s.force_duration.count())
+           , cereal::make_nvp("FORCE spans", s.force_spans));
   }
   if (s.conf.compute_dead_states)
   {
