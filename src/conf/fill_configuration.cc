@@ -70,7 +70,6 @@ const auto version_str = "version";
 const auto order_show_str = "order-show";
 const auto order_random_str = "order-random";
 const auto order_flat_str = "order-flat";
-const auto order_min_height_str = "order-min-height";
 const auto order_force_str = "order-force";
 const auto order_force_iterations_str = "order-force-iterations";
 const auto order_only_str = "order-only";
@@ -122,8 +121,6 @@ fill_configuration(int argc, char** argv)
     (order_show_str             , "Show the order")
     (order_random_str           , "Random order (not recommanded)")
     (order_flat_str             , "Don't use hierarchy informations")
-    (order_min_height_str       , po::value<unsigned int>()->default_value(10)
-                                , "Minimal number of variables at every level of the SDD")
     (order_force_str            , "Use the FORCE ordering heuristic")
     (order_force_iterations_str , po::value<unsigned int>()->default_value(100)
                                 , "Number of FORCE iterations")
@@ -244,7 +241,6 @@ fill_configuration(int argc, char** argv)
   conf.order_show = vm.count(order_show_str);
   conf.order_random = vm.count(order_random_str);
   conf.order_force_flat = vm.count(order_flat_str);
-  conf.order_min_height = vm[order_min_height_str].as<unsigned int>();
   conf.order_ordering_force = vm.count(order_force_str);
   conf.order_force_iterations = vm[order_force_iterations_str].as<unsigned int>();
   conf.order_only = vm.count(order_only_str);

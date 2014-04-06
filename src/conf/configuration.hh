@@ -47,8 +47,6 @@ struct configuration
   /// @brief Stop after order computation.
   bool order_only;
 
-  unsigned int order_min_height;
-
   /// @brief Show the homomorphism of the transition relation.
   bool show_relation;
 

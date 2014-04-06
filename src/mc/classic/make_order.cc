@@ -20,79 +20,29 @@ using sdd_conf = sdd::conf1;
 struct mk_order_visitor
   : public boost::static_visitor<std::pair<std::string, sdd::order_builder<sdd_conf>>>
 {
-  using order_identifier = sdd::order_identifier<sdd_conf>;
-  using result_type = std::pair<order_identifier, sdd::order_builder<sdd_conf>>;
   using order_builder = sdd::order_builder<sdd_conf>;
-
-  const conf::configuration& conf;
-  mutable unsigned int artificial_id_counter;
-
-  mk_order_visitor(const conf::configuration& c)
-    : conf(c), artificial_id_counter(0)
-  {}
+  using result_type = order_builder;
 
   // Place: base case of the recursion, there's no more possible nested hierarchies.
   result_type
   operator()(const pn::place* p)
-  const noexcept
+  const
   {
-    return std::make_pair(order_identifier(p->id), order_builder());
+    return p->connected() ? order_builder(p->id) : order_builder();
   }
 
   // Hierarchy.
   result_type
   operator()(const pn::module_node& m)
-  const noexcept
+  const
   {
     assert(not m.nested.empty());
-
-    std::deque<result_type> tmp;
-
-    for (const auto& h : m.nested)
+    order_builder local_ob;
+    for (const auto& nested_module : m.nested)
     {
-      const auto res = boost::apply_visitor(*this, *h);
-      tmp.push_back(res);
+      local_ob = local_ob << boost::apply_visitor(*this, *nested_module);
     }
-
-    std::size_t height = 0;
-    for (const auto& p : tmp)
-    {
-      if (not p.second.empty())
-      {
-        height += p.second.height();
-      }
-      else
-      {
-        height += 1; // place
-      }
-    }
-
-    order_builder ob;
-    if (height <= conf.order_min_height)
-    {
-      order_identifier id;
-      for (const auto& p : tmp)
-      {
-        if (not p.second.empty())
-        {
-          ob = p.second << ob;
-        }
-        else // place
-        {
-          ob.push(p.first, p.second);
-        }
-      }
-      return result_type(id, ob);
-    }
-    else
-    {
-      for (const auto& p : tmp)
-      {
-        ob.push(p.first, p.second);
-      }
-    }
-
-    return std::make_pair(order_identifier(m.id) , ob);
+    return order_builder(m.id, local_ob);
   }
 };
 
@@ -164,7 +114,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   }
   else if (not conf.order_force_flat and net.modules)
   {
-    return sdd::order<sdd_conf>(boost::apply_visitor(mk_order_visitor(conf), *net.modules).second);
+    return boost::apply_visitor(mk_order_visitor(), *net.modules);
   }
   else
   {
