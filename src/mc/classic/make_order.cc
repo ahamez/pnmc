@@ -38,11 +38,18 @@ struct mk_order_visitor
   {
     assert(not m.nested.empty());
     order_builder local_ob;
-    for (const auto& nested_module : m.nested)
+    if (m.nested.size() == 1)
     {
-      local_ob = local_ob << boost::apply_visitor(*this, *nested_module);
+      return boost::apply_visitor(*this, *m.nested.front());
     }
-    return order_builder(m.id, local_ob);
+    else
+    {
+      for (const auto& nested_module : m.nested)
+      {
+        local_ob = local_ob << boost::apply_visitor(*this, *nested_module);
+      }
+      return order_builder(m.id, local_ob);
+    }
   }
 };
 
@@ -114,7 +121,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   }
   else if (not conf.order_force_flat and net.modules)
   {
-    return boost::apply_visitor(mk_order_visitor(), *net.modules);
+    return boost::apply_visitor(mk_order_visitor(), *net.modules).nested();
   }
   else
   {
