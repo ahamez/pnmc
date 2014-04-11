@@ -273,7 +273,7 @@ const
   // Initialize the libsdd.
   sdd_conf sconf;
   sconf.final_cleanup = not conf.fast_exit;
-  auto manager = sdd::manager<sdd_conf>::init(sconf);
+  auto manager = sdd::init(sconf);
 
   statistics stats(conf);
 
