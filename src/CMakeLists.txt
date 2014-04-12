@@ -1,6 +1,7 @@
 set(SOURCES
     main.cc
     conf/fill_configuration.cc
+    mc/classic/count_tokens.cc
     mc/classic/dead.cc
     mc/classic/dump.cc
     mc/classic/live.cc

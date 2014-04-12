@@ -1,8 +1,5 @@
 #include <algorithm> // max_element
 #include <cassert>
-#include <vector>
-
-#include <iostream>
 
 #include <boost/container/flat_set.hpp>
 
