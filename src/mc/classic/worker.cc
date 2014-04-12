@@ -103,8 +103,12 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
     // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
     if (conf.compute_dead_transitions)
     {
-      const auto var = transition.pre.cbegin()->first;
-      const auto f = mk_fun<live>( conf, stop, o, var, transition.index, transitions_bitset);
+      // Target the same variable as the last pre or post to be fired to avoid evaluations.
+      const auto var = transition.pre.empty()
+                     ? std::prev(transition.post.cend())->first
+                     : transition.pre.cbegin()->first;
+
+      const auto f = mk_fun<live>(conf, stop, o, var, transition.index, transitions_bitset);
       h_t = composition(h_t, sdd::carrier(o, var, f));
     }
 
