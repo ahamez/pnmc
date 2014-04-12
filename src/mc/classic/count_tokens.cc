@@ -10,7 +10,7 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-//namespace /* anonymous */{
+namespace /* anonymous */{
 
 /// @internal
 struct count_tokens_visitor
@@ -23,18 +23,9 @@ struct count_tokens_visitor
   /// We use the addresses of nodes as key. It's legit because nodes are unified and immutable.
   mutable std::unordered_map<const char*, result_type> cache_;
 
-  /// @The results to update.
-//  results& res;
-
-//  /// @brief Constructor.
-//  count_tokens_visitor(results& r)
-//    : res(r)
-//  {}
-
   /// @brief |0|.
   result_type
-  operator()( const sdd::zero_terminal<sdd::conf1>&
-            , std::shared_ptr<sdd::dd::sdd_stack<sdd::conf1>>)
+  operator()(const sdd::zero_terminal<sdd::conf1>&)
   const
   {
     assert(false);
@@ -43,25 +34,15 @@ struct count_tokens_visitor
 
   /// @brief |1|.
   result_type
-  operator()( const sdd::one_terminal<sdd::conf1>&
-            , std::shared_ptr<sdd::dd::sdd_stack<sdd::conf1>> stack)
+  operator()(const sdd::one_terminal<sdd::conf1>&)
   const
   {
-    if (stack)
-    {
-      return visit(*this, stack->sdd, stack->next);
-    }
-    else
-    {
-//      res.max_token_markings = std::max(res.max_token_markings, nb_marking_tokens);
-      return {0ul, 0ul};
-    }
+    return {0ul, 0ul};
   }
 
   /// @brief Flat SDD.
   result_type
-  operator()( const sdd::flat_node<sdd::conf1>& n
-            , std::shared_ptr<sdd::dd::sdd_stack<sdd::conf1>> stack)
+  operator()(const sdd::flat_node<sdd::conf1>& n)
   const
   {
     auto insertion = cache_.emplace(reinterpret_cast<const char*>(&n), std::make_pair(0, 0));
@@ -74,7 +55,7 @@ struct count_tokens_visitor
       {
         const unsigned long max_value
           = *std::max_element(arc.valuation().cbegin(), arc.valuation().cend());
-        const auto res = visit(*this, arc.successor(), stack);
+        const auto res = visit(*this, arc.successor());
 
         markings = std::max(markings, max_value + res.first);
         places = std::max(max_value, res.second);
@@ -87,8 +68,7 @@ struct count_tokens_visitor
 
   /// @brief Hierarchical SDD.
   result_type
-  operator()( const sdd::hierarchical_node<sdd::conf1>& n
-            , std::shared_ptr<sdd::dd::sdd_stack<sdd::conf1>> stack)
+  operator()(const sdd::hierarchical_node<sdd::conf1>& n)
   const
   {
     auto insertion = cache_.emplace(reinterpret_cast<const char*>(&n), std::make_pair(0, 0));
@@ -99,12 +79,11 @@ struct count_tokens_visitor
 
       for (const auto& arc : n)
       {
-        const auto local_stack
-          = std::make_shared<sdd::dd::sdd_stack<sdd::conf1>>(arc.successor(), stack);
-        const auto res = visit(*this, arc.valuation(), local_stack);
+        const auto val_res = visit(*this, arc.valuation());
+        const auto succ_res = visit(*this, arc.successor());
 
-        markings = std::max(markings, res.first);
-        places = std::max(places, res.second);
+        markings = std::max(markings, val_res.first + succ_res.first);
+        places = std::max(val_res.second, std::max(places, succ_res.second));
       }
 
       insertion.first->second = std::make_pair(markings, places);
@@ -113,15 +92,14 @@ struct count_tokens_visitor
   }
 }; // struct count_tokens_visitor
 
-//} // namespace anonymous
+} // namespace anonymous
 
 /*------------------------------------------------------------------------------------------------*/
 
 void
-count_tokens(results& res, const sdd::SDD<sdd::conf1>& state_space)
+count_tokens(results& res, const sdd::SDD<sdd::conf1>& states)
 {
-  const auto pair = visit(count_tokens_visitor(), state_space, nullptr);
-  std::tie(res.max_token_markings, res.max_token_places) = pair;
+  std::tie(res.max_token_markings, res.max_token_places) = visit(count_tokens_visitor(), states);
 }
 
 /*------------------------------------------------------------------------------------------------*/
