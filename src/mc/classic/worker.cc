@@ -73,7 +73,7 @@ mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_
 homomorphism
 transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>& o
                    , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-                   , statistics& stats, results& res, const bool& stop)
+                   , statistics& stats, const bool& stop)
 {
   chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
 
@@ -84,11 +84,11 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
   {
     homomorphism h_t = sdd::id<sdd_conf>();
 
-    // Add a "canary" to detect live transitions and count the number of fired transitions.
-    if (not transition.post.empty())
+    // Add a "canary" to detect live transitions.
+    if (conf.compute_dead_transitions and not transition.post.empty())
     {
       const auto f = mk_fun<live>( conf, stop, o, transition.post.begin()->first, transition.index
-                                 , transitions_bitset, res);
+                                 , transitions_bitset);
       h_t = sdd::carrier(o, transition.post.begin()->first, f);
     }
 
@@ -301,7 +301,7 @@ const
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
   // Compute the transition relation.
-  const auto h_classic = transition_relation(conf, o, net, transitions_bitset, stats, res, stop);
+  const auto h_classic = transition_relation(conf, o, net, transitions_bitset, stats, stop);
   if (conf.show_relation)
   {
     std::cout << h_classic << std::endl;

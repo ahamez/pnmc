@@ -10,12 +10,11 @@ namespace pnmc { namespace mc { namespace classic {
 struct results
 {
   boost::multiprecision::cpp_int nb_states;
-  unsigned long nb_fired_transitions;
   unsigned long max_token_markings;
   unsigned long max_token_places;
 
   results()
-    : nb_states(0), nb_fired_transitions(0), max_token_markings(0), max_token_places(0)
+    : nb_states(0), max_token_markings(0), max_token_places(0)
   {}
 };
 

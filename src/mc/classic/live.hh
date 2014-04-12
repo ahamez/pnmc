@@ -6,7 +6,6 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "mc/classic/results.hh"
 #include "sdd/values/flat_set.hh"
 #include "sdd/values_manager.hh"
 
@@ -18,9 +17,8 @@ struct live
 {
   const std::size_t index;
   boost::dynamic_bitset<>& bitset;
-  results& res;
 
-  live(std::size_t, boost::dynamic_bitset<>&, results&);
+  live(std::size_t, boost::dynamic_bitset<>&);
 
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>&)
