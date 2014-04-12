@@ -11,6 +11,7 @@
 
 #include "mc/classic/bound_error.hh"
 #include "mc/classic/bounded_post.hh"
+#include "mc/classic/count_tokens.hh"
 #include "mc/classic/dead.hh"
 #include "mc/classic/dump.hh"
 #include "mc/classic/live.hh"
@@ -315,7 +316,10 @@ const
 
   // Compute the state space.
   const auto m = state_space(conf, o, m0, h, stats, stop, manager);
+
   res.nb_states = m.size();
+  count_tokens(res, m);
+
   stats.nb_states = res.nb_states.template convert_to<long double>();
   std::cout << stats.nb_states << " states" << std::endl;
 

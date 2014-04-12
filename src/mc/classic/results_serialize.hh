@@ -16,8 +16,8 @@ save(Archive& archive, const results& r)
 {
   archive( cereal::make_nvp("states", r.nb_states.template convert_to<long double>())
          , cereal::make_nvp("fired transitions", r.nb_fired_transitions)
-         , cereal::make_nvp("maximal number of token per marking", r.max_token_markings)
-         , cereal::make_nvp("maximal number of token in a place", r.max_token_places));
+         , cereal::make_nvp("maximal number of tokens per marking", r.max_token_markings)
+         , cereal::make_nvp("maximal number of tokens in a place", r.max_token_places));
 }
 
 /*------------------------------------------------------------------------------------------------*/
