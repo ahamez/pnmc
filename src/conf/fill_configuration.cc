@@ -93,6 +93,7 @@ const auto delete_input_file_str = "delete-input-file";
 const auto export_to_lua_str = "export-to-lua";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
+const auto results_json_str = "results-json";
 const auto show_time_str = "show-time";
 const auto hypergraph_dot_str = "force-hypergraph-dot";
 const auto fast_exit_str = "fast-exit";
@@ -163,6 +164,8 @@ fill_configuration(int argc, char** argv)
                                 , "Export the SDD state space to a DOT file")
     (json_str                   , po::value<std::string>()
                                 , "Export PNMC's statistics to a JSON file")
+    (results_json_str           , po::value<std::string>()
+                                , "Export PNMC's results to a JSON file")
     (show_time_str              , "Show a breakdown of all steps' times")
     (limit_time_str             , po::value<unsigned int>()->default_value(0)
                                 , "Limit the execution time (s)")
@@ -273,6 +276,10 @@ fill_configuration(int argc, char** argv)
   if (vm.count(json_str))
   {
     conf.json_file = vm[json_str].as<std::string>();
+  }
+  if (vm.count(results_json_str))
+  {
+    conf.results_json_file = vm[results_json_str].as<std::string>();
   }
   if (conf.order_ordering_force)
   {

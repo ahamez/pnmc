@@ -8,8 +8,8 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-live::live(std::size_t i, boost::dynamic_bitset<>& b)
-  : index(i), bitset(b)
+live::live(std::size_t i, boost::dynamic_bitset<>& b, results& r)
+  : index(i), bitset(b), res(r)
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -19,6 +19,7 @@ live::operator()(const sdd::values::flat_set<unsigned int>& val)
 const noexcept
 {
   bitset[index] = true;
+  ++res.nb_fired_transitions;
   return val;
 }
 

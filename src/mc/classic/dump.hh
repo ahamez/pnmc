@@ -7,6 +7,7 @@
 #include "sdd/order/strategies/force_hypergraph.hh"
 
 #include "conf/configuration.hh"
+#include "mc/classic/results.hh"
 #include "mc/classic/statistics.hh"
 #include "pn/net.hh"
 
@@ -26,6 +27,10 @@ dump_lua(const conf::configuration&, const sdd::SDD<sdd::conf1>&);
 void
 dump_json( const conf::configuration&, const statistics&, const sdd::manager<sdd::conf1>&
          , const sdd::SDD<sdd::conf1>&, const pn::net&);
+
+/// @brief Export results to a JSON file when required by the configuration.
+void
+dump_results( const conf::configuration&, const results&);
 
 /// @brief Export the FORCE's hypergraph to the DOT format when required by the configuration.
 void

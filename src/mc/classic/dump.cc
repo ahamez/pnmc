@@ -9,6 +9,7 @@
 #include <cereal/archives/json.hpp>
 
 #include "mc/classic/dump.hh"
+#include "mc/classic/results_serialize.hh"
 #include "mc/classic/statistics_serialize.hh"
 #include "pn/statistics.hh"
 #include "pn/statistics_serialize.hh"
@@ -81,6 +82,26 @@ dump_json( const conf::configuration& conf, const statistics& stats
     else
     {
       std::cerr << "Can't export statistics to " << *conf.json_file << std::endl;
+    }
+  }
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+void
+dump_results(const conf::configuration& conf, const results& res)
+{
+  if (conf.results_json_file)
+  {
+    std::ofstream file(*conf.results_json_file);
+    if (file.is_open())
+    {
+      cereal::JSONOutputArchive archive(file);
+      archive(cereal::make_nvp("pnmc", res));
+    }
+    else
+    {
+      std::cerr << "Can't export results to " << *conf.results_json_file << std::endl;
     }
   }
 }
