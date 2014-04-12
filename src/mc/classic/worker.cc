@@ -84,19 +84,10 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
   {
     if (transition.pre.empty() and transition.post.empty())
     {
-      // A transition with no pre or post places.
-      continue;
+      continue; // A transition with no pre or post places, no need to keep it.
     }
 
     homomorphism h_t = sdd::id<sdd_conf>();
-
-    // Add a "canary" to detect live transitions.
-    if (conf.compute_dead_transitions and not transition.post.empty())
-    {
-      const auto f = mk_fun<live>( conf, stop, o, transition.post.begin()->first, transition.index
-                                 , transitions_bitset);
-      h_t = sdd::carrier(o, transition.post.begin()->first, f);
-    }
 
     // Post actions.
     for (const auto& arc : transition.post)
@@ -107,6 +98,14 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
                      : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second
                                                      , conf.marking_bound, arc.first);
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+    }
+
+    // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
+    if (conf.compute_dead_transitions)
+    {
+      const auto var = transition.pre.cbegin()->first;
+      const auto f = mk_fun<live>( conf, stop, o, var, transition.index, transitions_bitset);
+      h_t = composition(h_t, sdd::carrier(o, var, f));
     }
 
     // Pre actions.
