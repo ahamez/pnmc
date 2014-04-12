@@ -82,6 +82,12 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
 
   for (const auto& transition : net.transitions())
   {
+    if (transition.pre.empty() and transition.post.empty())
+    {
+      // A transition with no pre or post places.
+      continue;
+    }
+
     homomorphism h_t = sdd::id<sdd_conf>();
 
     // Add a "canary" to detect live transitions.
