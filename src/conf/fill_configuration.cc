@@ -23,23 +23,25 @@ const std::string version
 /*------------------------------------------------------------------------------------------------*/
 
 // Input format options.
-const auto bpn_str = "bpn";
+const auto bpn_str  = "bpn";
+const auto pnml_str = "pnml";
 const auto prod_str = "prod";
 const auto tina_str = "tina";
-const auto xml_str = "xml";
+const auto xml_str  = "xml";
 
 input_format
 file_type(const po::variables_map& vm)
 {
-  const bool bpn = vm.count(bpn_str);
+  const bool bpn  = vm.count(bpn_str);
+  const bool pnml = vm.count(pnml_str);
   const bool prod = vm.count(prod_str);
   const bool tina = vm.count(tina_str);
 
-  if (not (bpn or prod or tina))
+  if (not (bpn or pnml or prod or tina))
   {
     return input_format::xml;
   }
-  else if (not (bpn xor prod xor tina))
+  else if (not (bpn xor pnml xor prod xor tina))
   {
     throw po::error("Can specify only one input format.");
   }
@@ -48,6 +50,10 @@ file_type(const po::variables_map& vm)
     if (bpn)
     {
       return input_format::bpn;
+    }
+    else if (pnml)
+    {
+      return input_format::pnml;
     }
     else if (prod)
     {
@@ -112,6 +118,7 @@ fill_configuration(int argc, char** argv)
   po::options_description file_options("Input file options");
   file_options.add_options()
     (bpn_str  , "Parse BPN format")
+    (pnml_str , "Parse PNML format")
     (prod_str , "Parse PROD format")
     (tina_str , "Parse TINA format")
     (xml_str  , "Parse pnmc's XML format (default)")
