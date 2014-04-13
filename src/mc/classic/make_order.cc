@@ -70,8 +70,6 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   {
     std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
     using identifier_type = sdd_conf::Identifier;
-    using vertex = sdd::force::vertex<identifier_type>;
-    using hyperedge = sdd::force::hyperedge<identifier_type>;
 
     // Temporary placeholder for identifiers.
     std::vector<identifier_type> identifiers;
