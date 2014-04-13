@@ -58,7 +58,7 @@ struct count_tokens_visitor
         const auto res = visit(*this, arc.successor());
 
         markings = std::max(markings, max_value + res.first);
-        places = std::max(max_value, res.second);
+        places = std::max({places, max_value, res.second});
       }
 
       insertion.first->second = std::make_pair(markings, places);
@@ -83,7 +83,7 @@ struct count_tokens_visitor
         const auto succ_res = visit(*this, arc.successor());
 
         markings = std::max(markings, val_res.first + succ_res.first);
-        places = std::max(val_res.second, std::max(places, succ_res.second));
+        places = std::max({places, val_res.second, succ_res.second});
       }
 
       insertion.first->second = std::make_pair(markings, places);
