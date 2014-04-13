@@ -95,6 +95,14 @@ const auto pn_marking_bound_str = "pn-marking-bound";
 const auto mc_dead_transitions_str = "dead-transitions";
 const auto mc_dead_states_str = "dead-states";
 
+// libsdd options
+const auto libsdd_sdd_ut_size_str = "sdd-ut-size";
+const auto libsdd_sdd_diff_cache_size_str = "sdd-diff-cache-size";
+const auto libsdd_sdd_inter_cache_size_str = "sdd-inter-cache-size";
+const auto libsdd_sdd_sum_cache_size_str = "sdd-sum-size-cache";
+const auto libsdd_hom_ut_size_str = "hom-ut-size";
+const auto libsdd_hom_cache_size_str = "hom-cache-size";
+
 // Advanced options
 const auto limit_time_str = "time-limit";
 const auto delete_input_file_str = "delete-input-file";
@@ -103,7 +111,7 @@ const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
 const auto results_json_str = "results-json";
 const auto show_time_str = "show-time";
-const auto hypergraph_dot_str = "force-hypergraph-dot";
+const auto hypergraph_dot_str = "hypergraph-force-dot";
 const auto fast_exit_str = "fast-exit";
 
 boost::optional<configuration>
@@ -119,7 +127,7 @@ fill_configuration(int argc, char** argv)
                   , "Configure PNMC with a file")
   ;
 
-  po::options_description file_options("Input file options");
+  po::options_description file_options("Input file format options");
   file_options.add_options()
     (bpn_str  , "Parse BPN format")
     (pnml_str , "Parse PNML format")
@@ -167,22 +175,34 @@ fill_configuration(int argc, char** argv)
 
   ;
 
-  po::options_description hidden_options("Hidden options");
-  hidden_options.add_options()
-    ("input-file", po::value<std::string>(), "The Petri net file to analyse")
+  po::options_description hidden_libsdd_options("Hidden libsdd options");
+  hidden_libsdd_options.add_options()
+    (libsdd_sdd_ut_size_str          , po::value<unsigned int>()->default_value(2000000))
+    (libsdd_sdd_diff_cache_size_str  , po::value<unsigned int>()->default_value(500000))
+    (libsdd_sdd_inter_cache_size_str , po::value<unsigned int>()->default_value(500000))
+    (libsdd_sdd_sum_cache_size_str   , po::value<unsigned int>()->default_value(2000000))
+    (libsdd_hom_ut_size_str          , po::value<unsigned int>()->default_value(25000))
+    (libsdd_hom_cache_size_str       , po::value<unsigned int>()->default_value(2000000))
   ;
 
-  po::options_description advanced_options("Advanced options");
-  advanced_options.add_options()
+
+  po::options_description hidden_options("Hidden options");
+  hidden_options.add_options()
+    ("input-file"               , po::value<std::string>()
+                                , "The Petri net file to analyse")
     (delete_input_file_str      , "Delete input file after reading it")
     (export_to_lua_str          , po::value<std::string>()
                                 , "Export the final SDD to a Lua structure")
     (final_sdd_dot_export_str   , po::value<std::string>()
                                 , "Export the SDD state space to a DOT file")
-    (limit_time_str             , po::value<unsigned int>()->default_value(0)
-                                , "Limit the execution time (s)")
     (hypergraph_dot_str         , po::value<std::string>()
                                 , "Export FORCE's hypergraph to a DOT file")
+  ;
+
+  po::options_description advanced_options("Advanced options");
+  advanced_options.add_options()
+    (limit_time_str             , po::value<unsigned int>()->default_value(0)
+                                , "Limit the execution time (s)")
     (fast_exit_str              , "Don't cleanup memory on exit")
   ;
 
@@ -197,6 +217,7 @@ fill_configuration(int argc, char** argv)
     .add(hom_options)
     .add(petri_options)
     .add(mc_options)
+    .add(hidden_libsdd_options)
     .add(stats_options)
     .add(advanced_options)
     .add(hidden_options);
@@ -207,6 +228,7 @@ fill_configuration(int argc, char** argv)
     .add(hom_options)
     .add(petri_options)
     .add(mc_options)
+    .add(hidden_libsdd_options)
     .add(stats_options)
     .add(advanced_options)
     .add(hidden_options);
@@ -293,6 +315,14 @@ fill_configuration(int argc, char** argv)
 
   // Petri net options
   conf.marking_bound = vm[pn_marking_bound_str].as<unsigned int>();
+
+  // Hidden libsdd options
+  conf.sdd_ut_size= vm[libsdd_sdd_ut_size_str].as<unsigned int>();
+  conf.sdd_diff_cache_size = vm[libsdd_sdd_diff_cache_size_str].as<unsigned int>();;
+  conf.sdd_inter_cache_size = vm[libsdd_sdd_inter_cache_size_str].as<unsigned int>();;
+  conf.sdd_sum_cache_size = vm[libsdd_sdd_sum_cache_size_str].as<unsigned int>();;
+  conf.hom_ut_size = vm[libsdd_hom_ut_size_str].as<unsigned int>();;
+  conf.hom_cache_size = vm[libsdd_hom_cache_size_str].as<unsigned int>();;
 
   // Model checking options
   conf.compute_dead_states = vm.count(mc_dead_states_str);

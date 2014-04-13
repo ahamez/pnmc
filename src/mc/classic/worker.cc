@@ -281,6 +281,12 @@ const
   // Initialize the libsdd.
   sdd_conf sconf;
   sconf.final_cleanup = not conf.fast_exit;
+  sconf.sdd_unique_table_size = conf.sdd_ut_size;
+  sconf.sdd_difference_cache_size = conf.sdd_diff_cache_size;
+  sconf.sdd_intersection_cache_size = conf.sdd_inter_cache_size;
+  sconf.sdd_sum_cache_size = conf.sdd_sum_cache_size;
+  sconf.hom_unique_table_size = conf.hom_ut_size;
+  sconf.hom_cache_size = conf.hom_cache_size;
   auto manager = sdd::init(sconf);
 
   statistics stats(conf);

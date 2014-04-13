@@ -68,6 +68,13 @@ struct configuration
   /// @brief Don't cleanup memory on exit.
   bool fast_exit;
 
+  std::size_t sdd_ut_size;
+  std::size_t sdd_diff_cache_size;
+  std::size_t sdd_inter_cache_size;
+  std::size_t sdd_sum_cache_size;
+  std::size_t hom_ut_size;
+  std::size_t hom_cache_size;
+
   boost::optional<std::string> export_final_sdd_dot_file;
   boost::optional<std::string> export_to_lua_file;
   boost::optional<std::string> json_file;
