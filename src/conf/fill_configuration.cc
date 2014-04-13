@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -71,6 +72,7 @@ file_type(const po::variables_map& vm)
 // General options
 const auto help_str = "help";
 const auto version_str = "version";
+const auto conf_str = "conf";
 
 // Order options
 const auto order_show_str = "order-show";
@@ -113,6 +115,8 @@ fill_configuration(int argc, char** argv)
   general_options.add_options()
     (help_str     , "Show this help")
     (version_str  , "Show version")
+    (conf_str     , po::value<std::string>()
+                  , "Configure PNMC with a file")
   ;
 
   po::options_description file_options("Input file options");
@@ -142,7 +146,10 @@ fill_configuration(int argc, char** argv)
 
   po::options_description stats_options("Statistics options");
   stats_options.add_options()
-    (show_final_sdd_bytes_str     , "Show the number of bytes used by the final state space's SDD")
+    (show_time_str              , "Show a breakdown of all steps' times")
+    (show_final_sdd_bytes_str   , "Show the number of bytes used by the final state space's SDD")
+    (json_str                   , po::value<std::string>()
+                                , "Export PNMC's statistics to a JSON file")
   ;
 
   po::options_description petri_options("Petri net options");
@@ -153,8 +160,11 @@ fill_configuration(int argc, char** argv)
 
   po::options_description mc_options("Model checking options");
   mc_options.add_options()
-    (mc_dead_transitions_str      , "Compute dead transitions")
-    (mc_dead_states_str           , "Compute dead states")
+    (mc_dead_transitions_str   , "Compute dead transitions")
+    (mc_dead_states_str        , "Compute dead states")
+    (results_json_str          , po::value<std::string>()
+                               , "Export PNMC's results to a JSON file")
+
   ;
 
   po::options_description hidden_options("Hidden options");
@@ -169,11 +179,6 @@ fill_configuration(int argc, char** argv)
                                 , "Export the final SDD to a Lua structure")
     (final_sdd_dot_export_str   , po::value<std::string>()
                                 , "Export the SDD state space to a DOT file")
-    (json_str                   , po::value<std::string>()
-                                , "Export PNMC's statistics to a JSON file")
-    (results_json_str           , po::value<std::string>()
-                                , "Export PNMC's results to a JSON file")
-    (show_time_str              , "Show a breakdown of all steps' times")
     (limit_time_str             , po::value<unsigned int>()->default_value(0)
                                 , "Limit the execution time (s)")
     (hypergraph_dot_str         , po::value<std::string>()
@@ -195,7 +200,17 @@ fill_configuration(int argc, char** argv)
     .add(stats_options)
     .add(advanced_options)
     .add(hidden_options);
-  
+
+  po::options_description config_file_options;
+  config_file_options
+    .add(order_options)
+    .add(hom_options)
+    .add(petri_options)
+    .add(mc_options)
+    .add(stats_options)
+    .add(advanced_options)
+    .add(hidden_options);
+
   po::variables_map vm;
   po::parsed_options parsed
     = po::command_line_parser(argc, argv).options(cmdline_options)
@@ -204,7 +219,7 @@ fill_configuration(int argc, char** argv)
                                          .run();
   po::store(parsed, vm);
   po::notify(vm);
-  
+
   std::vector<std::string> unrecognized
     = po::collect_unrecognized(parsed.options, po::exclude_positional);
   
@@ -230,7 +245,7 @@ fill_configuration(int argc, char** argv)
     std::cout << advanced_options << std::endl;
     return boost::optional<configuration>();
   }
-  
+
   if (vm.count(version_str))
   {
     std::cout << version << std::endl;
@@ -240,6 +255,21 @@ fill_configuration(int argc, char** argv)
   if (not vm.count("input-file"))
   {
     throw po::error("No file specified.");
+  }
+
+  if (vm.count(conf_str))
+  {
+    const auto file_name = vm[conf_str].as<std::string>();
+    std::ifstream file(file_name);
+    if (file.is_open())
+    {
+      store(parse_config_file(file, config_file_options), vm);
+      notify(vm);
+    }
+    else
+    {
+      throw po::error("Cannot open configuration file " + file_name);
+    }
   }
 
   // Input options
