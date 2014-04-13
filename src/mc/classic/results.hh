@@ -1,7 +1,7 @@
 #ifndef _PNMC_MC_CLASSIC_RESULTS_HH_
 #define _PNMC_MC_CLASSIC_RESULTS_HH_
 
-#include <boost/multiprecision/cpp_int.hpp>
+#include <sdd/util/boost_multiprecision_no_warnings.hh>
 
 namespace pnmc { namespace mc { namespace classic {
 
