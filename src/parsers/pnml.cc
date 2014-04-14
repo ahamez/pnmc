@@ -1,4 +1,3 @@
-#include <cstring>  // strncmp
 #include <istream>
 #include <string>
 
@@ -7,18 +6,6 @@
 #include "parsers/rapidxml/rapidxml.hpp"
 
 namespace pnmc { namespace parsers {
-
-/*------------------------------------------------------------------------------------------------*/
-
-namespace /* anonymous*/ {
-
-bool
-cmp(char* lhs, const std::string& rhs)
-{
-  return std::strncmp(lhs, rhs.c_str(), rhs.size()) == 0;
-}
-
-} // namespace anonymous
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -47,13 +34,18 @@ pnml(std::istream& in)
     throw parse_error(p.what());
   }
 
+  const std::string type_str       = "http://www.pnml.org/version-2009/grammar/ptnet";
+  const std::string place_str      = "place";
+  const std::string transition_str = "transition";
+  const std::string arc_str        = "arc";
+
   auto net_ptr = std::make_shared<pn::net>();
 
   const auto pnml_node = doc.first_node();
   const auto net_node = pnml_node->first_node("net");
   net_ptr->name = net_node->first_attribute("id")->value();
   const auto type = net_node->first_attribute("type")->value();
-  if (not cmp(type, "http://www.pnml.org/version-2009/grammar/ptnet"))
+  if (type_str != type)
   {
     throw parse_error("Unsupported Petri net type " + std::string(type));
   }
@@ -63,7 +55,7 @@ pnml(std::istream& in)
   auto node = page_node->first_node();
   while (node)
   {
-    if (cmp(node->name(), "place"))
+    if (place_str == node->name())
     {
       const auto id = node->first_attribute("id")->value();
       auto marking = 0u;
@@ -82,7 +74,7 @@ pnml(std::istream& in)
       }
       net_ptr->add_place(id, marking);
     }
-    else if (cmp(node->name(), "transition"))
+    else if (transition_str == node->name())
     {
       net_ptr->add_transition(node->first_attribute("id")->value());
     }
@@ -93,7 +85,7 @@ pnml(std::istream& in)
   node = page_node->first_node();
   while (node)
   {
-    if (cmp(node->name(), "arc"))
+    if (arc_str == node->name())
     {
       const auto src = node->first_attribute("source")->value();
       const auto dst = node->first_attribute("target")->value();
