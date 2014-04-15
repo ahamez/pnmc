@@ -427,6 +427,7 @@ const
   dump_lua(conf, m);
   dump_json(conf, stats, manager, m, net);
   dump_results(conf, res);
+  dump_hom_dot(conf, h_classic, h);
 }
 
 /*------------------------------------------------------------------------------------------------*/

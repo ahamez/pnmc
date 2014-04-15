@@ -80,6 +80,8 @@ struct configuration
   boost::optional<std::string> json_file;
   boost::optional<std::string> results_json_file;
   boost::optional<std::string> hypergraph_dot_file;
+  boost::optional<std::string> export_hom_to_dot_file;
+  boost::optional<std::string> export_sat_hom_to_dot_file;
 
   /// @brief Stop state space generation after this much time.
   std::chrono::duration<double> max_time;

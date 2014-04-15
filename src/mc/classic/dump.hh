@@ -36,6 +36,11 @@ dump_results( const conf::configuration&, const results&);
 void
 dump_hypergraph_dot(const conf::configuration&, const sdd::force::hypergraph<sdd::conf1>&);
 
+/// @brief Export homomorphisms to the DOT format when required by the configuration.
+void
+dump_hom_dot( const conf::configuration&, const sdd::homomorphism<sdd::conf1>& classic
+            , const sdd::homomorphism<sdd::conf1>& sat);
+
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic

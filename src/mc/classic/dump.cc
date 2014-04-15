@@ -1,7 +1,8 @@
 #include <fstream>
 
-#include <sdd/tools/dot/sdd.hh>
 #include <sdd/tools/dot/force_hypergraph.hh>
+#include <sdd/tools/dot/homomorphism.hh>
+#include <sdd/tools/dot/sdd.hh>
 #include <sdd/tools/lua.hh>
 #include <sdd/tools/sdd_statistics.hh>
 #include <sdd/tools/serialization.hh>
@@ -123,6 +124,40 @@ dump_hypergraph_dot( const conf::configuration& conf
     {
       std::cerr << "Can't export FORCE hypergraph to " << *conf.hypergraph_dot_file << std::endl;
     }
+  }
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+void
+dump_hom_dot( const conf::configuration& conf, const sdd::homomorphism<sdd::conf1>& classic
+            , const sdd::homomorphism<sdd::conf1>& sat)
+{
+  if (conf.export_hom_to_dot_file)
+  {
+    std::ofstream file(*conf.export_hom_to_dot_file);
+    if (file.is_open())
+    {
+      file << sdd::tools::dot(classic) << std::endl;
+    }
+    else
+    {
+      std::cerr << "Can't export homomorphism to " << *conf.export_hom_to_dot_file << std::endl;
+    }
+
+  }
+  if (conf.export_sat_hom_to_dot_file)
+  {
+    std::ofstream file(*conf.export_sat_hom_to_dot_file);
+    if (file.is_open())
+    {
+      file << sdd::tools::dot(sat) << std::endl;
+    }
+    else
+    {
+      std::cerr << "Can't export homomorphism to " << *conf.export_sat_hom_to_dot_file << std::endl;
+    }
+
   }
 }
 

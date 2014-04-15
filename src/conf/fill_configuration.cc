@@ -113,6 +113,8 @@ const auto results_json_str = "results-json";
 const auto show_time_str = "show-time";
 const auto hypergraph_dot_str = "hypergraph-force-dot";
 const auto fast_exit_str = "fast-exit";
+const auto hom_dot_export_str = "hom-dot";
+const auto hom_sat_dot_export_str = "sat-hom-dot";
 
 boost::optional<configuration>
 fill_configuration(int argc, char** argv)
@@ -197,6 +199,10 @@ fill_configuration(int argc, char** argv)
                                 , "Export the SDD state space to a DOT file")
     (hypergraph_dot_str         , po::value<std::string>()
                                 , "Export FORCE's hypergraph to a DOT file")
+    (hom_dot_export_str         , po::value<std::string>()
+                                , "Export homomorphism to a DOT file")
+    (hom_sat_dot_export_str     , po::value<std::string>()
+                                , "Export saturated homomorphism to a DOT file")
   ;
 
   po::options_description advanced_options("Advanced options");
@@ -356,6 +362,14 @@ fill_configuration(int argc, char** argv)
   if (vm.count(hypergraph_dot_str))
   {
     conf.hypergraph_dot_file = vm[hypergraph_dot_str].as<std::string>();
+  }
+  if (vm.count(hom_dot_export_str))
+  {
+    conf.export_hom_to_dot_file = vm[hom_dot_export_str].as<std::string>();
+  }
+  if (vm.count(hom_sat_dot_export_str))
+  {
+    conf.export_sat_hom_to_dot_file = vm[hom_sat_dot_export_str].as<std::string>();
   }
 
   return conf;
