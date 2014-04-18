@@ -17,6 +17,7 @@ struct statistics
   std::chrono::duration<double> relation_duration;
   std::chrono::duration<double> rewrite_duration;
   std::chrono::duration<double> state_space_duration;
+  std::chrono::duration<double> tokens_duration;
   std::chrono::duration<double> force_duration;
   std::chrono::duration<double> dead_states_relation_duration;
   std::chrono::duration<double> dead_states_rewrite_duration;
@@ -31,8 +32,8 @@ struct statistics
   std::deque<double> force_spans;
 
   statistics(const conf::configuration& c)
-    : conf(c), relation_duration(), rewrite_duration(), state_space_duration(), force_duration()
-    , dead_states_relation_duration(), dead_states_rewrite_duration()
+    : conf(c), relation_duration(), rewrite_duration(), state_space_duration(), tokens_duration()
+    , force_duration(), dead_states_relation_duration(), dead_states_rewrite_duration()
     , dead_states_duration(), nb_states(0), interrupted(false), sdd_ut_size(), force_spans()
   {}
 };

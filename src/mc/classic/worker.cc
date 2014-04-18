@@ -333,7 +333,9 @@ const
   const auto m = state_space(conf, o, m0, h, stats, stop, manager);
 
   res.nb_states = m.size();
+  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
   count_tokens(res, m);
+  stats.tokens_duration = chrono::system_clock::now() - start;
 
   stats.nb_states = res.nb_states.template convert_to<long double>();
   std::cout << stats.nb_states << " states" << std::endl;
