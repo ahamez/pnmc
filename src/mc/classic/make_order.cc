@@ -7,6 +7,7 @@
 
 #include <sdd/order/order.hh>
 #include <sdd/order/strategies/force.hh>
+#include <sdd/order/strategies/identifiers_per_hierarchy.hh>
 
 #include "mc/classic/dump.hh"
 #include "mc/classic/make_order.hh"
@@ -67,6 +68,8 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
   }
 
+  sdd::order_builder<sdd_conf> ob;
+
   if (conf.order_ordering_force)
   {
     util::timer timer;
@@ -110,21 +113,19 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
     // Apply the FORCE ordering strategy.
     auto force = sdd::force::worker<sdd_conf>(graph, conf.order_reverse);
-    const auto o = force(conf.order_force_iterations);
+    ob = force(conf.order_force_iterations);
     stats.force_duration = timer.duration();
     stats.force_spans = force.spans();
 
     // Dump the hypergraph to a DOT file if required by the configuration.
     dump_hypergraph_dot(conf, graph);
-    return sdd::order<sdd_conf>(o);
   }
-  else if (not conf.order_force_flat and net.modules)
+  else if (not conf.order_flat and net.modules)
   {
-    return boost::apply_visitor(mk_order_visitor(), *net.modules).nested();
+    ob = boost::apply_visitor(mk_order_visitor(), *net.modules).nested();
   }
   else
   {
-    sdd::order_builder<sdd_conf> ob;
     if (conf.order_random)
     {
       std::vector<std::string> tmp;
@@ -167,8 +168,13 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
         }
       }
     }
-    return sdd::order<sdd_conf>(ob);
   }
+
+  if (conf.order_id_per_hierarchy > 0 and not conf.order_flat)
+  {
+    ob = sdd::identifiers_per_hierarchy<sdd_conf>(conf.order_id_per_hierarchy)(ob);
+  }
+  return sdd::order<sdd_conf>(ob);
 }
 
 /*------------------------------------------------------------------------------------------------*/

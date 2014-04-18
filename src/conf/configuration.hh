@@ -38,7 +38,7 @@ struct configuration
   bool order_show;
 
   /// @brief Remove all hierarchy from order.
-  bool order_force_flat;
+  bool order_flat;
 
   /// @brief Reverse order.
   bool order_reverse;
@@ -46,6 +46,9 @@ struct configuration
   /// @brief Use the FORCE ordering heuristic.
   bool order_ordering_force;
   unsigned int order_force_iterations;
+
+  /// @brief Maximum number of identifiers per hierarchy.
+  unsigned int order_id_per_hierarchy;
 
   /// @brief Stop after order computation.
   bool order_only;

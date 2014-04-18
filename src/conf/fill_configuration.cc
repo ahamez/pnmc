@@ -82,6 +82,7 @@ const auto order_force_str = "order-force";
 const auto order_force_iterations_str = "order-force-iterations";
 const auto order_only_str = "order-only";
 const auto order_reverse_str = "order-reverse";
+const auto order_id_per_hier_str = "order-ids-per-hierarchy";
 
 // Homomorphisms options
 const auto hom_show_relation_str = "hom-show-relation";
@@ -142,24 +143,13 @@ fill_configuration(int argc, char** argv)
   po::options_description order_options("Order options");
   order_options.add_options()
     (order_show_str             , "Show the order")
-    (order_random_str           , "Random order (not recommanded)")
     (order_flat_str             , "Don't use hierarchy informations")
     (order_force_str            , "Use the FORCE ordering heuristic")
-    (order_force_iterations_str , po::value<unsigned int>()->default_value(100)
-                                , "Number of FORCE iterations")
-    (order_only_str             , "Compute order only")
-    (order_reverse_str          , "Reverse order (depends on on strategy)")
-  ;
-
-  po::options_description hom_options("Homomorphisms options");
-  hom_options.add_options()
-    (hom_show_relation_str      , "Show the transition relation")
   ;
 
   po::options_description stats_options("Statistics options");
   stats_options.add_options()
     (show_time_str              , "Show a breakdown of all steps' times")
-    (show_final_sdd_bytes_str   , "Show the number of bytes used by the final state space's SDD")
     (json_str                   , po::value<std::string>()
                                 , "Export PNMC's statistics to a JSON file")
   ;
@@ -176,7 +166,30 @@ fill_configuration(int argc, char** argv)
     (mc_dead_states_str        , "Compute dead states")
     (results_json_str          , po::value<std::string>()
                                , "Export PNMC's results to a JSON file")
+  ;
 
+  po::options_description hidden_exp_options("Hidden dev/experimental options");
+  hidden_exp_options.add_options()
+    (order_random_str           , "Random order (not recommanded)")
+    (order_force_iterations_str , po::value<unsigned int>()->default_value(100)
+                                , "Number of FORCE iterations")
+    (order_reverse_str          , "Reverse order (depends on on strategy)")
+    (order_id_per_hier_str      , po::value<unsigned int>()->default_value(0)
+                                , "Number of identifiers per hierarchy")
+    (order_only_str             , "Compute order only")
+    (show_final_sdd_bytes_str   , "Show the number of bytes used by the final state space's SDD")
+    (delete_input_file_str      , "Delete input file after reading it")
+    (export_to_lua_str          , po::value<std::string>()
+                                , "Export the final SDD to a Lua structure")
+    (final_sdd_dot_export_str   , po::value<std::string>()
+                                , "Export the SDD state space to a DOT file")
+    (hypergraph_dot_str         , po::value<std::string>()
+                                , "Export FORCE's hypergraph to a DOT file")
+    (hom_dot_export_str         , po::value<std::string>()
+                                , "Export homomorphism to a DOT file")
+    (hom_sat_dot_export_str     , po::value<std::string>()
+                                , "Export saturated homomorphism to a DOT file")
+    (hom_show_relation_str      , "Show the transition relation")
   ;
 
   po::options_description hidden_libsdd_options("Hidden libsdd options");
@@ -189,22 +202,10 @@ fill_configuration(int argc, char** argv)
     (libsdd_hom_cache_size_str       , po::value<unsigned int>()->default_value(2000000))
   ;
 
-
   po::options_description hidden_options("Hidden options");
   hidden_options.add_options()
     ("input-file"               , po::value<std::string>()
                                 , "The Petri net file to analyse")
-    (delete_input_file_str      , "Delete input file after reading it")
-    (export_to_lua_str          , po::value<std::string>()
-                                , "Export the final SDD to a Lua structure")
-    (final_sdd_dot_export_str   , po::value<std::string>()
-                                , "Export the SDD state space to a DOT file")
-    (hypergraph_dot_str         , po::value<std::string>()
-                                , "Export FORCE's hypergraph to a DOT file")
-    (hom_dot_export_str         , po::value<std::string>()
-                                , "Export homomorphism to a DOT file")
-    (hom_sat_dot_export_str     , po::value<std::string>()
-                                , "Export saturated homomorphism to a DOT file")
   ;
 
   po::options_description advanced_options("Advanced options");
@@ -222,9 +223,9 @@ fill_configuration(int argc, char** argv)
   	.add(general_options)
     .add(file_options)
     .add(order_options)
-    .add(hom_options)
     .add(petri_options)
     .add(mc_options)
+    .add(hidden_exp_options)
     .add(hidden_libsdd_options)
     .add(stats_options)
     .add(advanced_options)
@@ -233,9 +234,9 @@ fill_configuration(int argc, char** argv)
   po::options_description config_file_options;
   config_file_options
     .add(order_options)
-    .add(hom_options)
     .add(petri_options)
     .add(mc_options)
+    .add(hidden_exp_options)
     .add(hidden_libsdd_options)
     .add(stats_options)
     .add(advanced_options)
@@ -268,7 +269,6 @@ fill_configuration(int argc, char** argv)
     std::cout << general_options << std::endl;
     std::cout << file_options << std::endl;
     std::cout << order_options << std::endl;
-    std::cout << hom_options << std::endl;
     std::cout << petri_options << std::endl;
     std::cout << mc_options << std::endl;
     std::cout << stats_options << std::endl;
@@ -310,11 +310,12 @@ fill_configuration(int argc, char** argv)
   // Order options
   conf.order_show = vm.count(order_show_str);
   conf.order_random = vm.count(order_random_str);
-  conf.order_force_flat = vm.count(order_flat_str);
+  conf.order_flat = vm.count(order_flat_str);
   conf.order_ordering_force = vm.count(order_force_str);
   conf.order_force_iterations = vm[order_force_iterations_str].as<unsigned int>();
   conf.order_only = vm.count(order_only_str);
   conf.order_reverse = vm.count(order_reverse_str);
+  conf.order_id_per_hierarchy = vm[order_id_per_hier_str].as<unsigned int>();
 
   // Hom options
   conf.show_relation = vm.count(hom_show_relation_str);
@@ -359,7 +360,7 @@ fill_configuration(int argc, char** argv)
   }
   if (conf.order_ordering_force)
   {
-    conf.order_force_flat = true;
+    conf.order_flat = true;
   }
   conf.max_time = std::chrono::duration<double>(vm[limit_time_str].as<unsigned int>());
   if (vm.count(hypergraph_dot_str))
