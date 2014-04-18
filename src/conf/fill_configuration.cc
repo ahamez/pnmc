@@ -71,6 +71,7 @@ file_type(const po::variables_map& vm)
 
 // General options
 const auto help_str = "help";
+const auto help_exp_str = "help-exp";
 const auto version_str = "version";
 const auto conf_str = "conf";
 
@@ -126,6 +127,7 @@ fill_configuration(int argc, char** argv)
   po::options_description general_options("General options");
   general_options.add_options()
     (help_str     , "Show this help")
+    (help_exp_str , "Show experimental/dev features help")
     (version_str  , "Show version")
     (conf_str     , po::value<std::string>()
                   , "Configure PNMC with a file")
@@ -170,7 +172,7 @@ fill_configuration(int argc, char** argv)
 
   po::options_description hidden_exp_options("Hidden dev/experimental options");
   hidden_exp_options.add_options()
-    (order_random_str           , "Random order (not recommanded)")
+    (order_random_str           , "Random order")
     (order_force_iterations_str , po::value<unsigned int>()->default_value(100)
                                 , "Number of FORCE iterations")
     (order_reverse_str          , "Reverse order (depends on on strategy)")
@@ -253,7 +255,7 @@ fill_configuration(int argc, char** argv)
 
   std::vector<std::string> unrecognized
     = po::collect_unrecognized(parsed.options, po::exclude_positional);
-  
+
   if (vm.count(help_str) or unrecognized.size() > 0)
   {
     if (unrecognized.size() > 0)
@@ -273,6 +275,11 @@ fill_configuration(int argc, char** argv)
     std::cout << mc_options << std::endl;
     std::cout << stats_options << std::endl;
     std::cout << advanced_options << std::endl;
+    return boost::optional<configuration>();
+  }
+  else if (vm.count(help_exp_str))
+  {
+    std::cout << hidden_exp_options << std::endl;
     return boost::optional<configuration>();
   }
 
