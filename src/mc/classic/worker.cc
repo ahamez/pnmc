@@ -22,6 +22,7 @@
 #include "mc/classic/statistics.hh"
 #include "mc/classic/timed.hh"
 #include "mc/classic/worker.hh"
+#include "util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -75,7 +76,7 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
                    , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
                    , statistics& stats, const bool& stop)
 {
-  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
+  util::timer timer;
 
   std::set<homomorphism> operands;
   operands.insert(sdd::id<sdd_conf>());
@@ -121,7 +122,7 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
 
     operands.insert(h_t);
   }
-  stats.relation_duration = chrono::system_clock::now() - start;
+  stats.relation_duration = timer.duration();
   return fixpoint(sum(o, operands.cbegin(), operands.cend()));
 }
 
@@ -131,9 +132,9 @@ homomorphism
 rewrite( const conf::configuration&, const sdd::order<sdd_conf>& o
        , const homomorphism& h, statistics& stats)
 {
-  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
+  util::timer timer;
   const auto res = sdd::rewrite(o, h);
-  stats.rewrite_duration = chrono::system_clock::now() - start;
+  stats.rewrite_duration = timer.duration();
   return res;
 }
 
@@ -149,8 +150,7 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
   bool finished = false;
 
   // The reference time;
-  const std::chrono::time_point<std::chrono::system_clock>
-    beginning(std::chrono::system_clock::now());
+  util::timer beginnning;
 
   // Limited time mode?
   std::thread clock;
@@ -161,7 +161,7 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
                           while (not finished)
                           {
                             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                            if (std::chrono::system_clock::now() - beginning >= conf.max_time)
+                            if (beginnning.duration() >= conf.max_time)
                             {
                               stop = true;
                               std::cout << "Time limit exceeded,";
@@ -189,7 +189,7 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
                     }
                   });
 
-  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
+  util::timer timer;
   try
   {
     res = h(o, m);
@@ -208,12 +208,11 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
   }
   // Tell the clock thread to stop on next wakeup.
   finished = true;
-  stats.state_space_duration = chrono::system_clock::now() - start;
+  stats.state_space_duration = timer.duration();
 
   if (stats.interrupted)
   {
-    std::cout << "State space computation interrupted after "
-              << std::chrono::duration<double>(std::chrono::system_clock::now() - beginning).count()
+    std::cout << "State space computation interrupted after " << beginnning.duration().count()
               << "s." << std::endl;
   }
 
@@ -235,7 +234,7 @@ dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn
   std::set<homomorphism> and_operands;
   std::set<homomorphism> or_operands;
 
-  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
+  util::timer timer;
 
   // Get relation
   for (const auto& transition : net.transitions())
@@ -251,17 +250,17 @@ dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn
     or_operands.clear();
   }
   const auto tmp = intersection(o, and_operands.cbegin(), and_operands.cend());
-  stats.dead_states_relation_duration = chrono::system_clock::now() - start;
+  stats.dead_states_relation_duration = timer.duration();
 
   // Rewrite the relation
-  start = chrono::system_clock::now();
+  timer.reset();
   const auto h = sdd::rewrite(o, tmp);
-  stats.dead_states_rewrite_duration = chrono::system_clock::now() - start;
+  stats.dead_states_rewrite_duration = timer.duration();
 
   // Compute the dead states
-  start = chrono::system_clock::now();
+  timer.reset();
   const auto res = h(o, state_space);
-  stats.dead_states_duration = chrono::system_clock::now() - start;
+  stats.dead_states_duration = timer.duration();
 
   return res;
 }
@@ -333,9 +332,9 @@ const
   const auto m = state_space(conf, o, m0, h, stats, stop, manager);
 
   res.nb_states = m.size();
-  chrono::time_point<chrono::system_clock> start = chrono::system_clock::now();
+  util::timer tokens_start;
   count_tokens(res, m);
-  stats.tokens_duration = chrono::system_clock::now() - start;
+  stats.tokens_duration = tokens_start.duration();
 
   stats.nb_states = res.nb_states.template convert_to<long double>();
   std::cout << stats.nb_states << " states" << std::endl;
