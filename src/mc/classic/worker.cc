@@ -277,6 +277,8 @@ void
 worker::operator()(const pn::net& net)
 const
 {
+  util::timer total_timer;
+
   // Initialize the libsdd.
   sdd_conf sconf;
   sconf.final_cleanup = not conf.fast_exit;
@@ -423,6 +425,8 @@ const
   {
     std::cout << "Final SDD size: " << sdd::tools::size(m) << " bytes" << std::endl;
   }
+
+  stats.total_duration = total_timer.duration();
 
   dump_sdd_dot(conf, m);
   dump_lua(conf, m);
