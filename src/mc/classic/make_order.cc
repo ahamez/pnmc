@@ -10,6 +10,7 @@
 
 #include "mc/classic/dump.hh"
 #include "mc/classic/make_order.hh"
+#include "util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -68,7 +69,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
 
   if (conf.order_ordering_force)
   {
-    std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
+    util::timer timer;
     using identifier_type = sdd_conf::Identifier;
 
     // Temporary placeholder for identifiers.
@@ -110,7 +111,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     // Apply the FORCE ordering strategy.
     auto force = sdd::force::worker<sdd_conf>(graph, conf.order_reverse);
     const auto o = force(conf.order_force_iterations);
-    stats.force_duration = std::chrono::system_clock::now() - start;
+    stats.force_duration = timer.duration();
     stats.force_spans = force.spans();
 
     // Dump the hypergraph to a DOT file if required by the configuration.
