@@ -81,6 +81,7 @@ const auto order_flat_str = "order-flat";
 const auto order_force_str = "order-force";
 const auto order_force_iterations_str = "order-force-iterations";
 const auto order_only_str = "order-only";
+const auto order_reverse_str = "order-reverse";
 
 // Homomorphisms options
 const auto hom_show_relation_str = "hom-show-relation";
@@ -147,6 +148,7 @@ fill_configuration(int argc, char** argv)
     (order_force_iterations_str , po::value<unsigned int>()->default_value(100)
                                 , "Number of FORCE iterations")
     (order_only_str             , "Compute order only")
+    (order_reverse_str          , "Reverse order (depends on on strategy)")
   ;
 
   po::options_description hom_options("Homomorphisms options");
@@ -312,6 +314,7 @@ fill_configuration(int argc, char** argv)
   conf.order_ordering_force = vm.count(order_force_str);
   conf.order_force_iterations = vm[order_force_iterations_str].as<unsigned int>();
   conf.order_only = vm.count(order_only_str);
+  conf.order_reverse = vm.count(order_reverse_str);
 
   // Hom options
   conf.show_relation = vm.count(hom_show_relation_str);

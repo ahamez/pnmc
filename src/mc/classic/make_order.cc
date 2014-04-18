@@ -108,7 +108,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       identifiers.clear();
     }
     // Apply the FORCE ordering strategy.
-    auto force = sdd::force::worker<sdd_conf>(graph);
+    auto force = sdd::force::worker<sdd_conf>(graph, conf.order_reverse);
     const auto o = force(conf.order_force_iterations);
     stats.force_duration = std::chrono::system_clock::now() - start;
     stats.force_spans = force.spans();
@@ -145,11 +145,24 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
     else
     {
-      for (const auto& place : net.places())
+      if (conf.order_reverse)
       {
-        if (place.connected())
+        for (auto rcit = net.places().rbegin(); rcit != net.places().rend(); ++rcit)
         {
+          if (rcit->connected())
+          {
+            ob.push(rcit->id);
+          }
+        }
+      }
+      else
+      {
+        for (const auto& place : net.places())
+        {
+          if (place.connected())
+          {
           ob.push(place.id);
+          }
         }
       }
     }

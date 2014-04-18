@@ -40,6 +40,9 @@ struct configuration
   /// @brief Remove all hierarchy from order.
   bool order_force_flat;
 
+  /// @brief Reverse order.
+  bool order_reverse;
+
   /// @brief Use the FORCE ordering heuristic.
   bool order_ordering_force;
   unsigned int order_force_iterations;
