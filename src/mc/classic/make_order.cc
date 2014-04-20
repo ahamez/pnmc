@@ -145,48 +145,42 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   {
     ob = boost::apply_visitor(mk_order_visitor(), *net.modules).nested();
   }
-  else
+  else if (conf.order_random)
   {
-    if (conf.order_random)
+    std::vector<std::string> tmp;
+    tmp.reserve(net.places().size());
+    for (const auto& place : net.places())
     {
-      std::vector<std::string> tmp;
-      tmp.reserve(net.places().size());
-      for (const auto& place : net.places())
+      if (place.connected())
       {
-        if (place.connected())
-        {
           tmp.emplace_back(place.id);
-        }
-      }
-      std::random_device rd;
-      std::mt19937 g(rd());
-      std::shuffle(tmp.begin(), tmp.end(), g);
-      for (const auto& id : tmp)
-      {
-        ob.push(id);
       }
     }
-    else
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(tmp.begin(), tmp.end(), g);
+    for (const auto& id : tmp)
     {
-      if (conf.order_reverse)
+      ob.push(id);
+    }
+  }
+  else if (conf.order_reverse)
+  {
+    for (auto rcit = net.places().rbegin(); rcit != net.places().rend(); ++rcit)
+    {
+      if (rcit->connected())
       {
-        for (auto rcit = net.places().rbegin(); rcit != net.places().rend(); ++rcit)
-        {
-          if (rcit->connected())
-          {
-            ob.push(rcit->id);
-          }
-        }
+        ob.push(rcit->id);
       }
-      else
+    }
+  }
+  else
+  {
+    for (const auto& place : net.places())
+    {
+      if (place.connected())
       {
-        for (const auto& place : net.places())
-        {
-          if (place.connected())
-          {
-          ob.push(place.id);
-          }
-        }
+        ob.push(place.id);
       }
     }
   }
