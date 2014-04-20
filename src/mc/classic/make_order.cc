@@ -69,8 +69,6 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
   }
 
-  sdd::order_builder<sdd_conf> ob;
-
   if (conf.load_order_file)
   {
     std::fstream file(*conf.load_order_file);
@@ -81,17 +79,11 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     else
     {
       std::cerr << "Can't open JSON order file " << *conf.load_order_file << std::endl;
-      std::cerr << "Using default order" << std::endl;
-      for (const auto& place : net.places())
-      {
-        if (place.connected())
-        {
-          ob.push(place.id);
-        }
-      }
     }
   }
-  else if (conf.order_ordering_force)
+
+  sdd::order_builder<sdd_conf> ob;
+  if (conf.order_ordering_force)
   {
     util::timer timer;
     using identifier_type = sdd_conf::Identifier;
