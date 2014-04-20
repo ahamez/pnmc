@@ -84,6 +84,7 @@ const auto order_force_iterations_str = "order-force-iterations";
 const auto order_only_str = "order-only";
 const auto order_reverse_str = "order-reverse";
 const auto order_id_per_hier_str = "order-ids-per-hierarchy";
+const auto order_load_str = "order-load";
 
 // Homomorphisms options
 const auto hom_show_relation_str = "hom-show-relation";
@@ -195,6 +196,8 @@ fill_configuration(int argc, char** argv)
     (hom_show_relation_str      , "Show the transition relation")
     (export_tina_str            , po::value<std::string>()
                                 , "Export Petri net to a TINA file")
+    (order_load_str             , po::value<std::string>()
+                                , "Load order from a JSON file")
   ;
 
   po::options_description hidden_libsdd_options("Hidden libsdd options");
@@ -389,7 +392,10 @@ fill_configuration(int argc, char** argv)
   {
     conf.export_tina_file = vm[export_tina_str].as<std::string>();
   }
-
+  if (vm.count(order_load_str))
+  {
+    conf.load_order_file = vm[order_load_str].as<std::string>();
+  }
   return conf;
 }
 

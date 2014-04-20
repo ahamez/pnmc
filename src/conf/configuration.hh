@@ -89,6 +89,7 @@ struct configuration
   boost::optional<std::string> export_hom_to_dot_file;
   boost::optional<std::string> export_sat_hom_to_dot_file;
   boost::optional<std::string> export_tina_file;
+  boost::optional<std::string> load_order_file;
 
   /// @brief Stop state space generation after this much time.
   std::chrono::duration<double> max_time;

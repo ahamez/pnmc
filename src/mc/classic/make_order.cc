@@ -2,11 +2,13 @@
 #include <cassert>
 #include <deque>
 #include <chrono>
+#include <fstream>
 #include <random>
 
 #include <sdd/order/order.hh>
 #include <sdd/order/strategies/force.hh>
 #include <sdd/order/strategies/identifiers_per_hierarchy.hh>
+#include <sdd/tools/load_order.hh>
 
 #include "mc/classic/dump.hh"
 #include "mc/classic/make_order.hh"
@@ -69,7 +71,27 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
 
   sdd::order_builder<sdd_conf> ob;
 
-  if (conf.order_ordering_force)
+  if (conf.load_order_file)
+  {
+    std::fstream file(*conf.load_order_file);
+    if (file.is_open())
+    {
+      return sdd::tools::load_order<sdd_conf>(file);
+    }
+    else
+    {
+      std::cerr << "Can't open JSON order file " << *conf.load_order_file << std::endl;
+      std::cerr << "Using default order" << std::endl;
+      for (const auto& place : net.places())
+      {
+        if (place.connected())
+        {
+          ob.push(place.id);
+        }
+      }
+    }
+  }
+  else if (conf.order_ordering_force)
   {
     util::timer timer;
     using identifier_type = sdd_conf::Identifier;
