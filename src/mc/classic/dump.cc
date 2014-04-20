@@ -144,7 +144,6 @@ dump_hom_dot( const conf::configuration& conf, const sdd::homomorphism<sdd::conf
     {
       std::cerr << "Can't export homomorphism to " << *conf.export_hom_to_dot_file << std::endl;
     }
-
   }
   if (conf.export_sat_hom_to_dot_file)
   {
@@ -157,7 +156,6 @@ dump_hom_dot( const conf::configuration& conf, const sdd::homomorphism<sdd::conf
     {
       std::cerr << "Can't export homomorphism to " << *conf.export_sat_hom_to_dot_file << std::endl;
     }
-
   }
 }
 

@@ -3,7 +3,6 @@
 #include <deque>
 #include <chrono>
 #include <random>
-#include <utility>  // pair
 
 #include <sdd/order/order.hh>
 #include <sdd/order/strategies/force.hh>
@@ -20,7 +19,7 @@ using sdd_conf = sdd::conf1;
 /*------------------------------------------------------------------------------------------------*/
 
 struct mk_order_visitor
-  : public boost::static_visitor<std::pair<std::string, sdd::order_builder<sdd_conf>>>
+  : public boost::static_visitor<sdd::order_builder<sdd_conf>>
 {
   using order_builder = sdd::order_builder<sdd_conf>;
   using result_type = order_builder;
