@@ -8,6 +8,7 @@
 #include "mc/mc.hh"
 #include "parsers/parse.hh"
 #include "parsers/parse_error.hh"
+#include "pn/tina.hh"
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -71,6 +72,18 @@ main(int argc, char** argv)
       if (conf.delete_file and not conf.read_stdin)
       {
         ::remove(conf.file_name.c_str());
+      }
+      if (conf.export_tina_file)
+      {
+        std::ofstream file(*conf.export_tina_file);
+        if (file.is_open())
+        {
+          pn::tina(file, *net_ptr);
+        }
+        else
+        {
+          std::cerr << "Can't export Petri net to " << *conf.export_tina_file << std::endl;
+        }
       }
       mc::mc worker(conf);
       worker(*net_ptr);

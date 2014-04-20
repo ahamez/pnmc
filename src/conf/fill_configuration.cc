@@ -109,7 +109,7 @@ const auto libsdd_hom_cache_size_str = "hom-cache-size";
 // Advanced options
 const auto limit_time_str = "time-limit";
 const auto delete_input_file_str = "delete-input-file";
-const auto export_to_lua_str = "export-to-lua";
+const auto export_to_lua_str = "export-lua";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
 const auto results_json_str = "results-json";
@@ -118,6 +118,7 @@ const auto hypergraph_dot_str = "hypergraph-force-dot";
 const auto fast_exit_str = "fast-exit";
 const auto hom_dot_export_str = "hom-dot";
 const auto hom_sat_dot_export_str = "sat-hom-dot";
+const auto export_tina_str = "export-tina";
 
 boost::optional<configuration>
 fill_configuration(int argc, char** argv)
@@ -192,6 +193,8 @@ fill_configuration(int argc, char** argv)
     (hom_sat_dot_export_str     , po::value<std::string>()
                                 , "Export saturated homomorphism to a DOT file")
     (hom_show_relation_str      , "Show the transition relation")
+    (export_tina_str            , po::value<std::string>()
+                                , "Export Petri net to a TINA file")
   ;
 
   po::options_description hidden_libsdd_options("Hidden libsdd options");
@@ -381,6 +384,10 @@ fill_configuration(int argc, char** argv)
   if (vm.count(hom_sat_dot_export_str))
   {
     conf.export_sat_hom_to_dot_file = vm[hom_sat_dot_export_str].as<std::string>();
+  }
+  if (vm.count(export_tina_str))
+  {
+    conf.export_tina_file = vm[export_tina_str].as<std::string>();
   }
 
   return conf;
