@@ -286,6 +286,7 @@ fill_configuration(int argc, char** argv)
   else if (vm.count(help_exp_str))
   {
     std::cout << hidden_exp_options << std::endl;
+    std::cout << hidden_libsdd_options << std::endl;
     return boost::optional<configuration>();
   }
 
