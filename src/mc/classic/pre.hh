@@ -21,6 +21,13 @@ struct pre
 
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>&) const;
+
+  bool
+  selector()
+  const noexcept
+  {
+    return true;
+  }
 };
 
 /// @brief Equality of two pre.
