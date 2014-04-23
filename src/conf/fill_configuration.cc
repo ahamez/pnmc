@@ -120,6 +120,7 @@ const auto fast_exit_str = "fast-exit";
 const auto hom_dot_export_str = "hom-dot";
 const auto hom_sat_dot_export_str = "sat-hom-dot";
 const auto export_tina_str = "export-tina";
+const auto sample_nb_sdd_str = "sample-nb-sdd";
 
 boost::optional<configuration>
 fill_configuration(int argc, char** argv)
@@ -198,6 +199,7 @@ fill_configuration(int argc, char** argv)
                                 , "Export Petri net to a TINA file")
     (order_load_str             , po::value<std::string>()
                                 , "Load order from a JSON file")
+    (sample_nb_sdd_str          , "Sample the number of SDD regularly")
   ;
 
   po::options_description hidden_libsdd_options("Hidden libsdd options");
@@ -356,6 +358,7 @@ fill_configuration(int argc, char** argv)
   conf.delete_file = vm.count(delete_input_file_str);
   conf.show_time = vm.count(show_time_str);
   conf.fast_exit = vm.count(fast_exit_str);
+  conf.sample_nb_sdd = vm.count(sample_nb_sdd_str);
   if (vm.count(export_to_lua_str))
   {
     conf.export_to_lua_file = vm[export_to_lua_str].as<std::string>();

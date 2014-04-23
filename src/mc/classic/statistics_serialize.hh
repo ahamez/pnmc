@@ -33,8 +33,11 @@ save(Archive& archive, const statistics& s)
          , cereal::make_nvp("relation time", s.relation_duration.count())
          , cereal::make_nvp("rewrite time", s.rewrite_duration.count())
          , cereal::make_nvp("state space time", s.state_space_duration.count())
-         , cereal::make_nvp("tokens time", s.tokens_duration.count())
-         , cereal::make_nvp("sdd samples", s.sdd_ut_size));
+         , cereal::make_nvp("tokens time", s.tokens_duration.count()));
+  if (s.conf.sample_nb_sdd)
+  {
+    archive(cereal::make_nvp("sdd samples", s.sdd_ut_size));
+  }
   if (s.conf.order_ordering_force)
   {
     archive( cereal::make_nvp("FORCE time", s.force_duration.count())

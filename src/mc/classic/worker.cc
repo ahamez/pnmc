@@ -172,22 +172,26 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
                         });
   }
 
-  auto sdd_ut_thread_size
-    = std::thread([&]
-                  {
-                    const auto sample_time = std::chrono::milliseconds(500);
-                    auto last = std::chrono::system_clock::now();
-                    while (not finished)
+  std::thread sdd_ut_thread_size;
+  if (conf.sample_nb_sdd)
+  {
+    sdd_ut_thread_size
+      = std::thread([&]
                     {
-                      std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                      auto now = std::chrono::system_clock::now();
-                      if ((now - last) >= sample_time)
+                      const auto sample_time = std::chrono::milliseconds(500);
+                      auto last = std::chrono::system_clock::now();
+                      while (not finished)
                       {
-                        stats.sdd_ut_size.emplace_back(manager.sdd_stats().size);
-                        last = now;
+                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                        auto now = std::chrono::system_clock::now();
+                        if ((now - last) >= sample_time)
+                        {
+                          stats.sdd_ut_size.emplace_back(manager.sdd_stats().size);
+                          last = now;
+                        }
                       }
-                    }
-                  });
+                    });
+  }
 
   util::timer timer;
   try
@@ -220,7 +224,10 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
   {
     clock.join();
   }
-  sdd_ut_thread_size.join();
+  if (conf.sample_nb_sdd)
+  {
+    sdd_ut_thread_size.join();
+  }
 
   return res;
 }
