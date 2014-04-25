@@ -21,16 +21,12 @@ struct post
   operator()(const sdd::values::flat_set<unsigned int>&)
   const;
 
-  /// @brief Post is a selector.
-  ///
-  /// It's not quite true, but as post doesn't modify the partition, we can use a square union
-  /// rather than a full union.
-  bool
-  selector()
-  const noexcept
-  {
-    return true;
-  }
+//  bool
+//  shifter()
+//  const noexcept
+//  {
+//    return true;
+//  }
 
 };
 
