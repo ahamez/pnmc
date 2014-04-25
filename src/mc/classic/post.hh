@@ -21,12 +21,12 @@ struct post
   operator()(const sdd::values::flat_set<unsigned int>&)
   const;
 
-//  bool
-//  shifter()
-//  const noexcept
-//  {
-//    return true;
-//  }
+  bool
+  shifter()
+  const noexcept
+  {
+    return true;
+  }
 
 };
 
