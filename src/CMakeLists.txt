@@ -4,7 +4,6 @@ set(SOURCES
     mc/classic/count_tokens.cc
     mc/classic/dead.cc
     mc/classic/dump.cc
-    mc/classic/live.cc
     mc/classic/make_order.cc
     mc/classic/post.cc
     mc/classic/pre.cc
