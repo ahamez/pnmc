@@ -18,21 +18,34 @@ struct live
   const std::size_t index;
   boost::dynamic_bitset<>& bitset;
 
-  live(std::size_t, boost::dynamic_bitset<>&);
+  live(std::size_t i, boost::dynamic_bitset<>& b)
+    : index(i), bitset(b)
+  {}
 
   sdd::values::flat_set<unsigned int>
-  operator()(const sdd::values::flat_set<unsigned int>&)
-  const noexcept;
+  operator()(const sdd::values::flat_set<unsigned int>& val)
+  const noexcept
+  {
+    bitset[index] = true;
+    return val;
+  }
 };
 
 /// @brief Equality of two post.
+inline
 bool
-operator==(const live&, const live&)
-noexcept;
+operator==(const live& lhs, const live& rhs)
+noexcept
+{
+  return lhs.index == rhs.index;
+}
 
 /// @brief Textual output of a post.
 std::ostream&
-operator<<(std::ostream&, const live&);
+operator<<(std::ostream& os, const live& l)
+{
+  return os << "live(" << l.index << ")";
+}
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -46,7 +59,14 @@ namespace std
 template <>
 struct hash<pnmc::mc::classic::live>
 {
-  std::size_t operator()(const pnmc::mc::classic::live&) const noexcept;
+  std::size_t
+  operator()(const pnmc::mc::classic::live& l)
+  const noexcept
+  {
+    std::size_t seed = 49979687;
+    sdd::util::hash_combine(seed, l.index);
+    return seed;
+  }
 };
 
 /*------------------------------------------------------------------------------------------------*/

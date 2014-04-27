@@ -8,7 +8,7 @@
 #include <sdd/order/order.hh>
 #include <sdd/order/strategies/force.hh>
 #include <sdd/order/strategies/identifiers_per_hierarchy.hh>
-#include <sdd/tools/load_order.hh>
+#include <sdd/tools/order.hh>
 
 #include "mc/classic/dump.hh"
 #include "mc/classic/make_order.hh"
