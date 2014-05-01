@@ -17,7 +17,10 @@ namespace pnmc {
 
 struct unreadable_file
   : std::exception
-{};
+{
+  const std::string name;
+  unreadable_file(const std::string& n) : name(n) {}
+};
 
 std::shared_ptr<std::istream>
 file_or_cin(const conf::configuration& conf)
@@ -32,7 +35,7 @@ file_or_cin(const conf::configuration& conf)
     std::shared_ptr<std::istream> ptr(new std::ifstream(conf.file_name));
     if (not dynamic_cast<std::ifstream&>(*ptr).is_open())
     {
-      throw unreadable_file();
+      throw unreadable_file(conf.file_name);
     }
     return ptr;
   } 
@@ -50,15 +53,7 @@ main(int argc, char** argv)
   try
   {
     boost::optional<conf::configuration> conf_opt;
-    try
-    {
-      conf_opt = conf::fill_configuration(argc, argv);
-    }
-    catch (const boost::program_options::error& e)
-    {
-      std::cerr << e.what() << std::endl;
-      return 1;
-    }
+    conf_opt = conf::fill_configuration(argc, argv);
 
     if (not conf_opt) // --help or --version
     {
@@ -66,62 +61,66 @@ main(int argc, char** argv)
     }
 
     const auto& conf = *conf_opt;
-    try
+    auto in = file_or_cin(conf);
+    const auto net_ptr = parsers::parse(conf, *in);
+    if (conf.delete_file and not conf.read_stdin)
     {
-      auto in = file_or_cin(conf);
-      const auto net_ptr = parsers::parse(conf, *in);
-      if (conf.delete_file and not conf.read_stdin)
+      ::remove(conf.file_name.c_str());
+    }
+    if (conf.export_tina_file)
+    {
+      std::ofstream file(*conf.export_tina_file);
+      if (file.is_open())
       {
-        ::remove(conf.file_name.c_str());
+        pn::tina(file, *net_ptr);
       }
-      if (conf.export_tina_file)
+      else
       {
-        std::ofstream file(*conf.export_tina_file);
-        if (file.is_open())
-        {
-          pn::tina(file, *net_ptr);
-        }
-        else
-        {
-          std::cerr << "Can't export Petri net to " << *conf.export_tina_file << std::endl;
-        }
+        std::cerr << "Can't export Petri net to " << *conf.export_tina_file << std::endl;
       }
-      mc::mc worker(conf);
-      worker(*net_ptr);
     }
-    catch (const unreadable_file&)
-    {
-      std::cerr << "Can't open '" << conf.file_name << "'." << std::endl;
-      std::cerr << "Exiting." << std::endl;
-      return 2;
-    }
-    catch (const parsers::parse_error& p)
-    {
-      std::cerr << "Error when parsing input." << std::endl;
-      std::cerr << p.what() << std::endl;
-      std::cerr << "Exiting." << std::endl;
-      return 3;
-    }
-    catch (const sdd::order_error& e)
-    {
-      std::cerr << "Order error." << std::endl;
-      std::cerr << e.what() << std::endl;
-      std::cerr << "Exiting." << std::endl;
-      return 4;
-    }
-    catch (const std::runtime_error& e)
-    {
-      std::cerr << "Other error." << std::endl;
-      std::cerr << e.what() << std::endl;
-      std::cerr << "Exiting." << std::endl;
-      return 5;
-    }
+    mc::mc worker(conf);
+    worker(*net_ptr);
     return 0;
+  }
+  catch (const boost::program_options::error& e)
+  {
+    std::cerr << e.what() << std::endl;
+    std::cerr << "Exiting." << std::endl;
+    return 1;
+  }
+  catch (const unreadable_file& e)
+  {
+    std::cerr << "Can't open '" << e.name << "'." << std::endl;
+    std::cerr << "Exiting." << std::endl;
+    return 2;
+  }
+  catch (const parsers::parse_error& e)
+  {
+    std::cerr << "Error when parsing input." << std::endl;
+    std::cerr << e.what() << std::endl;
+    std::cerr << "Exiting." << std::endl;
+    return 3;
+  }
+  catch (const sdd::order_error& e)
+  {
+    std::cerr << "Order error." << std::endl;
+    std::cerr << e.what() << std::endl;
+    std::cerr << "Exiting." << std::endl;
+    return 4;
+  }
+  catch (const std::runtime_error& e)
+  {
+    std::cerr << "Other error." << std::endl;
+    std::cerr << e.what() << std::endl;
+    std::cerr << "Exiting." << std::endl;
+    return 5;
   }
   catch (std::exception& e)
   {
-    std::cerr << "Fatal error. Please report the following to a.hamez@isae.fr." << std::endl;
+    std::cerr << "Error unknown. Please report the following to a.hamez@isae.fr." << std::endl;
     std::cerr << e.what() << std::endl;
+    std::cerr << "Exiting." << std::endl;
     return -1;
   }
 }
