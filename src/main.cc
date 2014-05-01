@@ -104,9 +104,17 @@ main(int argc, char** argv)
     }
     catch (const sdd::order_error& e)
     {
+      std::cerr << "Order error." << std::endl;
       std::cerr << e.what() << std::endl;
       std::cerr << "Exiting." << std::endl;
       return 4;
+    }
+    catch (const std::runtime_error& e)
+    {
+      std::cerr << "Other error." << std::endl;
+      std::cerr << e.what() << std::endl;
+      std::cerr << "Exiting." << std::endl;
+      return 5;
     }
     return 0;
   }
