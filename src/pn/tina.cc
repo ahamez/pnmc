@@ -10,13 +10,11 @@ namespace pnmc { namespace pn {
 namespace /* anonymous */ {
 
 std::string
-format(const std::string& str)
+format(std::string str)
 {
-  std::string res;
-  res.reserve(str.size());
-  std::transform( str.cbegin(), str.cend(), std::back_inserter(res)
-                , [](char c){if (c == '.') return '_'; else return c;});
-  return res;
+  std::transform( str.cbegin(), str.cend(), str.begin()
+                , [](char c){if (c == '.' or c == '-') return '_'; else return c;});
+  return str;
 }
 
 }
@@ -28,25 +26,28 @@ tina(std::ostream& out, const net& net)
 {
   for (const auto& transition : net.transitions())
   {
-    out << "tr t" << format(transition.id);
+    out << "tr " << format(transition.id);
     for (const auto& arc : transition.pre)
     {
-      out << " p" << format(arc.first);
+      out << " " << format(arc.first);
     }
     out << " ->";
     for (const auto& arc : transition.post)
     {
-      out << " p" << format(arc.first);
+      out << " " << format(arc.first);
     }
-    out << "\n";
+    out << std::endl;
   }
 
   for (const auto& place : net.places())
   {
-    out << "pl p" << format(place.id) << " (" << place.marking << ")\n";
+    if (place.marking > 0)
+    {
+      out << "pl " << format(place.id) << " (" << place.marking << ")" << std::endl;
+    }
   }
 
-  out << "net generated_net\n";
+  out << "net " << format(net.name) << std::endl;
 }
 
 /*------------------------------------------------------------------------------------------------*/
