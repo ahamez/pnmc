@@ -60,8 +60,6 @@ set( CMAKE_CXX_FLAGS_RELEASE
 set( CMAKE_CXX_FLAGS_DEBUG
      "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,-stack_size -Wl,0x4000000")
-
 ################################################################################
 
 include_directories("${Boost_INCLUDE_DIRS}")
