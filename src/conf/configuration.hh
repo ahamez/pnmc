@@ -28,9 +28,6 @@ struct configuration
   /// @brief Read from standard input rather than from a file.
   bool read_stdin;
 
-  /// @brief Delete model file after reading it.
-  bool delete_file;
-
   /// @brief A random order is computed.
   bool order_random;
 

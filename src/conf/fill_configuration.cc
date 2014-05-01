@@ -109,7 +109,6 @@ const auto libsdd_hom_cache_size_str = "hom-cache-size";
 
 // Advanced options
 const auto limit_time_str = "time-limit";
-const auto delete_input_file_str = "delete-input-file";
 const auto export_to_lua_str = "export-lua";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
@@ -183,7 +182,6 @@ fill_configuration(int argc, char** argv)
                                 , "Number of identifiers per hierarchy")
     (order_only_str             , "Compute order only")
     (show_final_sdd_bytes_str   , "Show the number of bytes used by the final state space's SDD")
-    (delete_input_file_str      , "Delete input file after reading it")
     (export_to_lua_str          , po::value<std::string>()
                                 , "Export the final SDD to a Lua structure")
     (final_sdd_dot_export_str   , po::value<std::string>()
@@ -355,7 +353,6 @@ fill_configuration(int argc, char** argv)
   conf.compute_dead_transitions = vm.count(mc_dead_transitions_str);
 
   // Advanced options
-  conf.delete_file = vm.count(delete_input_file_str);
   conf.show_time = vm.count(show_time_str);
   conf.fast_exit = vm.count(fast_exit_str);
   conf.sample_nb_sdd = vm.count(sample_nb_sdd_str);

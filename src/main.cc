@@ -32,10 +32,6 @@ main(int argc, char** argv)
     const auto& conf = *conf_opt;
     auto in = util::select_input(conf);
     const auto net_ptr = parsers::parse(conf, *in);
-    if (conf.delete_file and not conf.read_stdin)
-    {
-      ::remove(conf.file_name.c_str());
-    }
     if (conf.export_tina_file)
     {
       std::ofstream file(*conf.export_tina_file);
