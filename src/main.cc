@@ -1,5 +1,3 @@
-#include <cstdio>
-#include <fstream>
 #include <iostream>
 
 #include <boost/program_options/errors.hpp>
@@ -10,6 +8,7 @@
 #include "parsers/parse.hh"
 #include "parsers/parse_error.hh"
 #include "pn/tina.hh"
+#include "util/export_to_tina.hh"
 #include "util/select_input.hh"
 
 /*------------------------------------------------------------------------------------------------*/
@@ -32,18 +31,7 @@ main(int argc, char** argv)
     const auto& conf = *conf_opt;
     auto in = util::select_input(conf);
     const auto net_ptr = parsers::parse(conf, *in);
-    if (conf.export_tina_file)
-    {
-      std::ofstream file(*conf.export_tina_file);
-      if (file.is_open())
-      {
-        pn::tina(file, *net_ptr);
-      }
-      else
-      {
-        std::cerr << "Can't export Petri net to " << *conf.export_tina_file << std::endl;
-      }
-    }
+    util::export_to_tina(conf, *net_ptr);
     mc::mc worker(conf);
     worker(*net_ptr);
     return 0;

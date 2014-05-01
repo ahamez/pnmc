@@ -22,6 +22,7 @@ set(SOURCES
     pn/place.cc
     pn/tina.cc
     pn/transition.cc
+    util/export_to_tina.cc
     util/select_input.cc
     )
 
