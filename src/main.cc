@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <boost/program_options/errors.hpp>
+#include <sdd/order/order_error.hh>
 
 #include "conf/fill_configuration.hh"
 #include "mc/mc.hh"
@@ -91,13 +92,21 @@ main(int argc, char** argv)
     catch (const unreadable_file&)
     {
       std::cerr << "Can't open '" << conf.file_name << "'." << std::endl;
+      std::cerr << "Exiting." << std::endl;
       return 2;
     }
     catch (const parsers::parse_error& p)
     {
       std::cerr << "Error when parsing input." << std::endl;
       std::cerr << p.what() << std::endl;
+      std::cerr << "Exiting." << std::endl;
       return 3;
+    }
+    catch (const sdd::order_error& e)
+    {
+      std::cerr << e.what() << std::endl;
+      std::cerr << "Exiting." << std::endl;
+      return 4;
     }
     return 0;
   }
