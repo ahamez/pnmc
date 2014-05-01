@@ -28,7 +28,7 @@ struct count_tokens_visitor
   operator()(const sdd::zero_terminal<sdd::conf1>&)
   const
   {
-    assert(false);
+    assert(false && "|0|");
     __builtin_unreachable();
   }
 
