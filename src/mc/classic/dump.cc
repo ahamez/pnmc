@@ -77,8 +77,7 @@ dump_json( const conf::configuration& conf, const statistics& stats
       }
       archive( cereal::make_nvp("pnmc", stats)
              , cereal::make_nvp("libsdd", manager)
-             , cereal::make_nvp("final sdd", final_sdd_stats)
-             , cereal::make_nvp("Petri net", pn_stats));
+             , cereal::make_nvp("final sdd", final_sdd_stats));
     }
     else
     {
