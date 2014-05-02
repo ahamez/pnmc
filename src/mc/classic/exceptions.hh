@@ -23,6 +23,13 @@ struct bound_error final
 
 /*------------------------------------------------------------------------------------------------*/
 
+template <typename C>
+struct time_limit final
+  : public sdd::interrupt<C>
+{};
+
+/*------------------------------------------------------------------------------------------------*/
+
 }}} // namespace pnmc::mc::classic
 
 #endif // _PNMC_MC_BOUNDED_ERROR_HH_

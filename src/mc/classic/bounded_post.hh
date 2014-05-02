@@ -7,7 +7,7 @@
 #include <sdd/values/flat_set.hh>
 #include <sdd/values_manager.hh>
 
-#include "mc/classic/bound_error.hh"
+#include "mc/classic/exceptions.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

@@ -1,6 +1,7 @@
 #include <cassert>
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <set>
 #include <thread>
 
@@ -9,11 +10,11 @@
 #include <sdd/sdd.hh>
 #include <sdd/tools/size.hh>
 
-#include "mc/classic/bound_error.hh"
 #include "mc/classic/bounded_post.hh"
 #include "mc/classic/count_tokens.hh"
 #include "mc/classic/dead.hh"
 #include "mc/classic/dump.hh"
+#include "mc/classic/exceptions.hh"
 #include "mc/classic/live.hh"
 #include "mc/classic/make_order.hh"
 #include "mc/classic/post.hh"
@@ -140,94 +141,93 @@ rewrite( const conf::configuration&, const sdd::order<sdd_conf>& o
 
 /*------------------------------------------------------------------------------------------------*/
 
+struct threads
+{
+  bool finished;
+  std::thread clock;
+  std::thread sdd_sampling;
+
+  threads( const conf::configuration& conf, statistics& stats, bool& stop
+         , const sdd::manager<sdd_conf>& manager, util::timer& beginnning)
+    : finished(false)
+    , clock()
+    , sdd_sampling()
+  {
+    if (conf.max_time > chrono::duration<double>(0))
+    {
+      clock = std::thread([&]
+              {
+                while (not finished)
+                {
+                  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                  if (beginnning.duration() >= conf.max_time)
+                  {
+                    stop = true;
+                    break;
+                  }
+                }
+              });
+    }
+
+    if (conf.sample_nb_sdd)
+    {
+      sdd_sampling = std::thread([&]
+                     {
+                       const auto sample_time = std::chrono::milliseconds(500);
+                       auto last = std::chrono::system_clock::now();
+                       while (not finished)
+                       {
+                         std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                         auto now = std::chrono::system_clock::now();
+                         if ((now - last) >= sample_time)
+                         {
+                           stats.sdd_ut_size.emplace_back(manager.sdd_stats().size);
+                           last = now;
+                         }
+                       }
+                     });
+    }
+  }
+
+  ~threads()
+  {
+    finished = true;
+    if (clock.joinable())
+    {
+      clock.join();
+     }
+    if (sdd_sampling.joinable())
+    {
+      sdd_sampling.join();
+    }
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
 SDD
 state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD m
            , homomorphism h, statistics& stats, bool& stop, const sdd::manager<sdd_conf>& manager)
 {
   SDD res;
 
-  // To stop the clock thread.
-  bool finished = false;
-
   // The reference time;
   util::timer beginnning;
 
-  // Limited time mode?
-  std::thread clock;
-  if (conf.max_time > chrono::duration<double>(0))
-  {
-    clock = std::thread([&]
-                        {
-                          while (not finished)
-                          {
-                            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                            if (beginnning.duration() >= conf.max_time)
-                            {
-                              stop = true;
-                              std::cout << "Time limit exceeded,";
-                              std::cout << " it may take a while to completely stop." << std::endl;
-                              break;
-                            }
-                          }
-                        });
-  }
-
-  std::thread sdd_ut_thread_size;
-  if (conf.sample_nb_sdd)
-  {
-    sdd_ut_thread_size
-      = std::thread([&]
-                    {
-                      const auto sample_time = std::chrono::milliseconds(500);
-                      auto last = std::chrono::system_clock::now();
-                      while (not finished)
-                      {
-                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                        auto now = std::chrono::system_clock::now();
-                        if ((now - last) >= sample_time)
-                        {
-                          stats.sdd_ut_size.emplace_back(manager.sdd_stats().size);
-                          last = now;
-                        }
-                      }
-                    });
-  }
+  threads _(conf, stats, stop, manager, beginnning);
 
   util::timer timer;
   try
   {
     res = h(o, m);
   }
-  catch (const bound_error<sdd_conf>& b)
+  catch (const std::exception& e)
   {
-    std::cout << "Marking limit (" << conf.marking_bound << ") reached for place " << b.place << "."
-              << std::endl;
-    stats.interrupted = true;
-    res = b.result();
+    stats.state_space_duration = timer.duration();
+    throw;
   }
-  catch (const sdd::interrupt<sdd_conf>& i)
-  {
-    stats.interrupted = true;
-    res = i.result();
-  }
-  // Tell the clock thread to stop on next wakeup.
-  finished = true;
+
   stats.state_space_duration = timer.duration();
-
-  if (stats.interrupted)
-  {
-    std::cout << "State space computation interrupted after " << beginnning.duration().count()
-              << "s." << std::endl;
-  }
-
-  if (conf.max_time > chrono::duration<double>(0))
-  {
-    clock.join();
-  }
-  if (conf.sample_nb_sdd)
-  {
-    sdd_ut_thread_size.join();
-  }
 
   return res;
 }
@@ -338,7 +338,30 @@ const
   }
 
   // Compute the state space.
-  const auto m = state_space(conf, o, m0, h, stats, stop, manager);
+  auto m = sdd::zero<sdd_conf>();
+
+  try
+  {
+    m = state_space(conf, o, m0, h, stats, stop, manager);
+  }
+  catch (const bound_error<sdd_conf>& e)
+  {
+    std::cout << "Marking limit (" << conf.marking_bound << ") reached for place " << e.place << "."
+              << std::endl;
+    stats.interrupted = true;
+    dump_json(conf, stats, manager, m, net);
+    dump_hom_dot(conf, h_classic, h);
+    return;
+  }
+  catch (const time_limit<sdd_conf>& e)
+  {
+    std::cout << "State space computation interrupted after " << stats.state_space_duration.count()
+              << "s." << std::endl;
+    stats.interrupted = true;
+    dump_json(conf, stats, manager, m, net);
+    dump_hom_dot(conf, h_classic, h);
+    return;
+  }
 
   res.nb_states = m.size();
   util::timer tokens_start;

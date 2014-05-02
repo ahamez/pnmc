@@ -4,15 +4,14 @@
 #include <functional> // hash
 #include <iosfwd>
 
-#include <sdd/hom/interrupt.hh>
-
 #include "conf/configuration.hh"
+#include "mc/classic/exceptions.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief A generic function which throws an sdd::interrupt when a given ammount of time has been
+/// @brief A generic function which throws a time_limit when a given ammount of time has been
 /// reached.
 template <typename C, typename Fun>
 struct timed
@@ -39,7 +38,7 @@ struct timed
   {
     if (stop_)
     {
-      throw sdd::interrupt<C>();
+      throw time_limit<C>();
     }
     return fun_(x);
   }
