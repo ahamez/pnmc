@@ -1,9 +1,11 @@
-#include <algorithm> // random_shuffle, transform
+#include <algorithm> // copy, random_shuffle, transform
 #include <cassert>
 #include <deque>
 #include <chrono>
 #include <fstream>
 #include <random>
+#include <set>
+#include <sstream>
 
 #include <sdd/order/order.hh>
 #include <sdd/order/strategies/force.hh>
@@ -74,7 +76,50 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     std::fstream file(*conf.load_order_file);
     if (file.is_open())
     {
-      return sdd::tools::load_order<sdd_conf>(file);
+      sdd::order<sdd_conf> o = sdd::tools::load_order<sdd_conf>(file);
+
+      // Check if loaded order corresponds to the Petri net.
+      std::set<std::string> order_identifiers;
+      o.flat(std::inserter(order_identifiers, order_identifiers.end()));
+
+      std::set<std::string> pn_identifiers;
+      std::transform( net.places_by_id().cbegin(), net.places_by_id().cend()
+                    , std::inserter(pn_identifiers, pn_identifiers.end())
+                    , [](const pn::place& p){return p.id;});
+
+
+      std::vector<std::string> diff;
+      diff.reserve(order_identifiers.size());
+
+      std::set_difference( order_identifiers.cbegin(), order_identifiers.cend()
+                         , pn_identifiers.cbegin(), pn_identifiers.cend()
+                         , std::back_inserter(diff));
+
+      if (not diff.empty())
+      {
+        std::stringstream ss;
+        ss << "The following identifiers from " << *conf.load_order_file << " don't exist in PN: ";
+        std::copy( diff.cbegin(), std::prev(diff.cend())
+                 , std::ostream_iterator<std::string>(ss, ", "));
+        ss << diff.back();
+        throw std::runtime_error(ss.str());
+      }
+
+      std::set_difference( pn_identifiers.cbegin(), pn_identifiers.cend()
+                         , order_identifiers.cbegin(), order_identifiers.cend()
+                         , std::back_inserter(diff));
+
+      if (not diff.empty())
+      {
+        std::stringstream ss;
+        ss << "The following identifiers from PN don't exist in " << *conf.load_order_file << ": ";
+        std::copy( diff.cbegin(), std::prev(diff.cend())
+                  , std::ostream_iterator<std::string>(ss, ", "));
+        ss << diff.back();
+        throw std::runtime_error(ss.str());
+      }
+
+      return o;
     }
     else
     {
