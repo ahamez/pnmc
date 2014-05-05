@@ -78,7 +78,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
     else
     {
-      std::cerr << "Can't open JSON order file " << *conf.load_order_file << std::endl;
+      throw std::runtime_error("Can't open JSON order file " + *conf.load_order_file);
     }
   }
 
