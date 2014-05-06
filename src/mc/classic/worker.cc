@@ -47,6 +47,7 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
   return SDD(order, [&](const std::string& id)
                         -> sdd::values::flat_set<unsigned int>
                        {
+                         assert(net.places_by_id().find(id) != net.places_by_id().end());
                          return {net.places_by_id().find(id)->marking};
                        });
 }
