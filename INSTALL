@@ -4,12 +4,12 @@ PNMC INSTALLATION
 
   * C++11 compiler
     - clang >= 3.3
-    - gcc >= 4.8
+    - gcc >= 4.9
     - Other compilers might work, as long as they implement the C++11 standard
 
   * Libraries
     - libsdd (https://github.com/ahamez/libsdd)
-    - Boost >= 1.55
+    - Boost >= 1.55 (http://www.boost.org)
     - cereal >= 1.0.0 (http://uscilab.github.io/cereal)
 
   * Tools
@@ -26,6 +26,4 @@ PNMC INSTALLATION
   * Available cmake variables to configure paths
     - CMAKE_INSTALL_PREFIX=/path/to/install
     - BOOST_ROOT=/path/to/boost
-
-  * Setting the compiler
-    - CXX=/path/to/bin/compiler cmake ...
+    - CMAKE_CXX_COMPILER=/path/to/bin/compiler
