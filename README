@@ -1,0 +1,14 @@
+pnmc
+====
+
+Pnmc is a small prototype of a symbolic model checker for Petri nets written in C++. It uses the libsdd library 
+(https://github.com/ahamez/libsdd) which implements Hierarchical Set Decision Diagrams.
+
+The goal of pnmc is mainly to assess the performances of the libsdd, both in term of algorithms and efficient memory
+usage. As such, it mainly focus on state space generation and can only computes the dead states of a Petri nets. 
+Reachabilty properties are planned in the future
+
+Installation
+============
+
+Instructions to compile and install pnmc are given in the INSTALL file.
