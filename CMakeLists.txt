@@ -7,7 +7,6 @@ cmake_minimum_required (VERSION 2.8.9)
 project (pnmc)
 
 option (PACKED "Pack structures" OFF)
-option (PROFILE "Profile the library" OFF)
 option (LIBSDD_PATH "Path to libsdd")
 option (NO_COROUTINE "Don't use Boost.Coroutine" OFF)
 
@@ -31,10 +30,6 @@ message("-- Boost Libraries: ${Boost_LIBRARY_DIRS}")
 
 if (PACKED)
   add_definitions("-DLIBSDD_PACKED")
-endif ()
-
-if (PROFILE)
-  add_definitions("-DLIBSDD_PROFILE")
 endif ()
 
 ################################################################################
