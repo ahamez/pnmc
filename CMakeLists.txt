@@ -19,6 +19,11 @@ if (NOT NO_COROUTINE)
 else ()
   find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options)
 endif ()
+
+if (NOT Boost_FOUND)
+  message(FATAL_ERROR "Boost not found")
+endif ()
+
 message("-- Boost Include: ${Boost_INCLUDE_DIR}")
 message("-- Boost Libraries: ${Boost_LIBRARY_DIRS}")
 
