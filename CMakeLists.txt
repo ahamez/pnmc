@@ -8,7 +8,7 @@ project (pnmc)
 
 option (PACKED "Pack structures" OFF)
 option (PROFILE "Profile the library" OFF)
-option (LIBSDD "Path to libsdd")
+option (LIBSDD_PATH "Path to libsdd")
 option (NO_COROUTINE "Don't use Boost.Coroutine" OFF)
 
 ################################################################################
@@ -48,6 +48,12 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+
+find_path(LIBSDD_INCLUDE_DIR sdd/sdd.hh PATHS ${LIBSDD_PATH})
+if (NOT LIBSDD_INCLUDE_DIR)
+  message(FATAL_ERROR "libsdd not found")
+endif ()
+
 add_definitions("-Wall")
 add_definitions("-std=c++11")
 add_definitions("-ftemplate-depth=256")
@@ -69,7 +75,7 @@ set( CMAKE_CXX_FLAGS_DEBUG
 
 include_directories("${Boost_INCLUDE_DIRS}")
 include_directories("${PROJECT_SOURCE_DIR}/src")
-include_directories("${LIBSDD}")
+include_directories("${LIBSDD_INCLUDE_DIR}")
 
 ################################################################################
 
