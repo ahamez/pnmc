@@ -97,9 +97,18 @@ struct count_tokens_visitor
 /*------------------------------------------------------------------------------------------------*/
 
 void
-count_tokens(results& res, const sdd::SDD<sdd::conf1>& states)
+count_tokens(results& res, const sdd::SDD<sdd::conf1>& states, const pn::net& net)
 {
   std::tie(res.max_token_markings, res.max_token_places) = visit(count_tokens_visitor(), states);
+
+  // Add markings of (useless) places that are connected.
+  for (const auto& place : net.places())
+  {
+    if (not place.connected())
+    {
+      res.max_token_markings += place.marking;
+    }
+  }
 }
 
 /*------------------------------------------------------------------------------------------------*/

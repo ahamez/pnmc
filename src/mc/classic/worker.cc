@@ -366,7 +366,7 @@ const
 
   res.nb_states = m.size();
   util::timer tokens_start;
-  count_tokens(res, m);
+  count_tokens(res, m, net);
   stats.tokens_duration = tokens_start.duration();
 
   stats.nb_states = res.nb_states.template convert_to<long double>();
