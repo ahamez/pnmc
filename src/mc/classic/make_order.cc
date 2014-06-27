@@ -67,7 +67,12 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   {
     if (not place.connected())
     {
-      std::cerr << "Warning: place " << place.id << " is not connected." << std::endl;
+      std::cerr << "Warning: place " << place.id << " is not connected";
+      if (place.marking > 0)
+      {
+        std::cerr << " and has an initial marking";
+      }
+      std::cerr << "." << std::endl;
     }
   }
 
