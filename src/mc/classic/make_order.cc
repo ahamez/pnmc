@@ -76,6 +76,8 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
   }
 
+  // Load a pre-computed order from a JSON file and check if it matches the Petri net.
+  // We don't try to apply any heuristic on this order.
   if (conf.load_order_file)
   {
     std::fstream file(*conf.load_order_file);
@@ -132,6 +134,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
   }
 
+  // FORCE heuristic.
   sdd::order_builder<sdd_conf> ob;
   if (conf.order_ordering_force)
   {
@@ -183,10 +186,12 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     // Dump the hypergraph to a DOT file if required by the configuration.
     dump_hypergraph_dot(conf, graph);
   }
+  // Use model's hierarchy, if any.
   else if (not conf.order_flat and net.modules)
   {
     ob = boost::apply_visitor(mk_order_visitor(), *net.modules).nested();
   }
+  // Random order, mostly used for developpement purposes.
   else if (conf.order_random)
   {
     std::vector<std::string> tmp;
@@ -206,6 +211,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       ob.push(id);
     }
   }
+  // Flat reversed order.
   else if (conf.order_reverse)
   {
     for (auto rcit = net.places().rbegin(); rcit != net.places().rend(); ++rcit)
@@ -216,6 +222,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       }
     }
   }
+  // Flat order.
   else
   {
     for (const auto& place : net.places())
@@ -227,6 +234,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
   }
 
+  // Constrain hierarchy with a given number of variables per level.
   if (conf.order_id_per_hierarchy > 0 and not conf.order_flat)
   {
     ob = sdd::identifiers_per_hierarchy<sdd_conf>(conf.order_id_per_hierarchy)(ob);
