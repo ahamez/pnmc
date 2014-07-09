@@ -77,10 +77,15 @@ marking(const std::string& s)
 std::shared_ptr<pn::net>
 tina(std::istream& in)
 {
+  // Known limitations:
+  // - there's must be a transition or place per line
+  // - labels are ignored
+
   std::shared_ptr<pn::net> net_ptr = std::make_shared<pn::net>();
   auto& net = *net_ptr;
 
-  std::string line, s0, s1, s2;
+  std::string line, s0, s1, s2, ignore;
+  char peek;
   line.reserve(1024);
 
   while (std::getline(in, line))
@@ -114,11 +119,18 @@ tina(std::istream& in)
         throw parse_error("Invalid transition: " + line);
       }
 
+      // Ignore label, if any.
+      peek = (ss >> std::ws).peek();
+      if (peek == std::char_traits<char>::to_int_type(':'))
+      {
+        ss >> ignore >> ignore; // ':' <label>
+      }
+
       // Skip time interval, if any.
       // We don't check if the interval is well-formed...
-      const auto c = (ss >> std::ws).peek();
-      if (  c == std::char_traits<char>::to_int_type('[')
-          or c == std::char_traits<char>::to_int_type(']'))
+      peek = (ss >> std::ws).peek();
+      if (   peek == std::char_traits<char>::to_int_type('[')
+          or peek == std::char_traits<char>::to_int_type(']'))
       {
         ss >> s1;
       }
@@ -152,6 +164,13 @@ tina(std::istream& in)
     {
       if (ss >> s1)
       {
+        // Ignore label, if any.
+        peek = (ss >> std::ws).peek();
+        if (peek == std::char_traits<char>::to_int_type(':'))
+        {
+          ss >> ignore >> ignore; // ':' <label>
+        }
+
         if (ss >> s2)
         {
           net.add_place(s1, marking(s2));
