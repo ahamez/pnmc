@@ -101,7 +101,8 @@ tina(std::istream& in)
     // Net
     if (s0 == "net")
     {
-      continue;
+      ss >> s0;
+      net_ptr->name = s0;
     }
 
     // Transitions
