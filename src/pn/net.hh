@@ -31,7 +31,7 @@ private:
   /// @brief A tag to identify the view ordered by insertion order for boost::multi_index.
   struct insertion_index{};
 
-  /// @brief A tag to identify the view ordered by idendifiers for boost::multi_index.
+  /// @brief A tag to identify the view ordered by identifiers for boost::multi_index.
   struct id_index{};
 
   /// @brief A tag to identify the view ordered by markings for boost::multi_index.
@@ -43,37 +43,28 @@ private:
 public:
 
   /// @brief The type of the set of all places.
-  typedef multi_index_container<
-                place
-  						, indexed_by<
-
-                  // keep insertion order
-                    sequenced<tag<insertion_index>>
-
-                  // sort by id
-                  ,  ordered_unique< tag<id_index>
-                                   , member<place, const std::string, &place::id>>
-
+  using places_type =
+    multi_index_container<
+      place
+    , indexed_by< // keep insertion order
+                  sequenced<tag<insertion_index>>
+                   // sort by id
+                ,  ordered_unique< tag<id_index>
+                                 , member<place, const std::string, &place::id>>
                   // sort by marking
-                  , ordered_non_unique< tag<marking_index>
-                                      , member<place, unsigned int, &place::marking>>
-              >
-          > places_type;
+                , ordered_non_unique< tag<marking_index>
+                                    , member<place, unsigned int, &place::marking>>>>;
 
   /// @brief The type of the set of all transitions.
-  typedef multi_index_container<
-                transition
-              , indexed_by<
-
-                   // sort by id
-                     ordered_unique< tag<id_index>
-                                   , member<transition, const std::string, &transition::id>>
-
-                   // sort by index
-                   , ordered_unique< tag<index_index>
-                                   , member<transition, const std::size_t, &transition::index>>
-              >
-         > transitions_type;
+  using transitions_type =
+    multi_index_container<
+      transition
+    , indexed_by< // sort by id
+                  ordered_unique< tag<id_index>
+                                , member<transition, const std::string, &transition::id>>
+                  // sort by index
+                , ordered_unique< tag<index_index>
+                                , member<transition, const std::size_t, &transition::index>>>>;
 
   /// @brief The net's name.
   std::string name;
