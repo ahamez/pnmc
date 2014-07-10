@@ -80,6 +80,7 @@ tina(std::istream& in)
   // Known limitations:
   // - there's must be a transition or place per line
   // - labels are ignored
+  // - time intervals are not completely validated (e.g. [0, 2a] is wrongly validated
 
   std::shared_ptr<pn::net> net_ptr = std::make_shared<pn::net>();
   auto& net = *net_ptr;
@@ -127,13 +128,56 @@ tina(std::istream& in)
         ss >> ignore >> ignore; // ':' <label>
       }
 
-      // Skip time interval, if any.
-      // We don't check if the interval is well-formed...
+      // Time interval.
       peek = (ss >> std::ws).peek();
       if (   peek == std::char_traits<char>::to_int_type('[')
           or peek == std::char_traits<char>::to_int_type(']'))
       {
-        ss >> s1;
+        char c = ss.get(); // '[' or ']';
+        while (ss.good())
+        {
+          c = ss.get();
+          if (c == '[' or c == ']')
+          {
+            break;
+          }
+          s1.push_back(c);
+        }
+
+        if (not ss.good())
+        {
+          throw parse_error("Unexpected end of file. Missing '[' or ']'?");
+        }
+
+        std::istringstream ss1(s1);
+        std::getline(ss1, s2, ','); // split on ','
+        unsigned int first, last;
+        try
+        {
+          first = std::stoi(s2);
+        }
+        catch (const std::invalid_argument&)
+        {
+          throw parse_error("Expected a value, got: '" + s2 + "'");
+        }
+        ss1 >> s2;
+        try
+        {
+          last = std::stoi(s2);
+        }
+        catch (const std::invalid_argument& e)
+        {
+          if (s2 == "w")
+          {
+            last = std::numeric_limits<unsigned int>::max();
+          }
+          else
+          {
+            throw parse_error("Expected a value, got: '" + s2 + "'");
+          }
+        }
+
+        net_ptr->add_time_interval(s0, first, last);
       }
 
       bool found_arrow = false;
