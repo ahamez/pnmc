@@ -235,6 +235,19 @@ tina(std::istream& in)
     }
   }
 
+  // Partition timed and untimed transitions.
+  for (const auto& t : net_ptr->transitions())
+  {
+    if (t.low != 0 or t.high != std::numeric_limits<unsigned int>::max())
+    {
+      net_ptr->timed_transitions.push_back(t);
+    }
+    else
+    {
+      net_ptr->untimed_transitions.push_back(t);
+    }
+  }
+
   return net_ptr;
 }
 

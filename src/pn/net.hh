@@ -1,6 +1,8 @@
 #ifndef _PNMC_PN_NET_HH_
 #define _PNMC_PN_NET_HH_
 
+#include <functional> // reference_wrapper
+
 #pragma GCC diagnostic push
 #if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC diagnostic ignored "-Wunused-local-typedefs"
@@ -66,7 +68,7 @@ public:
                 , ordered_unique< tag<index_index>
                                 , member<transition, const std::size_t, &transition::index>>>>;
 
-  /// @brief The net's name.
+  /// @brief The Petri net's name.
   std::string name;
 
   /// @brief The set of places.
@@ -75,7 +77,13 @@ public:
   /// @brief The set of transitions.
   transitions_type transitions_set;
 
-  /// @brief The hierarchical description, if any, of this Petri net.
+  /// @brief The timed transitions.
+  std::vector<std::reference_wrapper<const transition>> timed_transitions;
+
+  /// @brief The untimed transitions.
+  std::vector<std::reference_wrapper<const transition>> untimed_transitions;
+
+  /// @brief The hierarchical description, if any.
   module modules;
 
   /// @brief Default constructor.
