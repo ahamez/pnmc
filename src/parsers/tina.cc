@@ -86,7 +86,6 @@ tina(std::istream& in)
   auto& net = *net_ptr;
 
   std::string line, s0, s1, s2, ignore;
-  char peek;
   line.reserve(1024);
 
   while (std::getline(in, line))
@@ -122,14 +121,13 @@ tina(std::istream& in)
       }
 
       // Ignore label, if any.
-      peek = (ss >> std::ws).peek();
-      if (peek == std::char_traits<char>::to_int_type(':'))
+      if ((ss >> std::ws).peek() == std::char_traits<char>::to_int_type(':'))
       {
         ss >> ignore >> ignore; // ':' <label>
       }
 
       // Time interval.
-      peek = (ss >> std::ws).peek();
+      const auto peek = (ss >> std::ws).peek();
       if (   peek == std::char_traits<char>::to_int_type('[')
           or peek == std::char_traits<char>::to_int_type(']'))
       {
@@ -210,8 +208,7 @@ tina(std::istream& in)
       if (ss >> s1)
       {
         // Ignore label, if any.
-        peek = (ss >> std::ws).peek();
-        if (peek == std::char_traits<char>::to_int_type(':'))
+        if ((ss >> std::ws).peek() == std::char_traits<char>::to_int_type(':'))
         {
           ss >> ignore >> ignore; // ':' <label>
         }
