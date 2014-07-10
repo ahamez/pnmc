@@ -27,6 +27,12 @@ struct transition
   /// @brief Post-places
   std::multimap<std::string, unsigned int> post;
 
+  /// @brief Lower time interval.
+  unsigned int low;
+
+  /// @brief Upper time interval.
+  unsigned int high;
+
   /// @brief Constructor.
   transition(const std::string& id, std::size_t index);
 };

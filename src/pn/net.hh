@@ -129,6 +129,10 @@ public:
   /// @brief Get a transition using its index.
   const transition&
   get_transition_by_index(std::size_t index) const;
+
+  /// @brief Add a time interval to a transition.
+  void
+  add_time_interval(const std::string& tid, unsigned int low, unsigned int high);
 };
 
 /*------------------------------------------------------------------------------------------------*/

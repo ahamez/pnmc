@@ -4,6 +4,8 @@
 
 namespace pnmc { namespace pn {
 
+namespace /* anonymous */ {
+
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief Used by Boost.MultiIndex.
@@ -102,6 +104,10 @@ struct update_place
     p.marking = marking;
   }
 };
+
+/*------------------------------------------------------------------------------------------------*/
+
+} // namespace anonymous
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -211,6 +217,15 @@ net::get_transition_by_index(std::size_t index)
 const
 {
   return *transitions_set.get<index_index>().find(index);
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+void
+net::add_time_interval(const std::string& tid, unsigned int low, unsigned int high)
+{
+  const auto it = transitions_set.get<id_index>().find(tid);
+  transitions_set.modify(it, [&](transition& t){t.low = low; t.high = high;});
 }
 
 /*------------------------------------------------------------------------------------------------*/
