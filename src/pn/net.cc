@@ -4,111 +4,6 @@
 
 namespace pnmc { namespace pn {
 
-namespace /* anonymous */ {
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Used by Boost.MultiIndex.
-struct add_post_place_to_transition
-{
-  const unsigned int new_valuation;
-  const std::string new_place_id;
-
-  add_post_place_to_transition(unsigned int valuation, const std::string& id)
-	  : new_valuation(valuation), new_place_id(id)
-  {}
-
-  void
-  operator()(transition& t)
-  const
-  {
-    t.post.insert(std::make_pair(new_place_id , new_valuation));
-  }
-};
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Used by Boost.MultiIndex.
-struct add_pre_place_to_transition
-{
-  const unsigned int new_valuation;
-  const std::string new_place_id;
-
-  add_pre_place_to_transition(unsigned int valuation, const std::string& id)
-  	: new_valuation(valuation), new_place_id(id)
-  {}
-
-  void
-  operator()(transition& t)
-  const
-  {
-    t.pre.insert(std::make_pair(new_place_id, new_valuation));
-  }
-};
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Used by Boost.MultiIndex.
-struct add_post_transition_to_place
-{
-  const unsigned int new_valuation;
-  const std::string new_place_id;
-
-  add_post_transition_to_place(unsigned int valuation, const std::string& id)
-	  : new_valuation(valuation), new_place_id(id)
-  {}
-
-  void
-  operator()(place& p)
-  const
-  {
-    p.post.insert(std::make_pair(new_place_id , new_valuation));
-  }
-};
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Used by Boost.MultiIndex.
-struct add_pre_transition_to_place
-{
-  const unsigned int new_valuation;
-  const std::string new_place_id;
-
-  add_pre_transition_to_place(unsigned int valuation, const std::string& id)
-  	: new_valuation(valuation), new_place_id(id)
-  {}
-
-  void
-  operator()(place& p)
-  const
-  {
-    p.pre.insert(std::make_pair(new_place_id, new_valuation));
-  }
-};
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Used by Boost.MultiIndex.
-struct update_place
-{
-  const unsigned int marking;
-
-  update_place(unsigned int m)
-  	: marking(m)
-  {}
-
-  void
-  operator()(place& p)
-  const
-  {
-    p.marking = marking;
-  }
-};
-
-/*------------------------------------------------------------------------------------------------*/
-
-} // namespace anonymous
-
 /*------------------------------------------------------------------------------------------------*/
 
 net::net()
@@ -129,7 +24,7 @@ net::add_place(const std::string& pid, unsigned int marking)
   {
     // This place was created before by add_post_place() or add_pre_place().
     // At this time, the marking was not known. We can now update it.
-    places_set.get<id_index>().modify(cit, update_place(marking));
+    places_set.get<id_index>().modify(cit, [&](place& p){p.marking = marking;});
     return *cit;
   }
 }
@@ -157,14 +52,15 @@ void
 net::add_post_place(const std::string& tid, const std::string& post, unsigned int valuation)
 {
   const auto it = transitions_set.get<id_index>().find(tid);
-  transitions_set.modify(it, add_post_place_to_transition(valuation, post));
+  transitions_set.modify( it
+                        , [&](transition& t){t.post.insert({post , valuation});});
   if (places_by_id().find(post) == places_by_id().end())
   {
     add_place(post, 0);
   }
-  /// @todo Only one lookup.
   const auto place_cit = places_by_id().find(post);
-  places_set.get<id_index>().modify(place_cit, add_pre_transition_to_place(valuation, tid));
+  places_set.get<id_index>().modify( place_cit
+                                   , [&](place& p){p.pre.insert({tid, valuation});});
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -173,14 +69,16 @@ void
 net::add_pre_place(const std::string& tid, const std::string& pre, unsigned int valuation)
 {
   const auto it = transitions_set.get<id_index>().find(tid);
-  transitions_set.modify(it, add_pre_place_to_transition(valuation, pre));
+  transitions_set.modify( it
+                        , [&](transition& t){t.pre.insert({pre, valuation});});
   if (places_by_id().find(pre) == places_by_id().end())
   {
     add_place(pre, 0);
   }
   /// @todo Only one lookup.
   const auto place_cit = places_by_id().find(pre);
-  places_set.get<id_index>().modify(place_cit, add_post_transition_to_place(valuation, tid));
+  places_set.get<id_index>().modify( place_cit
+                                   , [&](place& p){p.post.insert({tid , valuation});});
 }
 
 /*------------------------------------------------------------------------------------------------*/
