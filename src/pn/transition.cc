@@ -13,6 +13,15 @@ transition::transition(const std::string& i, std::size_t idx)
 
 /*------------------------------------------------------------------------------------------------*/
 
+bool
+transition::timed()
+const
+{
+  return this->low != 0 or this->high != std::numeric_limits<unsigned int>::max();
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 /// Compare two transitions using their ids.
 bool
 operator<(const transition& left, const transition& right)

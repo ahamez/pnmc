@@ -2,7 +2,6 @@
 #define _PNMC_PN_TRANSITION_HH_
 
 #include <iosfwd>
-#include <limits>
 #include <map>
 
 namespace pnmc { namespace pn {
@@ -35,6 +34,9 @@ struct transition
 
   /// @brief Constructor.
   transition(const std::string& id, std::size_t index);
+
+  /// @brief Tell if the transition has a time interval.
+  bool timed() const;
 };
 
 /*------------------------------------------------------------------------------------------------*/
