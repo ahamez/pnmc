@@ -1,8 +1,6 @@
 #ifndef _PNMC_PN_NET_HH_
 #define _PNMC_PN_NET_HH_
 
-#include <functional> // reference_wrapper
-
 #pragma GCC diagnostic push
 #if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC diagnostic ignored "-Wunused-local-typedefs"
@@ -76,12 +74,6 @@ public:
 
   /// @brief The set of transitions.
   transitions_type transitions_set;
-
-  /// @brief The timed transitions.
-  std::vector<std::reference_wrapper<const transition>> timed_transitions;
-
-  /// @brief The untimed transitions.
-  std::vector<std::reference_wrapper<const transition>> untimed_transitions;
 
   /// @brief The hierarchical description, if any.
   module modules;
