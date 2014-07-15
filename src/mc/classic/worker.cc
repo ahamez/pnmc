@@ -209,7 +209,7 @@ struct threads
     if (clock.joinable())
     {
       clock.join();
-     }
+    }
     if (sdd_sampling.joinable())
     {
       sdd_sampling.join();
@@ -228,7 +228,7 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
   // The reference time;
   util::timer beginnning;
 
-  threads _(conf, stats, stop, manager, beginnning);
+  threads stop_threads_on_scope_exit(conf, stats, stop, manager, beginnning);
 
   util::timer timer;
   try
