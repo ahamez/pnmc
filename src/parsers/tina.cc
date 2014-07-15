@@ -90,7 +90,7 @@ place_valuation(const std::string& s)
   }
 
   const auto valuation = value(s.cbegin() + pos + 1, s.cend());
-  return std::make_pair(s.substr(0, pos), valuation);
+  return std::make_pair(s.substr(0, pos - 1), pn::arc{valuation, arc_type});
 }
 
 /*------------------------------------------------------------------------------------------------*/
