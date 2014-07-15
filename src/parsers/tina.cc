@@ -70,7 +70,6 @@ place_arc(const std::string& s)
         {
           ++pos;
           arc_type = pn::arc::type::inhibitor;
-          std::cout << "inhib\n";
         }
         else
         {
