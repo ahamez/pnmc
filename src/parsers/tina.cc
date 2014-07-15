@@ -47,13 +47,50 @@ value(std::string::const_iterator cit, std::string::const_iterator cend)
 std::pair<std::string, unsigned int>
 place_valuation(const std::string& s)
 {
-  const auto star_cit = std::find(s.cbegin(), s.cend(), '*');
-  if (star_cit == s.cend())
+  auto pos = s.find_first_of("*?!");
+
+  if (pos == std::string::npos)
   {
     return std::make_pair(s, 1);
   }
-  const auto valuation = value(star_cit + 1, s.cend());
-  return std::make_pair(std::string(s.cbegin(), star_cit), valuation);
+
+  if (pos == s.length() - 1)
+  {
+    throw parse_error("Valuation expected, got '" + s + "'");
+  }
+
+  switch (s[pos])
+  {
+      case '*': break;
+
+      case '?':
+      {
+        if (s[pos + 1] == '-')
+        {
+          ++pos;
+        }
+        break;
+      }
+
+      case '!':
+      {
+        if (s[pos +1] == '-')
+        {
+          ++pos;
+        }
+        break;
+      }
+
+      default :
+      {
+        std::stringstream ss;
+        ss << "Expected '*', '?' or '!', got '" << s[pos] << "'";
+        throw parse_error(ss.str());
+      }
+  }
+
+  const auto valuation = value(s.cbegin() + pos + 1, s.cend());
+  return std::make_pair(s.substr(0, pos), valuation);
 }
 
 /*------------------------------------------------------------------------------------------------*/
