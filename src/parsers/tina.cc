@@ -44,14 +44,15 @@ value(std::string::const_iterator cit, std::string::const_iterator cend)
 
 /*------------------------------------------------------------------------------------------------*/
 
-std::pair<std::string, unsigned int>
-place_valuation(const std::string& s)
+std::pair<std::string, pn::arc>
+place_arc(const std::string& s)
 {
   auto pos = s.find_first_of("*?!");
+  auto arc_type = pn::arc::type::normal;
 
   if (pos == std::string::npos)
   {
-    return std::make_pair(s, 1);
+    return std::make_pair(s, pn::arc{1, arc_type});
   }
 
   if (pos == s.length() - 1)
@@ -68,6 +69,12 @@ place_valuation(const std::string& s)
         if (s[pos + 1] == '-')
         {
           ++pos;
+          arc_type = pn::arc::type::inhibitor;
+          std::cout << "inhib\n";
+        }
+        else
+        {
+          arc_type = pn::arc::type::read;
         }
         break;
       }
@@ -77,6 +84,11 @@ place_valuation(const std::string& s)
         if (s[pos +1] == '-')
         {
           ++pos;
+          arc_type = pn::arc::type::stopwatch_inhibitor;
+        }
+        else
+        {
+          arc_type = pn::arc::type::stopwatch;
         }
         break;
       }
@@ -147,7 +159,6 @@ tina(std::istream& in)
     else if (s0 == "tr")
     {
       std::string place_id;
-      unsigned int valuation;
 
       if (ss >> s0)
       {
@@ -225,8 +236,8 @@ tina(std::istream& in)
           found_arrow = true;
           break;
         }
-        std::tie(place_id, valuation) = place_valuation(s1);
-        net.add_pre_place(s0, place_id, {valuation, pn::arc::type::normal});
+        const auto res = place_arc(s1);
+        net.add_pre_place(s0, res.first, res.second);
       }
 
       if (not found_arrow)
@@ -236,8 +247,8 @@ tina(std::istream& in)
 
       while (ss >> s1)
       {
-        std::tie(place_id, valuation) = place_valuation(s1);
-        net.add_post_place(s0, place_id, {valuation, pn::arc::type::normal});
+        const auto res = place_arc(s1);
+        net.add_post_place(s0, res.first, res.second);
       }
     }
 

@@ -15,6 +15,7 @@
 #include "mc/classic/dead.hh"
 #include "mc/classic/dump.hh"
 #include "mc/classic/exceptions.hh"
+#include "mc/classic/inhibitor.hh"
 #include "mc/classic/live.hh"
 #include "mc/classic/make_order.hh"
 #include "mc/classic/post.hh"
@@ -118,7 +119,19 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
     // Pre actions.
     for (const auto& arc : transition.pre)
     {
-      homomorphism f = mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
+      const homomorphism f = [&]{
+        switch (arc.second.kind)
+        {
+          case pn::arc::type::normal:
+            return mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
+
+          case pn::arc::type::inhibitor:
+            return mk_fun<inhibitor>(conf, stop, o, arc.first, arc.second.weight);
+
+          default:
+            throw std::runtime_error("Unsupported arc type.");
+        }
+      }();
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
