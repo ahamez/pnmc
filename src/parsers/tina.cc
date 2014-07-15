@@ -132,6 +132,7 @@ tina(std::istream& in)
       if (   peek == std::char_traits<char>::to_int_type('[')
           or peek == std::char_traits<char>::to_int_type(']'))
       {
+        s1.clear();
         char c = ss.get(); // '[' or ']';
         while (ss.good())
         {
