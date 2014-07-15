@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include "parsers/parse_error.hh"
 #include "parsers/tina.hh"
@@ -26,7 +27,7 @@ value(std::string::const_iterator cit, std::string::const_iterator cend)
       {
         case 'K': value *= 1000; break;
         case 'M': value *= 1000000; break;
-        default: throw parse_error("Invalid suffix, got " + std::string(*cit, 1));
+        default: throw parse_error("Invalid suffix, got '" + std::string(cit, cend) + "'");
       }
     }
     else if (std::distance(cit, cend) > 1)
