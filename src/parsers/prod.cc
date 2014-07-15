@@ -149,7 +149,8 @@ prod(std::istream& in)
         {
           throw parse_error("Incorrect arc " + arc_str);
         }
-        net.add_pre_place(s0, arc[0], marking(arc[1].cbegin(), arc[1].cend()));
+        net.add_pre_place( s0, arc[0]
+                         , {marking(arc[1].cbegin(), arc[1].cend()), pn::arc::type::normal});
       }
 
       // post
@@ -171,7 +172,8 @@ prod(std::istream& in)
         {
           throw parse_error("Incorrect arc " + arc_str);
         }
-        net.add_post_place(s0, arc[0], marking(arc[1].cbegin(), arc[1].cend()));
+        net.add_post_place( s0, arc[0]
+                          , {marking(arc[1].cbegin(), arc[1].cend()), pn::arc::type::normal});
       }
 
       // end of transition

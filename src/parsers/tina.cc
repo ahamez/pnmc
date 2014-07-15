@@ -226,7 +226,7 @@ tina(std::istream& in)
           break;
         }
         std::tie(place_id, valuation) = place_valuation(s1);
-        net.add_pre_place(s0, place_id, valuation);
+        net.add_pre_place(s0, place_id, {valuation, pn::arc::type::normal});
       }
 
       if (not found_arrow)
@@ -237,7 +237,7 @@ tina(std::istream& in)
       while (ss >> s1)
       {
         std::tie(place_id, valuation) = place_valuation(s1);
-        net.add_post_place(s0, place_id, valuation);
+        net.add_post_place(s0, place_id, {valuation, pn::arc::type::normal});
       }
     }
 

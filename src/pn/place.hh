@@ -5,6 +5,8 @@
 #include <map>
 #include <string>
 
+#include "pn/arc.hh"
+
 namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
@@ -18,10 +20,10 @@ struct place
   unsigned int marking;
 
   /// @brief Pre transitions.
-  std::multimap<std::string, unsigned int> pre;
+  std::multimap<std::string, arc> pre;
 
   /// @brief Post transitions.
-  std::multimap<std::string, unsigned int> post;
+  std::multimap<std::string, arc> post;
 
   /// @brief Constructor.
   place(const std::string& id, unsigned int m);

@@ -52,12 +52,12 @@ operator<<(std::ostream& os, const transition& t)
   }
   for(auto p : t.pre)
   {
-    os << " " << p.first << p.second;
+    os << " " << p.first << p.second.weight;
   }
   os << " -> ";
   for(auto p : t.post)
   {
-    os << " " << p.first << p.second;
+    os << " " << p.first << p.second.weight;
   }  
   return os;
 }

@@ -4,6 +4,8 @@
 #include <iosfwd>
 #include <map>
 
+#include "pn/arc.hh"
+
 namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
@@ -21,10 +23,10 @@ struct transition
   const std::size_t index;
 
   /// @brief Pre-places
-  std::multimap<std::string, unsigned int> pre;
+  std::multimap<std::string, arc> pre;
 
   /// @brief Post-places
-  std::multimap<std::string, unsigned int> post;
+  std::multimap<std::string, arc> post;
 
   /// @brief Lower time interval.
   unsigned int low;

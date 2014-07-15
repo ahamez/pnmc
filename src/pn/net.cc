@@ -1,6 +1,4 @@
 #include "pn/net.hh"
-#include "pn/place.hh"
-#include "pn/transition.hh"
 
 namespace pnmc { namespace pn {
 
@@ -49,28 +47,28 @@ net::add_transition(const std::string& tid)
 /*------------------------------------------------------------------------------------------------*/
 
 void
-net::add_post_place(const std::string& tid, const std::string& post, unsigned int valuation)
+net::add_post_place(const std::string& tid, const std::string& post, const arc& a)
 {
   const auto it = transitions_set.get<id_index>().find(tid);
   transitions_set.modify( it
-                        , [&](transition& t){t.post.insert({post , valuation});});
+                        , [&](transition& t){t.post.insert({post , a});});
   if (places_by_id().find(post) == places_by_id().end())
   {
     add_place(post, 0);
   }
   const auto place_cit = places_by_id().find(post);
   places_set.get<id_index>().modify( place_cit
-                                   , [&](place& p){p.pre.insert({tid, valuation});});
+                                   , [&](place& p){p.pre.insert({tid, a});});
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 void
-net::add_pre_place(const std::string& tid, const std::string& pre, unsigned int valuation)
+net::add_pre_place(const std::string& tid, const std::string& pre, const arc& a)
 {
   const auto it = transitions_set.get<id_index>().find(tid);
   transitions_set.modify( it
-                        , [&](transition& t){t.pre.insert({pre, valuation});});
+                        , [&](transition& t){t.pre.insert({pre, a});});
   if (places_by_id().find(pre) == places_by_id().end())
   {
     add_place(pre, 0);
@@ -78,7 +76,7 @@ net::add_pre_place(const std::string& tid, const std::string& pre, unsigned int 
   /// @todo Only one lookup.
   const auto place_cit = places_by_id().find(pre);
   places_set.get<id_index>().modify( place_cit
-                                   , [&](place& p){p.post.insert({tid , valuation});});
+                                   , [&](place& p){p.post.insert({tid , a});});
 }
 
 /*------------------------------------------------------------------------------------------------*/

@@ -97,8 +97,8 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
     {
       // Is the maximal marking limited?
       homomorphism f = conf.marking_bound == 0
-                     ? mk_fun<post>(conf, stop, o, arc.first, arc.second)
-                     : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second
+                     ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
+                     : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
                                                      , conf.marking_bound, arc.first);
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
@@ -118,7 +118,7 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
     // Pre actions.
     for (const auto& arc : transition.pre)
     {
-      homomorphism f = mk_fun<pre>(conf, stop, o, arc.first, arc.second);
+      homomorphism f = mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
@@ -250,7 +250,7 @@ dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn
     // We are only interested in pre actions.
     for (const auto& arc : transition.pre)
     {
-      const auto h = function(o, arc.first, dead(arc.second));
+      const auto h = function(o, arc.first, dead(arc.second.weight));
       or_operands.insert(sdd::carrier(o, arc.first, h));
     }
 
