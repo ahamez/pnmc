@@ -1,11 +1,12 @@
 #ifndef _PNMC_MC_POST_HH_
 #define _PNMC_MC_POST_HH_
 
+#include <algorithm>  // transform
 #include <functional> // hash
-#include <iosfwd>
+#include <ostream>
 
+#include <sdd/util/hash.hh>
 #include "sdd/values/flat_set.hh"
-#include "sdd/values_manager.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -15,11 +16,19 @@ struct post
 {
   const unsigned int valuation;
 
-  post(unsigned int);
+  post(unsigned int v)
+    : valuation(v)
+  {}
 
   sdd::values::flat_set<unsigned int>
-  operator()(const sdd::values::flat_set<unsigned int>&)
-  const;
+  operator()(const sdd::values::flat_set<unsigned int>& val)
+  const
+  {
+    sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    std::transform( val.cbegin(), val.cend(), std::inserter(builder, builder.end())
+                  , [this](unsigned int v){return v + valuation;});
+    return std::move(builder);
+  }
 
   bool
   shifter()
@@ -28,16 +37,23 @@ struct post
     return true;
   }
 
+  /// @brief Equality of two post.
+  friend
+  bool
+  operator==(const post& lhs, const post& rhs)
+  noexcept
+  {
+    return lhs.valuation == rhs.valuation;
+  }
+
+  /// @brief Textual output of a post.
+  friend
+  std::ostream&
+  operator<<(std::ostream& os, const post& p)
+  {
+    return os << "post(" << p.valuation << ")";
+  }
 };
-
-/// @brief Equality of two post.
-bool
-operator==(const post&, const post&)
-noexcept;
-
-/// @brief Textual output of a post.
-std::ostream&
-operator<<(std::ostream&, const post&);
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -51,7 +67,14 @@ namespace std
 template <>
 struct hash<pnmc::mc::classic::post>
 {
-  std::size_t operator()(const pnmc::mc::classic::post&) const noexcept;
+  std::size_t
+  operator()(const pnmc::mc::classic::post& p)
+  const noexcept
+  {
+    std::size_t seed = 2564450027;
+    sdd::util::hash_combine(seed, p.valuation);
+    return seed;
+  }
 };
 
 /*------------------------------------------------------------------------------------------------*/
