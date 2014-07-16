@@ -312,7 +312,7 @@ const
   auto manager = sdd::init(sconf);
 
   statistics stats(conf);
-  results res;
+  results res(conf);
 
   // Used in limited time mode.
   bool stop = false;
@@ -377,11 +377,16 @@ const
     return;
   }
 
-  res.nb_states = m.size();
-  util::timer tokens_start;
-  count_tokens(res, m, net);
-  stats.tokens_duration = tokens_start.duration();
+  if (conf.count_tokens)
+  {
+    util::timer tokens_start;
+    count_tokens(res, m, net);
+    stats.tokens_duration = tokens_start.duration();
+    std::cout << "maximal number of tokens per marking : " << res.max_token_markings << std::endl
+              << "maximal number of tokens in a place : " << res.max_token_places << std::endl;
+  }
 
+  res.nb_states = m.size();
   stats.nb_states = res.nb_states.template convert_to<long double>();
   std::cout << stats.nb_states << " states" << std::endl;
 

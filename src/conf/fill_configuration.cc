@@ -98,6 +98,7 @@ const auto pn_marking_bound_str = "pn-marking-bound";
 // Model checking options
 const auto mc_dead_transitions_str = "dead-transitions";
 const auto mc_dead_states_str = "dead-states";
+const auto mc_count_tokens_str = "count-tokens";
 
 // libsdd options
 const auto libsdd_sdd_ut_size_str = "sdd-ut-size";
@@ -168,6 +169,7 @@ fill_configuration(int argc, char** argv)
   mc_options.add_options()
     (mc_dead_transitions_str   , "Compute dead transitions")
     (mc_dead_states_str        , "Compute dead states")
+    (mc_count_tokens_str       , "Compute maximal markings")
     (results_json_str          , po::value<std::string>()
                                , "Export PNMC's results to a JSON file")
   ;
@@ -351,6 +353,7 @@ fill_configuration(int argc, char** argv)
   // Model checking options
   conf.compute_dead_states = vm.count(mc_dead_states_str);
   conf.compute_dead_transitions = vm.count(mc_dead_transitions_str);
+  conf.count_tokens = vm.count(mc_count_tokens_str);
 
   // Advanced options
   conf.show_time = vm.count(show_time_str);

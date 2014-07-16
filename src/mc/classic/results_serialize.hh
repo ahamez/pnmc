@@ -14,9 +14,12 @@ template<class Archive>
 void
 save(Archive& archive, const results& r)
 {
-  archive( cereal::make_nvp("states", r.nb_states.template convert_to<long double>())
-         , cereal::make_nvp("maximal number of tokens per marking", r.max_token_markings)
-         , cereal::make_nvp("maximal number of tokens in a place", r.max_token_places));
+  archive(cereal::make_nvp("states", r.nb_states.template convert_to<long double>()));
+  if (r.conf.count_tokens)
+  {
+    archive( cereal::make_nvp("maximal number of tokens per marking", r.max_token_markings)
+           , cereal::make_nvp("maximal number of tokens in a place", r.max_token_places));
+  }
 }
 
 /*------------------------------------------------------------------------------------------------*/
