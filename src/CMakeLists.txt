@@ -6,7 +6,6 @@ set(SOURCES
     mc/classic/dump.cc
     mc/classic/make_order.cc
     mc/classic/post.cc
-    mc/classic/pre.cc
     mc/classic/worker.cc
     mc/mc.cc
     parsers/bpn.cc
