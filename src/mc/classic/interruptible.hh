@@ -58,7 +58,7 @@ struct interruptible
   std::ostream&
   operator<<(std::ostream& os, const interruptible<C_, Fun_>& t)
   {
-    return os << "timed(" << t.fun_ << ")";
+    return os << "interruptible(" << t.fun_ << ")";
   }
 };
 
