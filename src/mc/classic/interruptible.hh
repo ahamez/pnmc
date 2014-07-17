@@ -1,8 +1,8 @@
-#ifndef _PNMC_MC_TIMED_HH_
-#define _PNMC_MC_TIMED_HH_
+#ifndef _PNMC_MC_INTERRUPTIBLE_HH_
+#define _PNMC_MC_INTERRUPTIBLE_HH_
 
 #include <functional> // hash
-#include <iosfwd>
+#include <ostream>
 
 #include "conf/configuration.hh"
 #include "mc/classic/exceptions.hh"
@@ -11,10 +11,9 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief A generic function which throws a time_limit when a given ammount of time has been
-/// reached.
+/// @brief A generic function which throws an interrupted exception when the stop flag has been set.
 template <typename C, typename Fun>
-struct timed
+struct interruptible
 {
   /// @brief The configuration keeps the timing informations.
   const bool& stop_;
@@ -26,7 +25,7 @@ struct timed
   ///
   /// Delegates to the contained function.
   template <typename... Args>
-  timed(const bool& stop, Args&&... args)
+  interruptible(const bool& stop, Args&&... args)
     : stop_(stop), fun_(std::forward<Args>(args)...)
   {}
 
@@ -38,28 +37,30 @@ struct timed
   {
     if (stop_)
     {
-      throw time_limit<C>();
+      throw interrupted<C>();
     }
     return fun_(x);
   }
+
+  /// @brief Equality of two interruptible.
+  template <typename C_, typename Fun_>
+  friend
+  bool
+  operator==(const interruptible<C_, Fun_>& lhs, const interruptible<C_, Fun_>& rhs)
+  noexcept
+  {
+    return lhs.fun_ == rhs.fun_;
+  }
+
+  /// @brief Textual output of a interruptible.
+  template <typename C_, typename Fun_>
+  friend
+  std::ostream&
+  operator<<(std::ostream& os, const interruptible<C_, Fun_>& t)
+  {
+    return os << "timed(" << t.fun_ << ")";
+  }
 };
-
-/// @brief Equality of two timed.
-template <typename C, typename Fun>
-bool
-operator==(const timed<C, Fun>& lhs, const timed<C, Fun>& rhs)
-noexcept
-{
-  return lhs.fun_ == rhs.fun_;
-}
-
-/// @brief Textual output of a timed.
-template <typename C, typename Fun>
-std::ostream&
-operator<<(std::ostream& os, const timed<C, Fun>& t)
-{
-  return os << "timed(" << t.fun_ << ")";
-}
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -70,10 +71,10 @@ namespace std {
 /*------------------------------------------------------------------------------------------------*/
 
 template <typename C, typename Fun>
-struct hash<pnmc::mc::classic::timed<C, Fun>>
+struct hash<pnmc::mc::classic::interruptible<C, Fun>>
 {
   std::size_t
-  operator()(const pnmc::mc::classic::timed<C, Fun>& t)
+  operator()(const pnmc::mc::classic::interruptible<C, Fun>& t)
   const noexcept
   {
     return std::hash<Fun>()(t.fun_);
@@ -84,4 +85,4 @@ struct hash<pnmc::mc::classic::timed<C, Fun>>
 
 } // namespace std
 
-#endif // _PNMC_MC_TIMED_HH_
+#endif // _PNMC_MC_INTERRUPTIBLE_HH_

@@ -24,7 +24,7 @@ struct bound_error final
 /*------------------------------------------------------------------------------------------------*/
 
 template <typename C>
-struct time_limit final
+struct interrupted final
   : public sdd::interrupt<C>
 {};
 

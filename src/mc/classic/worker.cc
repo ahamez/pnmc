@@ -16,13 +16,13 @@
 #include "mc/classic/dump.hh"
 #include "mc/classic/exceptions.hh"
 #include "mc/classic/inhibitor.hh"
+#include "mc/classic/interruptible.hh"
 #include "mc/classic/live.hh"
 #include "mc/classic/make_order.hh"
 #include "mc/classic/post.hh"
 #include "mc/classic/pre.hh"
 #include "mc/classic/results.hh"
 #include "mc/classic/statistics.hh"
-#include "mc/classic/timed.hh"
 #include "mc/classic/worker.hh"
 #include "util/timer.hh"
 
@@ -63,7 +63,7 @@ mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_
 {
   if (conf.max_time > chrono::duration<double>(0))
   {
-    return function(o, id, timed<sdd_conf, Fun>(stop, std::forward<Args>(args)...));
+    return function(o, id, interruptible<sdd_conf, Fun>(stop, std::forward<Args>(args)...));
   }
   else
   {
@@ -367,7 +367,7 @@ const
     dump_hom_dot(conf, h_classic, h);
     return;
   }
-  catch (const time_limit<sdd_conf>& e)
+  catch (const interrupted<sdd_conf>& e)
   {
     std::cout << "State space computation interrupted after " << stats.state_space_duration.count()
               << "s." << std::endl;
