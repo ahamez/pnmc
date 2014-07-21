@@ -1,3 +1,4 @@
+#include <algorithm> // sort, transform
 #include <cassert>
 #include <chrono>
 #include <iostream>
@@ -84,6 +85,10 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
   std::set<homomorphism> operands;
   operands.insert(sdd::id<sdd_conf>());
 
+  // Temporary storage to sort post and pre arcs.
+  std::vector<const std::pair<const std::string, pn::arc>*> arcs_tmp;
+  arcs_tmp.reserve(128);
+
   for (const auto& transition : net.transitions())
   {
     if (transition.pre.empty() and transition.post.empty())
@@ -93,21 +98,36 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
 
     homomorphism h_t = sdd::id<sdd_conf>();
 
+    // Sort post arcs using the variable order.
+    arcs_tmp.clear();
+    std::transform( transition.post.cbegin(), transition.post.cend()
+                  , std::back_inserter(arcs_tmp)
+                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
+    std::sort( arcs_tmp.begin(), arcs_tmp.end()
+             , [&]( const std::pair<const std::string, pn::arc>* lhs
+                  , const std::pair<const std::string, pn::arc>* rhs)
+                  {
+//                    return o.node(lhs->first) < o.node(rhs->first);
+                    return o.node(rhs->first) < o.node(lhs->first);
+                  }
+             );
+
     // Post actions.
-    for (const auto& arc : transition.post)
+    for (const auto& arc : arcs_tmp)
     {
       // Is the maximal marking limited?
       homomorphism f = conf.marking_bound == 0
-                     ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
-                     : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
-                                                     , conf.marking_bound, arc.first);
-      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+                     ? mk_fun<post>(conf, stop, o, arc->first, arc->second.weight)
+                     : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc->first, arc->second.weight
+                                                     , conf.marking_bound, arc->first);
+      h_t = composition(h_t, sdd::carrier(o, arc->first, f));
     }
 
     // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
     if (conf.compute_dead_transitions)
     {
       // Target the same variable as the last pre or post to be fired to avoid evaluations.
+      // @todo Target the same variable as the sorted pre or post.
       const auto var = transition.pre.empty()
                      ? std::prev(transition.post.cend())->first
                      : transition.pre.cbegin()->first;
@@ -116,23 +136,37 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
       h_t = composition(h_t, sdd::carrier(o, var, f));
     }
 
+    // Sort pre arcs using the variable order.
+    arcs_tmp.clear();
+    std::transform( transition.pre.cbegin(), transition.pre.cend()
+                  , std::back_inserter(arcs_tmp)
+                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
+    std::sort( arcs_tmp.begin(), arcs_tmp.end()
+             , [&]( const std::pair<const std::string, pn::arc>* lhs
+                  , const std::pair<const std::string, pn::arc>* rhs)
+                  {
+//                    return o.node(lhs->first) < o.node(rhs->first);
+                    return o.node(rhs->first) < o.node(lhs->first);
+                  }
+             );
+
     // Pre actions.
-    for (const auto& arc : transition.pre)
+    for (const auto& arc : arcs_tmp)
     {
       const homomorphism f = [&]{
-        switch (arc.second.kind)
+        switch (arc->second.kind)
         {
           case pn::arc::type::normal:
-            return mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
+            return mk_fun<pre>(conf, stop, o, arc->first, arc->second.weight);
 
           case pn::arc::type::inhibitor:
-            return mk_fun<inhibitor>(conf, stop, o, arc.first, arc.second.weight);
+            return mk_fun<inhibitor>(conf, stop, o, arc->first, arc->second.weight);
 
           default:
             throw std::runtime_error("Unsupported arc type.");
         }
       }();
-      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      h_t = composition(h_t, sdd::carrier(o, arc->first, f));
     }
 
     operands.insert(h_t);
