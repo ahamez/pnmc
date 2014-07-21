@@ -41,26 +41,26 @@ struct interruptible
     }
     return fun_(x);
   }
-
-  /// @brief Equality of two interruptible.
-  template <typename C_, typename Fun_>
-  friend
-  bool
-  operator==(const interruptible<C_, Fun_>& lhs, const interruptible<C_, Fun_>& rhs)
-  noexcept
-  {
-    return lhs.fun_ == rhs.fun_;
-  }
-
-  /// @brief Textual output of a interruptible.
-  template <typename C_, typename Fun_>
-  friend
-  std::ostream&
-  operator<<(std::ostream& os, const interruptible<C_, Fun_>& t)
-  {
-    return os << "interruptible(" << t.fun_ << ")";
-  }
 };
+
+/*------------------------------------------------------------------------------------------------*/
+
+/// @brief Equality of two interruptible.
+template <typename C, typename Fun>
+bool
+operator==(const interruptible<C, Fun>& lhs, const interruptible<C, Fun>& rhs)
+noexcept
+{
+  return lhs.fun_ == rhs.fun_;
+}
+
+/// @brief Textual output of a interruptible.
+template <typename C, typename Fun>
+std::ostream&
+operator<<(std::ostream& os, const interruptible<C, Fun>& t)
+{
+  return os << "interruptible(" << t.fun_ << ")";
+}
 
 /*------------------------------------------------------------------------------------------------*/
 
