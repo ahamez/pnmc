@@ -80,6 +80,11 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   // We don't try to apply any heuristic on this order.
   if (conf.load_order_file)
   {
+    if (net.timed())
+    {
+      throw std::invalid_argument("Loading order from file for timed PN is not supported yet");
+    }
+
     std::fstream file(*conf.load_order_file);
     if (file.is_open())
     {
@@ -154,6 +159,15 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       }
     }
 
+    // Add clocks of timed transitions.
+    for (const auto& transition : net.transitions())
+    {
+      if (transition.timed())
+      {
+        identifiers.emplace_back(transition.id);
+      }
+    }
+
     // The hypergraph that stores connections between the places of the Petri net.
     sdd::force::hypergraph<sdd_conf> graph(identifiers.cbegin(), identifiers.cend());
 
@@ -172,6 +186,12 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       {
         identifiers.emplace_back(arc.first);
       }
+
+      if (transition.timed())
+      {
+        identifiers.emplace_back(transition.id);
+      }
+
       graph.add_hyperedge(identifiers.cbegin(), identifiers.cend());
 
       // We use this container again in the next loop.
@@ -189,11 +209,20 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   // Use model's hierarchy, if any.
   else if (not conf.order_flat and net.modules)
   {
+    if (net.timed())
+    {
+      throw std::invalid_argument("Hierarchical order for timed PN is not supported yet");
+    }
     ob = boost::apply_visitor(mk_order_visitor(), *net.modules).nested();
   }
   // Random order, mostly used for developpement purposes.
   else if (conf.order_random)
   {
+    if (net.timed())
+    {
+      throw std::invalid_argument("Random order for timed PN is not supported yet");
+    }
+
     std::vector<std::string> tmp;
     tmp.reserve(net.places().size());
     for (const auto& place : net.places())
@@ -203,6 +232,16 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
           tmp.emplace_back(place.id);
       }
     }
+
+    // Add clocks of timed transitions.
+    for (const auto& transition : net.transitions())
+    {
+      if (transition.timed())
+      {
+        tmp.emplace_back(transition.id);
+      }
+    }
+
     std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(tmp.begin(), tmp.end(), g);
@@ -221,6 +260,17 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
         ob.push(rcit->id);
       }
     }
+
+    if (net.timed())
+    {
+      for (const auto& transition : net.transitions())
+      {
+        if (transition.timed())
+        {
+          ob.push(transition.id);
+        }
+      }
+    }
   }
   // Flat order.
   else
@@ -230,6 +280,17 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       if (place.connected())
       {
         ob.push(place.id);
+      }
+    }
+
+    if (net.timed())
+    {
+      for (const auto& transition : net.transitions())
+      {
+        if (transition.timed())
+        {
+          ob.push(transition.id);
+        }
       }
     }
   }

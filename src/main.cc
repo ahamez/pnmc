@@ -49,27 +49,27 @@ main(int argc, char** argv)
     std::cerr << "Exiting." << std::endl;
     return 2;
   }
-  catch (const sdd::order_error& e)
-  {
-    std::cerr << "Order error:" << std::endl;
-    std::cerr << e.what() << std::endl;
-    std::cerr << "Exiting." << std::endl;
-    return 3;
-  }
-  catch (const std::runtime_error& e)
-  {
-    std::cerr << "Error:" << std::endl;
-    std::cerr << e.what() << std::endl;
-    std::cerr << "Exiting." << std::endl;
-    return 4;
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << "Error unknown. Please report the following to a.hamez@isae.fr." << std::endl;
-    std::cerr << e.what() << std::endl;
-    std::cerr << "Exiting." << std::endl;
-    return -1;
-  }
+//  catch (const sdd::order_error& e)
+//  {
+//    std::cerr << "Order error:" << std::endl;
+//    std::cerr << e.what() << std::endl;
+//    std::cerr << "Exiting." << std::endl;
+//    return 3;
+//  }
+//  catch (const std::runtime_error& e)
+//  {
+//    std::cerr << "Error:" << std::endl;
+//    std::cerr << e.what() << std::endl;
+//    std::cerr << "Exiting." << std::endl;
+//    return 4;
+//  }
+//  catch (std::exception& e)
+//  {
+//    std::cerr << "Error unknown. Please report the following to a.hamez@isae.fr." << std::endl;
+//    std::cerr << e.what() << std::endl;
+//    std::cerr << "Exiting." << std::endl;
+//    return -1;
+//  }
 }
 
 /*------------------------------------------------------------------------------------------------*/

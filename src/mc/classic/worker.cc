@@ -1,3 +1,4 @@
+#include <algorithm> // for_each
 #include <cassert>
 #include <chrono>
 #include <iostream>
@@ -10,18 +11,24 @@
 #include <sdd/sdd.hh>
 #include <sdd/tools/size.hh>
 
+#include "mc/classic/advance.hh"
+#include "mc/classic/advance_capped.hh"
 #include "mc/classic/bounded_post.hh"
 #include "mc/classic/count_tokens.hh"
 #include "mc/classic/dead.hh"
 #include "mc/classic/dump.hh"
+#include "mc/classic/enabled.hh"
 #include "mc/classic/exceptions.hh"
+#include "mc/classic/filter.hh"
 #include "mc/classic/inhibitor.hh"
 #include "mc/classic/interruptible.hh"
 #include "mc/classic/live.hh"
 #include "mc/classic/make_order.hh"
 #include "mc/classic/post.hh"
 #include "mc/classic/pre.hh"
+#include "mc/classic/pre_clock.hh"
 #include "mc/classic/results.hh"
+#include "mc/classic/set.hh"
 #include "mc/classic/statistics.hh"
 #include "mc/classic/worker.hh"
 #include "util/timer.hh"
@@ -45,17 +52,43 @@ using sdd::function;
 SDD
 initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 {
+  std::map<std::string, std::reference_wrapper<const pn::transition>> timed;
+  for (const auto& t : net.transitions())
+  {
+    if (t.timed())
+    {
+      timed.emplace(t.id, t);
+    }
+  }
+
   return SDD(order, [&](const std::string& id)
                         -> sdd::values::flat_set<unsigned int>
                        {
-                         assert(net.places_by_id().find(id) != net.places_by_id().end());
-                         return {net.places_by_id().find(id)->marking};
+                         const auto cit = net.places_by_id().find(id);
+                         if (cit != net.places_by_id().end())
+                         {
+                           return {cit->marking};
+                         }
+                         else
+                         {
+                           const auto t_cit = timed.find(id);
+                           assert(t_cit != timed.end());
+                           if (net.enabled(t_cit->second.get().id))
+                           {
+                             return {0};
+                           }
+                           else
+                           {
+                             return {pn::sharp};
+                           }
+                         }
                        });
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief Create a timed function if required by the configuration, a normal function otherwise.
+/// @brief Create an interruptible function if required by the configuration, a normal function
+/// otherwise.
 template <typename Fun, typename... Args>
 homomorphism
 mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_conf>& o
@@ -81,62 +114,196 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
 {
   util::timer timer;
 
+  // Each transition will produce an operand.
   std::set<homomorphism> operands;
   operands.insert(sdd::id<sdd_conf>());
 
-  for (const auto& transition : net.transitions())
+  if (not net.timed())
   {
-    if (transition.pre.empty() and transition.post.empty())
+    for (const pn::transition& transition : net.transitions())
     {
-      continue; // A transition with no pre or post places, no need to keep it.
+      if (transition.pre.empty() and transition.post.empty())
+      {
+        continue; // A transition with no pre or post places, no need to keep it.
+      }
+
+      // compose from left to right
+      auto h_t = sdd::id<sdd_conf>();
+
+      // Post actions.
+      for (const auto& arc : transition.post)
+      {
+        // Is the maximal marking limited?
+        homomorphism f = conf.marking_bound == 0
+        ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
+        : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
+                                         , conf.marking_bound, arc.first);
+        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      }
+
+      // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
+      if (conf.compute_dead_transitions)
+      {
+        // Target the same variable as the last pre or post to be fired to avoid evaluations.
+        const auto var = transition.pre.empty()
+        ? std::prev(transition.post.cend())->first
+        : transition.pre.cbegin()->first;
+
+        const auto f = mk_fun<live>(conf, stop, o, var, transition.index, transitions_bitset);
+        h_t = composition(h_t, sdd::carrier(o, var, f));
+      }
+
+      // Pre actions.
+      for (const auto& arc : transition.pre)
+      {
+        const homomorphism f = [&]{
+          switch (arc.second.kind)
+          {
+            case pn::arc::type::normal:
+              return mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
+
+            case pn::arc::type::inhibitor:
+              return mk_fun<inhibitor>(conf, stop, o, arc.first, arc.second.weight);
+
+            default:
+              throw std::runtime_error("Unsupported arc type.");
+          }
+        }();
+        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      }
+      
+      operands.insert(h_t);
     }
-
-    homomorphism h_t = sdd::id<sdd_conf>();
-
-    // Post actions.
-    for (const auto& arc : transition.post)
-    {
-      // Is the maximal marking limited?
-      homomorphism f = conf.marking_bound == 0
-                     ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
-                     : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
-                                                     , conf.marking_bound, arc.first);
-      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
-    }
-
-    // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
-    if (conf.compute_dead_transitions)
-    {
-      // Target the same variable as the last pre or post to be fired to avoid evaluations.
-      const auto var = transition.pre.empty()
-                     ? std::prev(transition.post.cend())->first
-                     : transition.pre.cbegin()->first;
-
-      const auto f = mk_fun<live>(conf, stop, o, var, transition.index, transitions_bitset);
-      h_t = composition(h_t, sdd::carrier(o, var, f));
-    }
-
-    // Pre actions.
-    for (const auto& arc : transition.pre)
-    {
-      const homomorphism f = [&]{
-        switch (arc.second.kind)
-        {
-          case pn::arc::type::normal:
-            return mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
-
-          case pn::arc::type::inhibitor:
-            return mk_fun<inhibitor>(conf, stop, o, arc.first, arc.second.weight);
-
-          default:
-            throw std::runtime_error("Unsupported arc type.");
-        }
-      }();
-      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
-    }
-
-    operands.insert(h_t);
   }
+  else // timed Petri net
+  {
+    // @todo Add canary to detect dead timed transitions
+
+    for (const pn::transition& t : net.transitions())
+    {
+      // Compose from right to left into this homomorphism.
+      auto h_t = sdd::id<sdd_conf>();
+
+      // Check if the clock of t has reached the low time requirement.
+      // An untimed transition doesn't have a clock.
+      if (t.timed())
+      {
+        h_t = sdd::carrier(o, t.id, mk_fun<pre_clock>(conf, stop, o, t.id, t.low));
+      }
+
+      // All pre arcs.
+      for (const auto& arc : t.pre)
+      {
+        h_t = composition( sdd::carrier( o, arc.first
+                                        , function(o, arc.first, pre(arc.second.weight)))
+                         , h_t);
+      }
+
+      for (const pn::transition& u : net.transitions())
+      {
+        if (not u.timed())
+        {
+          // We don't need to check if firing t enables u and to set clocks accordingly.
+          continue;
+        }
+
+        // The predicate that selects markings where the transition u is enabled at m'.
+        auto u_enabled = sdd::id<sdd_conf>();
+
+        // Seperate places which are shared between t and u from those which are unshared.
+        std::vector<std::string> shared_pre;
+        std::vector<std::string> unshared_pre;
+        for (const auto& arc : u.pre)
+        {
+          if (t.post.find(arc.first) != t.post.cend())
+          {
+            shared_pre.push_back(arc.first);
+          }
+          else
+          {
+            unshared_pre.push_back(arc.first);
+          }
+        }
+
+        // Check if existing marking of pre (unshared) places of u is sufficient.
+        for (const auto& pid : unshared_pre)
+        {
+          const auto& arc = *u.pre.find(pid);
+          const auto e = function(o, arc.first, filter(arc.second.weight));
+          u_enabled = composition(sdd::carrier(o, arc.first, e), u_enabled);
+        }
+
+        // Check if pre places (of u) potentially marked by t enable u.
+        for (const auto& pid : shared_pre)
+        {
+          const auto& t_arc = *t.post.find(pid);
+          const auto& u_arc = *u.pre.find(pid);
+          const auto e = function( o, u_arc.first
+                                 , enabled(u_arc.second.weight, t_arc.second.weight));
+          u_enabled = composition(sdd::carrier(o, u_arc.first, e), u_enabled);
+        }
+
+        // The operation to perform when u is not persistent.
+        const auto else_branch =
+        sdd::if_then_else( u_enabled
+                         , sdd::carrier( o, u.id
+                                       , function(o, u.id, set(0)))
+                         , sdd::carrier( o, u.id
+                                       , function( o, u.id, set(pn::sharp)))
+                         );
+
+        // Test persistence.
+        if (t.id != u.id)
+        {
+          // The predicate to check if u is persistent vs t (pre of t have already been fired).
+          auto u_persistence = sdd::id<sdd_conf>();
+          for (const auto& arc : u.pre)
+          {
+            const auto e = function(o, arc.first, filter(arc.second.weight));
+            u_persistence = composition(sdd::carrier(o, arc.first, e), u_persistence);
+          }
+
+          // Finally, the whole operation for the transition u.
+          const auto ite_u = sdd::if_then_else(u_persistence, sdd::id<sdd_conf>(), else_branch);
+
+          // Compose it with the operation of the previous transition u.
+          h_t = composition(ite_u, h_t);
+        }
+        else // t.id == u.id, by convention, t cannot be persistent vs itself.
+        {
+          h_t = composition(else_branch, h_t);
+        }
+      } // for (pn::transition& u : shared)
+
+      // Finally, apply the post operations.
+      auto post_t = sdd::id<sdd_conf>();
+      for (const auto& arc : t.post)
+      {
+        const auto p = function(o, arc.first, post(arc.second.weight));
+        post_t = composition(sdd::carrier(o, arc.first, p), post_t);
+      }
+      h_t = composition(post_t, h_t);
+
+      // The operation for transition t is ready.
+      operands.insert(h_t);
+
+    } // for (const pn::transition& t : net.transitions())
+
+    // Advance time.
+    auto advance_h = sdd::id<sdd_conf>();
+    for (const pn::transition& t : net.transitions())
+    {
+      if (t.timed())
+      {
+        const auto f = t.high == pn::inf
+                     ? function(o, t.id, advance_capped(t.low, t.high))
+                     : function(o, t.id, advance(t.high));
+        advance_h = composition(sdd::carrier(o, t.id, f), advance_h);
+      }
+    }
+    operands.insert(advance_h);
+  }
+
   stats.relation_duration = timer.duration();
   return fixpoint(sum(o, operands.cbegin(), operands.cend()));
 }
@@ -325,12 +492,6 @@ const
     std::cout << o << std::endl;
   }
 
-  if (conf.order_only)
-  {
-    dump_json(conf, stats, manager, sdd::zero<sdd_conf>(), net);
-    return;
-  }
-
   // Get the initial state.
   const SDD m0 = initial_state(o, net);
 
@@ -351,9 +512,15 @@ const
     std::cout << h << std::endl;
   }
 
+  if (conf.order_only)
+  {
+    dump_json(conf, stats, manager, sdd::zero<sdd_conf>(), net);
+    dump_hom_dot(conf, h_classic, h);
+    return;
+  }
+
   // Compute the state space.
   auto m = sdd::zero<sdd_conf>();
-
   try
   {
     m = state_space(conf, o, m0, h, stats, stop, manager);

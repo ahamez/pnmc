@@ -2,11 +2,18 @@
 #define _PNMC_PN_TRANSITION_HH_
 
 #include <iosfwd>
+#include <limits>
 #include <map>
 
 #include "pn/arc.hh"
 
 namespace pnmc { namespace pn {
+
+/// @brief Time infinity.
+constexpr unsigned int inf = std::numeric_limits<unsigned int>::max();
+
+/// @brief Time sharp.
+constexpr unsigned int sharp = inf - 1;
 
 /*------------------------------------------------------------------------------------------------*/
 

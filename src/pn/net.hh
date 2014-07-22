@@ -125,6 +125,13 @@ public:
   /// @brief Add a time interval to a transition.
   void
   add_time_interval(const std::string& tid, unsigned int low, unsigned int high);
+
+  /// @brief Tell if some transitions are timed.
+  bool
+  timed() const noexcept;
+
+  /// @brief Tell if a transition is initially enabled.
+  bool enabled(const std::string& tid) const;
 };
 
 /*------------------------------------------------------------------------------------------------*/
