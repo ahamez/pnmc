@@ -199,6 +199,7 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
                          , h_t);
       }
 
+      // Update clocks of all other timed transitions.
       for (const pn::transition& u : net.transitions())
       {
         if (not u.timed())
@@ -215,7 +216,7 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
         std::vector<std::string> unshared_pre;
         for (const auto& arc : u.pre)
         {
-          if (t.post.find(arc.first) != t.post.cend())
+          if (t.post.find(arc.first) != t.post.cend()) // arc.first exists in t.post
           {
             shared_pre.push_back(arc.first);
           }
