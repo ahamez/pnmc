@@ -20,6 +20,8 @@ constexpr unsigned int sharp = inf - 1;
 /// @brief A transition in a Petri Net.
 struct transition
 {
+  using arcs_type = std::multimap<std::string, arc>;
+
   /// @brief This transition's id.
   const std::string id;
 
@@ -30,10 +32,10 @@ struct transition
   const std::size_t index;
 
   /// @brief Pre-places
-  std::multimap<std::string, arc> pre;
+  arcs_type pre;
 
   /// @brief Post-places
-  std::multimap<std::string, arc> post;
+  arcs_type post;
 
   /// @brief Lower time interval.
   unsigned int low;

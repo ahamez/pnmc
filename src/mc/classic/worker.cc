@@ -199,92 +199,113 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
                          , h_t);
       }
 
-      // Update clocks of all other timed transitions.
-      for (const pn::transition& u : net.transitions())
-      {
-        if (not u.timed())
-        {
-          // We don't need to check if firing t enables u and to set clocks accordingly.
-          continue;
-        }
+      const bool has_impact_on_time
+        = t.timed() or
+          // The transition t is untimed, but we should check if the places it marks are pre of
+          // some timed transition.
+          std::any_of( t.post.cbegin(), t.post.cend()
+                     , [&](const pn::transition::arcs_type::value_type& arc)
+                          {
+                            const auto& p = *net.places_by_id().find(arc.first);
+                            return std::any_of( p.post.cbegin(), p.post.cend()
+                                              , [&](const pn::place::arcs_type::value_type& arc2)
+                                                   {
+                                                     const auto& u
+                                                       = *net.transitions().find(arc2.first);
+                                                       return u.timed();
+                                                   });
+                          });
 
-        // The operation to perform when u is not persistent.
-        const homomorphism not_persistent = [&]
+      if (has_impact_on_time)
+      {
+        // Update clocks of all other timed transitions.
+        for (const pn::transition& u : net.transitions())
         {
-          // Seperate places which are shared between t and u from those which are unshared.
-          std::vector<std::string> shared_pre;
-          std::vector<std::string> unshared_pre;
-          for (const auto& arc : u.pre)
+          if (not u.timed())
           {
-            if (t.post.find(arc.first) != t.post.cend()) // arc.first exists in t.post
+            // We don't need to check if firing t enables u and to set clocks accordingly.
+            continue;
+          }
+
+          // The operation to perform when u is not persistent.
+          const homomorphism not_persistent = [&]
+          {
+            // Seperate places which are shared between t and u from those which are unshared.
+            std::vector<std::string> shared_pre;
+            std::vector<std::string> unshared_pre;
+            for (const auto& arc : u.pre)
             {
-              shared_pre.push_back(arc.first);
+              if (t.post.find(arc.first) != t.post.cend()) // arc.first exists in t.post
+              {
+                shared_pre.push_back(arc.first);
+              }
+              else
+              {
+                unshared_pre.push_back(arc.first);
+              }
+            }
+
+            if (shared_pre.empty() and t.id != u.id)
+            {
+              // Transition u doesn't have a pre place that t can marks. Thus, for a given marking,
+              // u is either persistent or disabled.
+              return sdd::carrier(o, u.id, function(o, u.id, set(pn::sharp)));
             }
             else
             {
-              unshared_pre.push_back(arc.first);
+              // The predicate that selects markings where the transition u is enabled at m'.
+              auto u_enabled = sdd::id<sdd_conf>();
+
+              // Check if existing marking of pre (unshared) places of u is sufficient.
+              for (const auto& pid : unshared_pre)
+              {
+                const auto& arc = *u.pre.find(pid);
+                const auto e = function(o, arc.first, filter(arc.second.weight));
+                u_enabled = composition(sdd::carrier(o, arc.first, e), u_enabled);
+              }
+
+              // Check if pre places (of u) potentially marked by t enable u.
+              for (const auto& pid : shared_pre)
+              {
+                const auto& t_arc = *t.post.find(pid);
+                const auto& u_arc = *u.pre.find(pid);
+                const auto e = function( o, u_arc.first
+                                       , enabled(u_arc.second.weight, t_arc.second.weight));
+                u_enabled = composition(sdd::carrier(o, u_arc.first, e), u_enabled);
+              }
+
+              return sdd::if_then_else( u_enabled
+                                      , sdd::carrier( o, u.id
+                                                    , function(o, u.id, set(0)))
+                                      , sdd::carrier( o, u.id
+                                                    , function( o, u.id, set(pn::sharp))));
             }
-          }
+          }();
 
-          if (shared_pre.empty() and t.id != u.id)
+          // Test persistence.
+          if (t.id != u.id)
           {
-            // Transition u doesn't have a pre place that t can marks. Thus, for a given marking,
-            // u is either persistent or disabled.
-            return sdd::carrier(o, u.id, function(o, u.id, set(pn::sharp)));
-          }
-          else
-          {
-            // The predicate that selects markings where the transition u is enabled at m'.
-            auto u_enabled = sdd::id<sdd_conf>();
-
-            // Check if existing marking of pre (unshared) places of u is sufficient.
-            for (const auto& pid : unshared_pre)
+            // The predicate that checks if u is persistent vs t (pre of t have already been fired).
+            auto u_persistence = sdd::id<sdd_conf>();
+            for (const auto& arc : u.pre)
             {
-              const auto& arc = *u.pre.find(pid);
               const auto e = function(o, arc.first, filter(arc.second.weight));
-              u_enabled = composition(sdd::carrier(o, arc.first, e), u_enabled);
+              u_persistence = composition(sdd::carrier(o, arc.first, e), u_persistence);
             }
 
-            // Check if pre places (of u) potentially marked by t enable u.
-            for (const auto& pid : shared_pre)
-            {
-              const auto& t_arc = *t.post.find(pid);
-              const auto& u_arc = *u.pre.find(pid);
-              const auto e = function( o, u_arc.first
-                                     , enabled(u_arc.second.weight, t_arc.second.weight));
-              u_enabled = composition(sdd::carrier(o, u_arc.first, e), u_enabled);
-            }
+            // Finally, the whole operation for the transition u.
+            const auto ite_u
+              = sdd::if_then_else(u_persistence, sdd::id<sdd_conf>(), not_persistent);
 
-            return sdd::if_then_else( u_enabled
-                                    , sdd::carrier( o, u.id
-                                                  , function(o, u.id, set(0)))
-                                    , sdd::carrier( o, u.id
-                                                  , function( o, u.id, set(pn::sharp))));
+            // Compose it with the operation of the previous transition u.
+            h_t = composition(ite_u, h_t);
           }
-        }();
-
-        // Test persistence.
-        if (t.id != u.id)
-        {
-          // The predicate that checks if u is persistent vs t (pre of t have already been fired).
-          auto u_persistence = sdd::id<sdd_conf>();
-          for (const auto& arc : u.pre)
+          else // t.id == u.id, by convention, t cannot be persistent vs itself.
           {
-            const auto e = function(o, arc.first, filter(arc.second.weight));
-            u_persistence = composition(sdd::carrier(o, arc.first, e), u_persistence);
+            h_t = composition(not_persistent, h_t);
           }
-
-          // Finally, the whole operation for the transition u.
-          const auto ite_u = sdd::if_then_else(u_persistence, sdd::id<sdd_conf>(), not_persistent);
-
-          // Compose it with the operation of the previous transition u.
-          h_t = composition(ite_u, h_t);
-        }
-        else // t.id == u.id, by convention, t cannot be persistent vs itself.
-        {
-          h_t = composition(not_persistent, h_t);
-        }
-      } // for (pn::transition& u : shared)
+        } // for (pn::transition& u : shared)
+      } // if (has_impact_on_time)
 
       // Finally, apply the post operations.
       auto post_t = sdd::id<sdd_conf>();
