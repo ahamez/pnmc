@@ -568,7 +568,12 @@ const
   stats.nb_states = res.nb_states.template convert_to<long double>();
   std::cout << stats.nb_states << " states" << std::endl;
 
-  if (conf.compute_dead_transitions)
+  if (conf.compute_dead_transitions and net.timed())
+  {
+    std::cerr << "Computation of dead transitions for Time Petri Nets is not supported yet."
+              << std::endl;
+  }
+  else if (conf.compute_dead_transitions)
   {
     std::deque<std::string> dead_transitions;
     for (std::size_t i = 0; i < net.transitions().size(); ++i)
@@ -592,7 +597,12 @@ const
     }
   }
 
-  if (conf.compute_dead_states)
+  if (conf.compute_dead_states and net.timed())
+  {
+    std::cerr << "Computation of dead states for Time Petri Nets is not supported yet."
+              << std::endl;
+  }
+  else if (conf.compute_dead_states)
   {
     const auto dead = dead_states(conf, o, net, m, stats);
     if (dead.empty())
