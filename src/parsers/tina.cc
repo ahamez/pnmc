@@ -60,6 +60,7 @@ place_arc(const std::string& s)
     throw parse_error("Valuation expected, got '" + s + "'");
   }
 
+  auto valuation_pos = pos;
   switch (s[pos])
   {
       case '*': break;
@@ -68,7 +69,7 @@ place_arc(const std::string& s)
       {
         if (s[pos + 1] == '-')
         {
-          ++pos;
+          ++valuation_pos;
           arc_type = pn::arc::type::inhibitor;
         }
         else
@@ -82,7 +83,7 @@ place_arc(const std::string& s)
       {
         if (s[pos +1] == '-')
         {
-          ++pos;
+          ++valuation_pos;
           arc_type = pn::arc::type::stopwatch_inhibitor;
         }
         else
@@ -100,8 +101,8 @@ place_arc(const std::string& s)
       }
   }
 
-  const auto valuation = value(s.cbegin() + pos + 1, s.cend());
-  return std::make_pair(s.substr(0, pos - 1), pn::arc{valuation, arc_type});
+  const auto valuation = value(s.cbegin() + valuation_pos + 1, s.cend());
+  return std::make_pair(s.substr(0, pos), pn::arc{valuation, arc_type});
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -261,6 +262,7 @@ tina(std::istream& in)
         {
           ss >> ignore >> ignore; // ':' <label>
         }
+
 
         if (ss >> s2)
         {
