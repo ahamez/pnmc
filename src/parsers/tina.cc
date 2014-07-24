@@ -220,13 +220,18 @@ tina(std::istream& in)
         try
         {
           last = std::stoi(s2);
-          if ((last < first) or (open_upper_endpoint and first == last))
+          if ((last < first) or ((open_upper_endpoint or open_lower_endpoint) and first == last))
           {
             throw parse_error( "Invalid time interval '"
                              + (open_lower_endpoint ? std::string("]") : std::string("["))
                              + std::to_string(first) + "," + std::to_string(last)
                              + (open_upper_endpoint ? std::string("[") : std::string("]"))
                              + "'");
+          }
+
+          if (open_lower_endpoint)
+          {
+            first += 1;
           }
 
           if (open_upper_endpoint)
