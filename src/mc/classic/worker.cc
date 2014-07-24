@@ -686,7 +686,7 @@ const
 
   stats.total_duration = total_timer.duration();
 
-  dump_sdd_dot(conf, m);
+  dump_sdd_dot(conf, m, o);
   dump_lua(conf, m);
   dump_json(conf, stats, manager, m, net);
   dump_results(conf, res);

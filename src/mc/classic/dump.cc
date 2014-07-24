@@ -20,14 +20,15 @@ namespace pnmc { namespace mc { namespace classic {
 /*------------------------------------------------------------------------------------------------*/
 
 void
-dump_sdd_dot(const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s)
+dump_sdd_dot( const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s
+            , const sdd::order<sdd::conf1>& o)
 {
   if (conf.export_final_sdd_dot_file)
   {
     std::ofstream file(*conf.export_final_sdd_dot_file);
     if (file.is_open())
     {
-      file << sdd::tools::dot(s) << std::endl;
+      file << sdd::tools::dot(s, o) << std::endl;
     }
     else
     {
