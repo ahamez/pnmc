@@ -80,11 +80,6 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   // We don't try to apply any heuristic on this order.
   if (conf.load_order_file)
   {
-    if (net.timed())
-    {
-      throw std::invalid_argument("Loading order from file for timed PN is not supported yet");
-    }
-
     std::fstream file(*conf.load_order_file);
     if (file.is_open())
     {
@@ -99,6 +94,12 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
                     , std::inserter(pn_identifiers, pn_identifiers.end())
                     , [](const pn::place& p){return p.id;});
 
+      if (net.timed())
+      {
+        std::transform( net.transitions().cbegin(), net.transitions().cend()
+                      , std::inserter(pn_identifiers, pn_identifiers.end())
+                      , [](const pn::transition& t){return t.id;});
+      }
 
       std::vector<std::string> diff;
       diff.reserve(order_identifiers.size());
