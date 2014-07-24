@@ -219,15 +219,10 @@ tina(std::istream& in)
         ss1 >> s2;
         try
         {
+
           last = std::stoi(s2);
-          if ((last < first) or ((open_upper_endpoint or open_lower_endpoint) and first == last))
-          {
-            throw parse_error( "Invalid time interval '"
-                             + (open_lower_endpoint ? std::string("]") : std::string("["))
-                             + std::to_string(first) + "," + std::to_string(last)
-                             + (open_upper_endpoint ? std::string("[") : std::string("]"))
-                             + "'");
-          }
+          const auto old_first = first;
+          const auto old_last = last;
 
           if (open_lower_endpoint)
           {
@@ -237,6 +232,15 @@ tina(std::istream& in)
           if (open_upper_endpoint)
           {
             last -= 1;
+          }
+
+          if (last < first)
+          {
+            throw parse_error( "Invalid time interval '"
+                             + (open_lower_endpoint ? std::string("]") : std::string("["))
+                             + std::to_string(old_first) + "," + std::to_string(old_last)
+                             + (open_upper_endpoint ? std::string("[") : std::string("]"))
+                             + "'");
           }
         }
         catch (const std::invalid_argument& e)
