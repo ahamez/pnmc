@@ -4,7 +4,8 @@
 #include <sdd/manager.hh>
 #include <sdd/conf/default_configurations.hh>
 #include <sdd/dd/definition.hh>
-#include "sdd/order/strategies/force_hypergraph.hh"
+#include <sdd/order/order.hh>
+#include <sdd/order/strategies/force_hypergraph.hh>
 
 #include "conf/configuration.hh"
 #include "mc/classic/results.hh"
@@ -17,7 +18,8 @@ namespace pnmc { namespace mc { namespace classic {
 
 /// @brief Export SDD to the DOT format when required by the configuration.
 void
-dump_sdd_dot(const conf::configuration&, const sdd::SDD<sdd::conf1>&);
+dump_sdd_dot( const conf::configuration&, const sdd::SDD<sdd::conf1>&
+            , const sdd::order<sdd::conf1>&);
 
 /// @brief Export SDD as a Lua data structure when required by the configuration.
 void
