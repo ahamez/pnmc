@@ -34,7 +34,7 @@ struct advance
       }
     }
     // As a flat_set is sorted, # is always the last, if it exists
-    if (*std::prev(val.cend()) == pn::sharp)
+    if (*val.crbegin() == pn::sharp)
     {
       builder.insert(pn::sharp);
     }
