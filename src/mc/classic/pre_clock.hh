@@ -36,6 +36,13 @@ struct pre_clock
     return std::move(builder);
   }
 
+  bool
+  selector()
+  const noexcept
+  {
+    return true;
+  }
+
   /// @brief Equality.
   friend
   bool
