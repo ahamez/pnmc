@@ -321,19 +321,23 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
 
     } // for (const pn::transition& t : net.transitions())
 
-    // Advance time.
-    auto advance_h = sdd::id<sdd_conf>();
-    for (const pn::transition& t : net.transitions())
+    const auto advance_time = [&]
     {
-      if (t.timed())
+      auto res = sdd::id<sdd_conf>();
+      for (const pn::transition& t : net.transitions())
       {
-        const auto f = t.high == pn::inf
-                     ? function(o, t.id, advance_capped(t.low, t.high))
-                     : function(o, t.id, advance(t.high));
-        advance_h = composition(sdd::carrier(o, t.id, f), advance_h);
+        if (t.timed())
+        {
+          const auto f = t.high == pn::inf
+                       ? function(o, t.id, advance_capped(t.low, t.high))
+                       : function(o, t.id, advance(t.high));
+          res = composition(sdd::carrier(o, t.id, f), res);
+        }
       }
-    }
-    operands.insert(advance_h);
+      return res;
+    }();
+
+    operands.insert(advance_time);
   }
 
   stats.relation_duration = timer.duration();
