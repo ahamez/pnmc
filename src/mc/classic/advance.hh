@@ -41,13 +41,12 @@ struct advance
     return std::move(builder);
   }
 
-//  ???
-//  bool
-//  shifter()
-//  const noexcept
-//  {
-//    return true;
-//  }
+  bool
+  shifter()
+  const noexcept
+  {
+    return true;
+  }
 
   /// @brief Equality.
   friend
