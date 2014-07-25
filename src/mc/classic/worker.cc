@@ -334,7 +334,12 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
       auto post_t = sdd::id<sdd_conf>();
       for (const auto& arc : t.post)
       {
-        const auto p = function(o, arc.first, post(arc.second.weight));
+        // Is the maximal marking limited?
+        const homomorphism p
+          = conf.marking_bound == 0
+          ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
+          : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
+                                          , conf.marking_bound, arc.first);
         post_t = composition(sdd::carrier(o, arc.first, p), post_t);
       }
       h_t = composition(post_t, h_t);
