@@ -144,13 +144,18 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
       // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
       if (conf.compute_dead_transitions)
       {
-        // Target the same variable as the last pre or post to be fired to avoid evaluations.
-        const auto var = transition.pre.empty()
-        ? std::prev(transition.post.cend())->first
-        : transition.pre.cbegin()->first;
-
-        const auto f = mk_fun<live>(conf, stop, o, var, transition.index, transitions_bitset);
-        h_t = composition(h_t, sdd::carrier(o, var, f));
+        if (transition.pre.empty())
+        {
+          // t is always enabled, it's useless to test if it's live.
+          transitions_bitset[transition.index] = true;
+        }
+        else
+        {
+          // Target the same variable as the last pre or post to be fired to avoid evaluations.
+          const auto var = transition.pre.cbegin()->first;
+          const auto f = mk_fun<live>(conf, stop, o, var, transition.index, transitions_bitset);
+          h_t = composition(h_t, sdd::carrier(o, var, f));
+        }
       }
 
       // Pre actions.
@@ -197,6 +202,24 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
         h_t = composition( sdd::carrier( o, arc.first
                                         , function(o, arc.first, pre(arc.second.weight)))
                          , h_t);
+      }
+
+      // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
+      if (conf.compute_dead_transitions)
+      {
+
+        if (t.pre.empty())
+        {
+          // t is always enabled, it's useless to test if it's live.
+          transitions_bitset[t.index] = true;
+        }
+        else
+        {
+          // Target the same variable as the last pre to be fired to avoid useless evaluations.
+          const auto var = t.pre.crbegin()->first;
+          const auto f = mk_fun<live>(conf, stop, o, var, t.index, transitions_bitset);
+          h_t = composition(sdd::carrier(o, var, f), h_t);
+        }
       }
 
       const bool has_impact_on_time
@@ -593,12 +616,7 @@ const
   stats.nb_states = res.nb_states.template convert_to<long double>();
   std::cout << stats.nb_states << " states" << std::endl;
 
-  if (conf.compute_dead_transitions and net.timed())
-  {
-    std::cerr << "Computation of dead transitions for Time Petri Nets is not supported yet."
-              << std::endl;
-  }
-  else if (conf.compute_dead_transitions)
+  if (conf.compute_dead_transitions)
   {
     std::deque<std::string> dead_transitions;
     for (std::size_t i = 0; i < net.transitions().size(); ++i)
