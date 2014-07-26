@@ -330,7 +330,10 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
           // Test persistence.
           if (t.id != u.id)
           {
-            // The predicate that checks if u is persistent vs t (pre of t have already been fired).
+            // The predicate that checks if u is persistent vs t. Pre(t) has already been fired.
+            // If u is enabled at m - Pre(t), then u was already enabled at m. Which means that
+            // u is persistent vs t. Thus, we just have to filter on markings where u is still
+            // enabled.
             auto u_persistence = sdd::id<sdd_conf>();
             for (const auto& arc : u.pre)
             {
