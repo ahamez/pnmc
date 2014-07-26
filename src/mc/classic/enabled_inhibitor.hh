@@ -1,26 +1,23 @@
-#ifndef _PNMC_MC_INHIBITOR_HH_
-#define _PNMC_MC_INHIBITOR_HH_
+#ifndef _PNMC_MC_ENABLED_INHIBITOR_HH_
+#define _PNMC_MC_ENABLED_INHIBITOR_HH_
 
-#include <algorithm>  // copy
 #include <functional> // hash
 #include <ostream>
 
 #include <sdd/util/hash.hh>
-#include <sdd/values/flat_set.hh>
-
-#include "conf/configuration.hh"
+#include "sdd/values/flat_set.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief An inhibitor arc.
-struct inhibitor
+struct enabled_inhibitor
 {
-  const unsigned int valuation;
+  const unsigned int pre;
+  const unsigned int post;
 
-  inhibitor(unsigned int val)
-    : valuation(val)
+  enabled_inhibitor(unsigned int pr, unsigned int po)
+    : pre(pr), post(po)
   {}
 
   sdd::values::flat_set<unsigned int>
@@ -28,10 +25,15 @@ struct inhibitor
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
-    // Only keep values that are less than the requested valuation.
-    std::copy(val.cbegin(), val.lower_bound(valuation), std::inserter(builder, builder.end()));
+    for (const auto v : val)
+    {
+      if ((v + post) < pre)
+      {
+        builder.insert(v);
+      }
+    }
     sdd::values::flat_set<unsigned int> res (std::move(builder));
-    std::cout << "inhibitor from " << val << " to " << res << std::endl;
+    std::cout << "enabled_inhibitor from " << val << " to " << res << std::endl;
     return res;
 //    return std::move(builder);
   }
@@ -43,21 +45,21 @@ struct inhibitor
     return true;
   }
 
-  /// @brief Equality of two inhibitor arcs.
+  /// @brief Equality.
   friend
   bool
-  operator==(const inhibitor& lhs, const inhibitor& rhs)
+  operator==(const enabled_inhibitor& lhs, const enabled_inhibitor& rhs)
   noexcept
   {
-    return lhs.valuation == rhs.valuation;
+    return lhs.pre == rhs.pre and lhs.post == rhs.post;
   }
 
-  /// @brief Textual output of an inhibitor arc.
+  /// @brief Textual output.
   friend
   std::ostream&
-  operator<<(std::ostream& os, const inhibitor& i)
+  operator<<(std::ostream& os, const enabled_inhibitor& e)
   {
-    return os << "inhib(" << i.valuation << ")";
+    return os << "enabled_inhib(" << e.pre << "," << e.post << ")";
   }
 };
 
@@ -65,18 +67,22 @@ struct inhibitor
 
 }}} // namespace pnmc::mc::classic
 
-namespace std {
+namespace std
+{
 
 /*------------------------------------------------------------------------------------------------*/
 
 template <>
-struct hash<pnmc::mc::classic::inhibitor>
+struct hash<pnmc::mc::classic::enabled_inhibitor>
 {
   std::size_t
-  operator()(const pnmc::mc::classic::inhibitor& i)
+  operator()(const pnmc::mc::classic::enabled_inhibitor& e)
   const noexcept
   {
-    return sdd::util::hash(i.valuation);
+    std::size_t seed = 6067551962;
+    sdd::util::hash_combine(seed, e.pre);
+    sdd::util::hash_combine(seed, e.post);
+    return seed;
   }
 };
 
@@ -84,4 +90,4 @@ struct hash<pnmc::mc::classic::inhibitor>
 
 } // namespace std
 
-#endif // _PNMC_MC_INHIBITOR_HH_
+#endif // _PNMC_MC_ENABLED_INHIBITOR_HH_

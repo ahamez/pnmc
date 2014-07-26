@@ -1,26 +1,22 @@
-#ifndef _PNMC_MC_INHIBITOR_HH_
-#define _PNMC_MC_INHIBITOR_HH_
+#ifndef _PNMC_MC_FILTER_LT_HH_
+#define _PNMC_MC_FILTER_LT_HH_
 
-#include <algorithm>  // copy
 #include <functional> // hash
 #include <ostream>
 
 #include <sdd/util/hash.hh>
-#include <sdd/values/flat_set.hh>
-
-#include "conf/configuration.hh"
+#include "sdd/values/flat_set.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief An inhibitor arc.
-struct inhibitor
+struct filter_lt
 {
-  const unsigned int valuation;
+  const unsigned int value;
 
-  inhibitor(unsigned int val)
-    : valuation(val)
+  filter_lt(unsigned int v)
+    : value(v)
   {}
 
   sdd::values::flat_set<unsigned int>
@@ -28,10 +24,12 @@ struct inhibitor
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
-    // Only keep values that are less than the requested valuation.
-    std::copy(val.cbegin(), val.lower_bound(valuation), std::inserter(builder, builder.end()));
+    for (auto cit = val.cbegin(); cit != val.lower_bound(value); ++cit)
+    {
+      builder.insert(*cit);
+    }
     sdd::values::flat_set<unsigned int> res (std::move(builder));
-    std::cout << "inhibitor from " << val << " to " << res << std::endl;
+    std::cout << "filter_lt " << val << " to " << res << std::endl;
     return res;
 //    return std::move(builder);
   }
@@ -43,21 +41,21 @@ struct inhibitor
     return true;
   }
 
-  /// @brief Equality of two inhibitor arcs.
+  /// @brief Equality.
   friend
   bool
-  operator==(const inhibitor& lhs, const inhibitor& rhs)
+  operator==(const filter_lt& lhs, const filter_lt& rhs)
   noexcept
   {
-    return lhs.valuation == rhs.valuation;
+    return lhs.value == rhs.value;
   }
 
-  /// @brief Textual output of an inhibitor arc.
+  /// @brief Textual output.
   friend
   std::ostream&
-  operator<<(std::ostream& os, const inhibitor& i)
+  operator<<(std::ostream& os, const filter_lt& e)
   {
-    return os << "inhib(" << i.valuation << ")";
+    return os << "filter_lt(" << e.value << ")";
   }
 };
 
@@ -65,18 +63,21 @@ struct inhibitor
 
 }}} // namespace pnmc::mc::classic
 
-namespace std {
+namespace std
+{
 
 /*------------------------------------------------------------------------------------------------*/
 
 template <>
-struct hash<pnmc::mc::classic::inhibitor>
+struct hash<pnmc::mc::classic::filter_lt>
 {
   std::size_t
-  operator()(const pnmc::mc::classic::inhibitor& i)
+  operator()(const pnmc::mc::classic::filter_lt& e)
   const noexcept
   {
-    return sdd::util::hash(i.valuation);
+    std::size_t seed = 7247563421;
+    sdd::util::hash_combine(seed, e.value);
+    return seed;
   }
 };
 
@@ -84,4 +85,4 @@ struct hash<pnmc::mc::classic::inhibitor>
 
 } // namespace std
 
-#endif // _PNMC_MC_INHIBITOR_HH_
+#endif // _PNMC_MC_FILTER_LT_HH_

@@ -157,10 +157,30 @@ const
       throw std::runtime_error("Place " + arc.first + " doesn't exist");
     }
     const auto& place = *place_cit;
-    if (place.marking < arc.second.weight)
+    switch (arc.second.kind)
     {
-      return false;
+      case pn::arc::type::normal:
+      {
+        if (place.marking < arc.second.weight)
+        {
+          return false;
+        }
+        break;
+      }
+
+      case pn::arc::type::inhibitor:
+      {
+        if (place.marking >= arc.second.weight)
+        {
+          return false;
+        }
+        break;
+      }
+
+      default:
+        throw std::runtime_error("Unsupported arc type.");
     }
+
   }
   return true;
 }
