@@ -250,25 +250,47 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
             continue;
           }
 
+          // Seperate places which are post of t and pre of u from those which are unshared.
+          std::vector<std::string> shared_pre_post;
+          std::vector<std::string> unshared_pre_post;
+          for (const auto& arc : u.pre)
+          {
+            if (t.post.find(arc.first) != t.post.cend()) // arc.first exists in t.post
+            {
+              shared_pre_post.push_back(arc.first);
+            }
+            else
+            {
+              unshared_pre_post.push_back(arc.first);
+            }
+          }
+
+          if (shared_pre_post.empty())
+          {
+            // Maybe t and u don't have any common places. It true, then firing t won't have any
+            // impact on the clock of u. Thus, we won't have to set its clock to # or 0.
+            const bool common_pre = [&]
+            {
+              for (const auto& u_arc : u.pre)
+              {
+                if (t.pre.find(u_arc.first) != t.pre.cend())
+                {
+                  return true;
+                }
+              }
+              return false;
+            }();
+
+            if (not common_pre)
+            {
+              continue;
+            }
+          }
+
           // The operation to perform when u is not persistent.
           const homomorphism not_persistent = [&]
           {
-            // Seperate places which are shared between t and u from those which are unshared.
-            std::vector<std::string> shared_pre;
-            std::vector<std::string> unshared_pre;
-            for (const auto& arc : u.pre)
-            {
-              if (t.post.find(arc.first) != t.post.cend()) // arc.first exists in t.post
-              {
-                shared_pre.push_back(arc.first);
-              }
-              else
-              {
-                unshared_pre.push_back(arc.first);
-              }
-            }
-
-            if (shared_pre.empty() and t.id != u.id)
+            if (shared_pre_post.empty() and t.id != u.id)
             {
               // Transition u doesn't have a pre place that t can marks. Thus, for a given marking,
               // u is either persistent or disabled.
@@ -280,7 +302,7 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
               auto u_enabled = sdd::id<sdd_conf>();
 
               // Check if existing marking of pre (unshared) places of u is sufficient.
-              for (const auto& pid : unshared_pre)
+              for (const auto& pid : unshared_pre_post)
               {
                 const auto& arc = *u.pre.find(pid);
                 const auto e = function(o, arc.first, filter(arc.second.weight));
@@ -288,7 +310,7 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
               }
 
               // Check if pre places (of u) potentially marked by t enable u.
-              for (const auto& pid : shared_pre)
+              for (const auto& pid : shared_pre_post)
               {
                 const auto& t_arc = *t.post.find(pid);
                 const auto& u_arc = *u.pre.find(pid);
@@ -327,7 +349,7 @@ transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>
           {
             h_t = composition(not_persistent, h_t);
           }
-        } // for (pn::transition& u : shared)
+        } // for (pn::transition& u : net.transitions())
       } // if (has_impact_on_time)
 
       // Finally, apply the post operations.
