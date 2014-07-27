@@ -28,10 +28,7 @@ struct filter_lt
     {
       builder.insert(*cit);
     }
-    sdd::values::flat_set<unsigned int> res (std::move(builder));
-    std::cout << "filter_lt " << val << " to " << res << std::endl;
-    return res;
-//    return std::move(builder);
+    return std::move(builder);
   }
 
   bool

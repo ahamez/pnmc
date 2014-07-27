@@ -32,10 +32,7 @@ struct enabled_inhibitor
         builder.insert(v);
       }
     }
-    sdd::values::flat_set<unsigned int> res (std::move(builder));
-    std::cout << "enabled_inhibitor from " << val << " to " << res << std::endl;
-    return res;
-//    return std::move(builder);
+    return std::move(builder);
   }
 
   bool

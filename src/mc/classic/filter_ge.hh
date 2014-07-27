@@ -1,5 +1,5 @@
-#ifndef _PNMC_MC_FILTER_HH_
-#define _PNMC_MC_FILTER_HH_
+#ifndef _PNMC_MC_FILTER_GE_HH_
+#define _PNMC_MC_FILTER_GE_HH_
 
 #include <functional> // hash
 #include <ostream>
@@ -11,11 +11,11 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-struct filter
+struct filter_ge
 {
   const unsigned int value;
 
-  filter(unsigned int v)
+  filter_ge(unsigned int v)
     : value(v)
   {}
 
@@ -41,7 +41,7 @@ struct filter
   /// @brief Equality.
   friend
   bool
-  operator==(const filter& lhs, const filter& rhs)
+  operator==(const filter_ge& lhs, const filter_ge& rhs)
   noexcept
   {
     return lhs.value == rhs.value;
@@ -50,9 +50,9 @@ struct filter
   /// @brief Textual output.
   friend
   std::ostream&
-  operator<<(std::ostream& os, const filter& e)
+  operator<<(std::ostream& os, const filter_ge& e)
   {
-    return os << "filter(" << e.value << ")";
+    return os << "filter_ge(" << e.value << ")";
   }
 };
 
@@ -66,10 +66,10 @@ namespace std
 /*------------------------------------------------------------------------------------------------*/
 
 template <>
-struct hash<pnmc::mc::classic::filter>
+struct hash<pnmc::mc::classic::filter_ge>
 {
   std::size_t
-  operator()(const pnmc::mc::classic::filter& e)
+  operator()(const pnmc::mc::classic::filter_ge& e)
   const noexcept
   {
     std::size_t seed = 3267553927;
@@ -82,4 +82,4 @@ struct hash<pnmc::mc::classic::filter>
 
 } // namespace std
 
-#endif // _PNMC_MC_FILTER_HH_
+#endif // _PNMC_MC_FILTER_GE_HH_

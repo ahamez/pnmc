@@ -30,10 +30,7 @@ struct inhibitor
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
     // Only keep values that are less than the requested valuation.
     std::copy(val.cbegin(), val.lower_bound(valuation), std::inserter(builder, builder.end()));
-    sdd::values::flat_set<unsigned int> res (std::move(builder));
-    std::cout << "inhibitor from " << val << " to " << res << std::endl;
-    return res;
-//    return std::move(builder);
+    return std::move(builder);
   }
 
   bool

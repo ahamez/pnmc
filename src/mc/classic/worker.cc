@@ -6,31 +6,16 @@
 #include <set>
 #include <thread>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <sdd/sdd.hh>
 #include <sdd/tools/size.hh>
 
-#include "mc/classic/advance.hh"
-#include "mc/classic/advance_capped.hh"
-#include "mc/classic/bounded_post.hh"
 #include "mc/classic/count_tokens.hh"
 #include "mc/classic/dead.hh"
 #include "mc/classic/dump.hh"
-#include "mc/classic/enabled.hh"
-#include "mc/classic/enabled_inhibitor.hh"
 #include "mc/classic/exceptions.hh"
-#include "mc/classic/filter.hh"
-#include "mc/classic/filter_lt.hh"
-#include "mc/classic/inhibitor.hh"
-#include "mc/classic/interruptible.hh"
-#include "mc/classic/live.hh"
+#include "mc/classic/firing_rule.hh"
 #include "mc/classic/make_order.hh"
-#include "mc/classic/post.hh"
-#include "mc/classic/pre.hh"
-#include "mc/classic/pre_clock.hh"
 #include "mc/classic/results.hh"
-#include "mc/classic/set.hh"
 #include "mc/classic/statistics.hh"
 #include "mc/classic/worker.hh"
 #include "util/timer.hh"
@@ -42,12 +27,6 @@ namespace chrono = std::chrono;
 using sdd_conf = sdd::conf1 ;
 using SDD = sdd::SDD<sdd_conf>;
 using homomorphism = sdd::homomorphism<sdd_conf>;
-
-using sdd::composition;
-using sdd::fixpoint;
-using sdd::intersection;
-using sdd::sum;
-using sdd::function;
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -89,394 +68,6 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief Create an interruptible function if required by the configuration, a normal function
-/// otherwise.
-template <typename Fun, typename... Args>
-homomorphism
-mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_conf>& o
-      , const sdd_conf::Identifier& id, Args&&... args)
-{
-  if (conf.max_time > chrono::duration<double>(0))
-  {
-    return function(o, id, interruptible<sdd_conf, Fun>(stop, std::forward<Args>(args)...));
-  }
-  else
-  {
-    return function(o, id, Fun(std::forward<Args>(args)...));;
-  }
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Compute the transition relation corresponding to a petri net.
-homomorphism
-transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>& o
-                   , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-                   , statistics& stats, const bool& stop)
-{
-  util::timer timer;
-
-  // Each transition will produce an operand.
-  std::set<homomorphism> operands;
-  operands.insert(sdd::id<sdd_conf>());
-
-  if (not net.timed())
-  {
-    for (const pn::transition& transition : net.transitions())
-    {
-      if (transition.pre.empty() and transition.post.empty())
-      {
-        continue; // A transition with no pre or post places, no need to keep it.
-      }
-
-      // compose from left to right
-      auto h_t = sdd::id<sdd_conf>();
-
-      // Post actions.
-      for (const auto& arc : transition.post)
-      {
-        // Is the maximal marking limited?
-        homomorphism f = conf.marking_bound == 0
-        ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
-        : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
-                                         , conf.marking_bound, arc.first);
-        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
-      }
-
-      // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
-      if (conf.compute_dead_transitions)
-      {
-        if (transition.pre.empty())
-        {
-          // t is always enabled, it's useless to test if it's live.
-          transitions_bitset[transition.index] = true;
-        }
-        else
-        {
-          // Target the same variable as the last pre or post to be fired to avoid evaluations.
-          const auto var = transition.pre.cbegin()->first;
-          const auto f = mk_fun<live>(conf, stop, o, var, transition.index, transitions_bitset);
-          h_t = composition(h_t, sdd::carrier(o, var, f));
-        }
-      }
-
-      // Pre actions.
-      for (const auto& arc : transition.pre)
-      {
-        const homomorphism f = [&]{
-          switch (arc.second.kind)
-          {
-            case pn::arc::type::normal:
-              return mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
-
-            case pn::arc::type::inhibitor:
-              return mk_fun<inhibitor>(conf, stop, o, arc.first, arc.second.weight);
-
-            default:
-              throw std::runtime_error("Unsupported arc type.");
-          }
-        }();
-        h_t = composition(h_t, sdd::carrier(o, arc.first, f));
-      }
-      
-      operands.insert(h_t);
-    }
-  }
-  else // timed Petri net
-  {
-    // @todo Add canary to detect dead timed transitions
-
-    for (const pn::transition& t : net.transitions())
-    {
-      std::cout << "transition t " << t.id << std::endl;
-
-      // Compose from right to left into this homomorphism.
-      auto h_t = sdd::id<sdd_conf>();
-
-      // Check if the clock of t has reached the low time requirement.
-      // An untimed transition doesn't have a clock.
-      if (t.timed())
-      {
-        h_t = sdd::carrier(o, t.id, mk_fun<pre_clock>(conf, stop, o, t.id, t.low));
-      }
-
-//      // All pre arcs.
-//      for (const auto& arc : t.pre)
-//      {
-//        h_t = composition( sdd::carrier( o, arc.first
-//                                        , function(o, arc.first, pre(arc.second.weight)))
-//                         , h_t);
-//
-//      }
-
-      // All pre arcs.
-      for (const auto& arc : t.pre)
-      {
-        const homomorphism p = [&]{
-          switch (arc.second.kind)
-          {
-            case pn::arc::type::normal:
-              return function(o, arc.first, pre(arc.second.weight));
-
-            case pn::arc::type::inhibitor:
-              return function(o, arc.first, inhibitor(arc.second.weight));
-
-            default:
-              throw std::runtime_error("Unsupported arc type.");
-          }
-        }();
-        h_t = composition(sdd::carrier(o, arc.first, p), h_t);
-      }
-
-
-      // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
-      if (conf.compute_dead_transitions)
-      {
-
-        if (t.pre.empty())
-        {
-          // t is always enabled, it's useless to test if it's live.
-          transitions_bitset[t.index] = true;
-        }
-        else
-        {
-          // Target the same variable as the last pre to be fired to avoid useless evaluations.
-          const auto var = t.pre.crbegin()->first;
-          const auto f = mk_fun<live>(conf, stop, o, var, t.index, transitions_bitset);
-          h_t = composition(sdd::carrier(o, var, f), h_t);
-        }
-      }
-
-      const bool has_impact_on_time
-        = t.timed() or
-          // The transition t is untimed, but we should check if the places it marks are pre of
-          // some timed transition.
-          std::any_of( t.post.cbegin(), t.post.cend()
-                     , [&](const pn::transition::arcs_type::value_type& arc)
-                          {
-                            const auto& p = *net.places_by_id().find(arc.first);
-                            return std::any_of( p.post.cbegin(), p.post.cend()
-                                              , [&](const pn::place::arcs_type::value_type& arc2)
-                                                   {
-                                                     const auto& u
-                                                       = *net.transitions().find(arc2.first);
-                                                       return u.timed();
-                                                   });
-                          });
-
-      if (has_impact_on_time)
-      {
-        // Update clocks of all other timed transitions.
-        for (const pn::transition& u : net.transitions())
-        {
-          std::cout << "transition u " << u.id << std::endl;
-
-          if (not u.timed())
-          {
-            // We don't need to check if firing t enables u and to set clocks accordingly.
-            continue;
-          }
-
-          bool u_has_inhib_arc = false;
-
-          // Seperate places which are post of t and pre of u from those which are unshared.
-          std::vector<std::string> shared_pre_post;
-          std::vector<std::string> unshared_pre_post;
-          for (const auto& arc : u.pre)
-          {
-            if (t.post.find(arc.first) != t.post.cend()) // arc.first exists in t.post
-            {
-              shared_pre_post.push_back(arc.first);
-            }
-            else
-            {
-              unshared_pre_post.push_back(arc.first);
-            }
-
-            if (arc.second.kind == pn::arc::type::inhibitor)
-            {
-              u_has_inhib_arc = true;
-            }
-          }
-
-//          if (shared_pre_post.empty())
-//          {
-//            // Maybe t and u don't have any common places. It true, then firing t won't have any
-//            // impact on the clock of u. Thus, we won't have to set its clock to # or 0.
-//            const bool common_pre = [&]
-//            {
-//              for (const auto& u_arc : u.pre)
-//              {
-//                if (t.pre.find(u_arc.first) != t.pre.cend())
-//                {
-//                  return true;
-//                }
-//              }
-//              return false;
-//            }();
-//
-//            if (not common_pre)
-//            {
-//              continue;
-//            }
-//          }
-
-          // The operation to perform when u is not persistent.
-          const homomorphism not_persistent = [&]
-          {
-//            if (shared_pre_post.empty() and not u_has_inhib_arc and t.id != u.id)
-//            {
-//              // Transition u doesn't have a pre place that t can marks. Thus, for a given marking,
-//              // u is either persistent or disabled. This is the branch when u is not persistent,
-//              // so we just set its clock to #.
-//              // We can't use this optimization when u has an inhibitor arc on pre place common with
-//              // t, because firing t will remove tokens from this place and thus might newly enable
-//              // u.
-//              return sdd::carrier(o, u.id, function(o, u.id, set(pn::sharp)));
-//            }
-//            else
-            {
-              // The predicate that selects markings where the transition u is enabled at m'.
-              auto u_enabled = sdd::id<sdd_conf>();
-
-              // Check if existing marking of pre (unshared) places of u is sufficient.
-              for (const auto& pid : unshared_pre_post)
-              {
-                const auto& u_arc = *u.pre.find(pid);
-                const auto e = [&]
-                {
-                  switch (u_arc.second.kind)
-                  {
-                    case pn::arc::type::normal:
-                      return function(o, u_arc.first, filter(u_arc.second.weight));
-
-                    case pn::arc::type::inhibitor:
-                      return function(o, u_arc.first, filter_lt(u_arc.second.weight));
-
-                    default:
-                      throw std::runtime_error("Unsupported arc type.");
-                  }
-                }();
-                u_enabled = composition(sdd::carrier(o, u_arc.first, e), u_enabled);
-              }
-
-//              // Check if pre places (of u) potentially marked by t enable u.
-//              for (const auto& pid : shared_pre_post)
-//              {
-//                const auto& t_arc = *t.post.find(pid);
-//                const auto& u_arc = *u.pre.find(pid);
-//                const auto e = [&]
-//                {
-//                  switch (u_arc.second.kind)
-//                  {
-//                    case pn::arc::type::normal:
-//                      return function( o, u_arc.first
-//                                     , enabled(u_arc.second.weight, t_arc.second.weight));
-//
-//                    case pn::arc::type::inhibitor:
-//                      return function( o, u_arc.first
-//                                     , enabled_inhibitor(u_arc.second.weight, t_arc.second.weight));
-//
-//                    default:
-//                      throw std::runtime_error("Unsupported arc type.");
-//                  }
-//                }();
-//                u_enabled = composition(sdd::carrier(o, u_arc.first, e), u_enabled);
-//              }
-
-              return sdd::if_then_else( u_enabled
-                                      , sdd::carrier( o, u.id
-                                                    , function(o, u.id, set(0)))
-                                      , sdd::carrier( o, u.id
-                                                    , function( o, u.id, set(pn::sharp))));
-            }
-          }();
-
-          // Test persistence.
-          if (t.id != u.id)
-          {
-            // The predicate that checks if u is persistent vs t (pre of t have already been fired)
-            // at this stage.
-            auto u_persistence = sdd::id<sdd_conf>();
-            for (const auto& u_arc : u.pre)
-            {
-              const auto e = [&]
-              {
-                switch (u_arc.second.kind)
-                {
-                  case pn::arc::type::normal:
-                    return function(o, u_arc.first, filter(u_arc.second.weight));
-
-                  case pn::arc::type::inhibitor:
-                    return function(o, u_arc.first, filter_lt(u_arc.second.weight));
-
-                  default:
-                    throw std::runtime_error("Unsupported arc type.");
-                }
-              }();
-              u_persistence = composition(sdd::carrier(o, u_arc.first, e), u_persistence);
-            }
-
-            // Finally, the whole operation for the transition u.
-            const auto ite_u
-              = sdd::if_then_else(u_persistence, sdd::id<sdd_conf>(), not_persistent);
-
-            // Compose it with the operation of the previous transition u.
-            h_t = composition(ite_u, h_t);
-          }
-          else // t.id == u.id, by convention, t cannot be persistent vs itself.
-          {
-            h_t = composition(not_persistent, h_t);
-          }
-        } // for (pn::transition& u : net.transitions())
-      } // if (has_impact_on_time)
-
-      // Finally, apply the post operations.
-      auto post_t = sdd::id<sdd_conf>();
-      for (const auto& arc : t.post)
-      {
-        // Is the maximal marking limited?
-        const homomorphism p
-          = conf.marking_bound == 0
-          ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
-          : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
-                                          , conf.marking_bound, arc.first);
-        post_t = composition(sdd::carrier(o, arc.first, p), post_t);
-      }
-      h_t = composition(post_t, h_t);
-
-      // The operation for transition t is ready.
-      operands.insert(h_t);
-
-      std::cout << std::endl;
-
-    } // for (const pn::transition& t : net.transitions())
-
-//    const auto advance_time = [&]
-//    {
-//      auto res = sdd::id<sdd_conf>();
-//      for (const pn::transition& t : net.transitions())
-//      {
-//        if (t.timed())
-//        {
-//          const auto f = t.high == pn::inf
-//                       ? function(o, t.id, advance_capped(t.low, t.high))
-//                       : function(o, t.id, advance(t.high));
-//          res = composition(sdd::carrier(o, t.id, f), res);
-//        }
-//      }
-//      return res;
-//    }();
-//    operands.insert(advance_time);
-  }
-
-  stats.relation_duration = timer.duration();
-  std::cout << "------------------------\n" << std::endl;
-  return fixpoint(sum(o, operands.cbegin(), operands.cend()));
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
 homomorphism
 rewrite( const conf::configuration&, const sdd::order<sdd_conf>& o
        , const homomorphism& h, statistics& stats)
@@ -497,9 +88,7 @@ struct threads
 
   threads( const conf::configuration& conf, statistics& stats, bool& stop
          , const sdd::manager<sdd_conf>& manager, util::timer& beginnning)
-    : finished(false)
-    , clock()
-    , sdd_sampling()
+    : finished(false), clock(), sdd_sampling()
   {
     if (conf.max_time > chrono::duration<double>(0))
     {
@@ -597,14 +186,14 @@ dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn
     // We are only interested in pre actions.
     for (const auto& arc : transition.pre)
     {
-      const auto h = function(o, arc.first, dead(arc.second.weight));
+      const auto h = sdd::function(o, arc.first, dead(arc.second.weight));
       or_operands.insert(sdd::carrier(o, arc.first, h));
     }
 
-    and_operands.insert(sum(o, or_operands.cbegin(), or_operands.cend()));
+    and_operands.insert(sdd::sum(o, or_operands.cbegin(), or_operands.cend()));
     or_operands.clear();
   }
-  const auto tmp = intersection(o, and_operands.cbegin(), and_operands.cend());
+  const auto tmp = sdd::intersection(o, and_operands.cbegin(), and_operands.cend());
   stats.dead_states_relation_duration = timer.duration();
 
   // Rewrite the relation
@@ -666,7 +255,7 @@ const
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
   // Compute the transition relation.
-  const auto h_classic = transition_relation(conf, o, net, transitions_bitset, stats, stop);
+  const auto h_classic = firing_rule(conf, o, net, transitions_bitset, stats, stop);
   if (conf.show_relation)
   {
     std::cout << h_classic << std::endl;
