@@ -42,6 +42,8 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
     }
   }
 
+  using builder_type = sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder;
+
   return SDD(order, [&](const std::string& id)
                         -> sdd::values::flat_set<unsigned int>
                        {
@@ -56,7 +58,16 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
                            assert(t_cit != timed.end());
                            if (net.enabled(t_cit->second.get().id))
                            {
-                             return {0};
+                             // Directly init transition clock with all possible values.
+                             builder_type builder;
+                             const auto max = t_cit->second.get().high == pn::inf
+                                            ? t_cit->second.get().low
+                                            : t_cit->second.get().high;
+                             for (unsigned int i = 0; i < max; ++i)
+                             {
+                               builder.insert(i);
+                             }
+                             return sdd::values::flat_set<unsigned int>(std::move(builder));
                            }
                            else
                            {
