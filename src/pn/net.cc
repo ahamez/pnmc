@@ -173,6 +173,7 @@ const
     switch (arc.second.kind)
     {
       case pn::arc::type::normal:
+      case pn::arc::type::read:
       {
         if (place.marking < arc.second.weight)
         {

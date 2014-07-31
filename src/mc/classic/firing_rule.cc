@@ -116,10 +116,13 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
         switch (arc.second.kind)
         {
           case pn::arc::type::normal:
-            return mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
+            return function(o, arc.first, pre(arc.second.weight));
 
           case pn::arc::type::inhibitor:
-            return mk_fun<inhibitor>(conf, stop, o, arc.first, arc.second.weight);
+            return function(o, arc.first, inhibitor(arc.second.weight));
+
+          case pn::arc::type::read:
+            return function(o, arc.first, filter_ge(arc.second.weight));
 
           default:
             throw std::runtime_error("Unsupported arc type.");
@@ -169,6 +172,9 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
 
           case pn::arc::type::inhibitor:
             return function(o, arc.first, inhibitor(arc.second.weight));
+
+          case pn::arc::type::read:
+            return function(o, arc.first, filter_ge(arc.second.weight));
 
           default:
             throw std::runtime_error("Unsupported arc type.");
@@ -272,6 +278,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
             switch (u_arc.second.kind)
             {
               case pn::arc::type::normal:
+              case pn::arc::type::read:
                 return function(o, u_arc.first, filter_ge(u_arc.second.weight));
 
               case pn::arc::type::inhibitor:
@@ -294,6 +301,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
             switch (u_arc.second.kind)
             {
               case pn::arc::type::normal:
+              case pn::arc::type::read:
                 return function( o, u_arc.first
                                , enabled(u_arc.second.weight, t_arc.second.weight));
 
@@ -373,7 +381,10 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
               {
                 switch (u_arc.second.kind)
                 {
+                  // Pre(t) has already been fired. As we are in the enabled branch of u, it means
+                  // that u was already enabled before Pre(t).
                   case pn::arc::type::normal:
+                  case pn::arc::type::read:
                     return function(o, u_arc.first, filter_ge(u_arc.second.weight));
 
                   case pn::arc::type::inhibitor:
