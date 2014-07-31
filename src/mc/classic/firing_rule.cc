@@ -85,10 +85,10 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
     for (const auto& arc : transition.post)
     {
       // Is the maximal marking limited?
-      homomorphism f = conf.marking_bound == 0
-      ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
-      : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
-                                       , conf.marking_bound, arc.first);
+      const auto f = conf.marking_bound == 0
+                   ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
+                   : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
+                                                   , conf.marking_bound, arc.first);
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
@@ -112,7 +112,7 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
     // Pre actions.
     for (const auto& arc : transition.pre)
     {
-      const homomorphism f = [&]{
+      const auto f = [&]{
         switch (arc.second.kind)
         {
           case pn::arc::type::normal:
@@ -214,7 +214,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
                                                  {
                                                    const auto& u
                                                      = *net.transitions().find(arc2.first);
-                                                     return u.timed();
+                                                   return u.timed();
                                                  });
                         });
 
@@ -445,11 +445,10 @@ post_and_advance_time:
     for (const auto& arc : t.post)
     {
       // Is the maximal marking limited?
-      const homomorphism p
-        = conf.marking_bound == 0
-        ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
-        : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
-                                        , conf.marking_bound, arc.first);
+      const auto p = conf.marking_bound == 0
+                   ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
+                   : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
+                                                   , conf.marking_bound, arc.first);
       post_t = composition(sdd::carrier(o, arc.first, p), post_t);
     }
     h_t = composition(post_t, h_t);
