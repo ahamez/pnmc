@@ -86,9 +86,9 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
     {
       // Is the maximal marking limited?
       const auto f = conf.marking_bound == 0
-                   ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
-                   : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
-                                                   , conf.marking_bound, arc.first);
+                   ? function(o, arc.first, post(arc.second.weight))
+                   : function(o, arc.first, bounded_post<sdd_conf>( arc.second.weight
+                                                                  , conf.marking_bound, arc.first));
       h_t = composition(h_t, sdd::carrier(o, arc.first, f));
     }
 
@@ -104,7 +104,7 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
       {
         // Target the same variable as the last pre or post to be fired to avoid evaluations.
         const auto var = transition.pre.cbegin()->first;
-        const auto f = mk_fun<live>(conf, stop, o, var, transition.index, transitions_bitset);
+        const auto f = function(o, var, live(transition.index, transitions_bitset));
         h_t = composition(h_t, sdd::carrier(o, var, f));
       }
     }
@@ -116,13 +116,13 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
         switch (arc.second.kind)
         {
           case pn::arc::type::normal:
-            return function(o, arc.first, pre(arc.second.weight));
+            return mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
 
           case pn::arc::type::inhibitor:
-            return function(o, arc.first, inhibitor(arc.second.weight));
+            return mk_fun<inhibitor>(conf, stop, o, arc.first, arc.second.weight);
 
           case pn::arc::type::read:
-            return function(o, arc.first, filter_ge(arc.second.weight));
+            return mk_fun<filter_ge>(conf, stop, o, arc.first, arc.second.weight);
 
           default:
             throw std::runtime_error("Unsupported arc type.");
