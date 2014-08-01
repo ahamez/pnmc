@@ -93,7 +93,8 @@ const auto hom_show_relation_str = "hom-show-relation";
 const auto show_final_sdd_bytes_str = "show-final-sdd-bytes";
 
 // Petri net options
-const auto pn_marking_bound_str = "pn-marking-bound";
+const auto pn_marking_bound_str = "marking-bound";
+const auto pn_one_safe_str = "1-safe";
 
 // Model checking options
 const auto mc_dead_transitions_str = "dead-transitions";
@@ -163,6 +164,7 @@ fill_configuration(int argc, char** argv)
   petri_options.add_options()
     (pn_marking_bound_str      , po::value<unsigned int>()->default_value(0)
                                , "Limit the marking")
+    (pn_one_safe_str           , "Optimize for 1-safe Petri nets")
   ;
 
   po::options_description mc_options("Model checking options");
@@ -341,6 +343,7 @@ fill_configuration(int argc, char** argv)
 
   // Petri net options
   conf.marking_bound = vm[pn_marking_bound_str].as<unsigned int>();
+  conf.one_safe = vm.count(pn_one_safe_str);
 
   // Hidden libsdd options
   conf.sdd_ut_size= vm[libsdd_sdd_ut_size_str].as<unsigned int>();

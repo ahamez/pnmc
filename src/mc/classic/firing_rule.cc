@@ -232,6 +232,9 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
         continue;
       }
 
+      // Indicates that u has an inhibitor arc to a place shared with t.
+      bool u_has_inhibitor = false;
+
       // Seperate places which are post of t and pre of u from those which are unshared.
       // Also keep places that are pre of both transitions.
       std::vector<std::string> shared_pre_post;
@@ -240,10 +243,12 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
       for (const auto& u_arc : u.pre)
       {
         const auto& u_pre_place = u_arc.first;
+        bool shared_arc = false;
 
         if (t.post.find(u_pre_place) != t.post.cend()) // pre of u exists in t.post
         {
           shared_pre_post.emplace_back(u_pre_place);
+          shared_arc = true;
         }
         else
         {
@@ -253,8 +258,13 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
         if (t.pre.find(u_pre_place) != t.pre.cend()) // pre of u exists in t.pre
         {
           shared_pre.emplace_back(u_pre_place);
+          shared_arc = true;
         }
 
+        if (u_arc.second.kind == pn::arc::type::inhibitor and shared_arc)
+        {
+          u_has_inhibitor = true;
+        }
       }
 
       if (shared_pre_post.empty() and shared_pre.empty())
@@ -263,6 +273,15 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
         // Transitions t and u don't share any places. Then firing t won't have any impact on the
         // clock of u. Thus, we don't have to test its status and update its clock if necessary.
         continue; // to next transition u
+      }
+
+      // If the Petri net is 1-safe and if t cannot mark a pre place of u, then u can't be
+      // newly enabled neither persistent, as t will consume tokens of some pre places of u.
+      if (conf.one_safe and shared_pre_post.empty() and not u_has_inhibitor)
+      {
+        assert(not shared_pre.empty());
+        h_t = composition(sdd::carrier(o, u.id, function(o, u.id, set(pn::sharp))), h_t);
+        continue; // to next u
       }
 
       const auto u_is_enabled = [&]
@@ -326,6 +345,16 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
           return false;
         }
 
+        // If the Petri net is safe and if:
+        // - Some pre places are shared, then firing t will consume tokens of these places, making
+        //   u not persistent.
+        // - Some post places of t are pre of u, by construction these places cannot have more
+        //   than one token. Thus, u cannot possibly be enabled at the same marking as t.
+        if (conf.one_safe)
+        {
+          return false;
+        }
+
         for (const auto& t_arc : t.pre)
         {
           const auto u_search = u.pre.find(t_arc.first);
@@ -342,6 +371,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
             }
           }
         }
+
         return true;
       }();
 
