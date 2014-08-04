@@ -89,7 +89,7 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
                    ? function(o, arc.first, post(arc.second.weight))
                    : function(o, arc.first, bounded_post<sdd_conf>( arc.second.weight
                                                                   , conf.marking_bound, arc.first));
-      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      h_t = composition(h_t, f);
     }
 
     // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
@@ -105,7 +105,7 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
         // Target the same variable as the last pre or post to be fired to avoid evaluations.
         const auto var = transition.pre.cbegin()->first;
         const auto f = function(o, var, live(transition.index, transitions_bitset));
-        h_t = composition(h_t, sdd::carrier(o, var, f));
+        h_t = composition(h_t, f);
       }
     }
 
@@ -128,7 +128,7 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
             throw std::runtime_error("Unsupported arc type.");
         }
       }();
-      h_t = composition(h_t, sdd::carrier(o, arc.first, f));
+      h_t = composition(h_t, f);
     }
 
     operands.insert(h_t);
@@ -158,7 +158,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
     // An untimed transition doesn't have a clock.
     if (t.timed())
     {
-      h_t = sdd::carrier(o, t.id, mk_fun<pre_clock>(conf, stop, o, t.id, t.low));
+      h_t = mk_fun<pre_clock>(conf, stop, o, t.id, t.low);
     }
 
     // All pre arcs.
@@ -180,7 +180,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
             throw std::runtime_error("Unsupported arc type.");
         }
       }();
-      h_t = composition(sdd::carrier(o, arc.first, p), h_t);
+      h_t = composition(p, h_t);
     }
 
     // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
@@ -197,7 +197,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
         // Target the same variable as the last pre to be fired to avoid useless evaluations.
         const auto var = t.pre.crbegin()->first;
         const auto f = mk_fun<live>(conf, stop, o, var, t.index, transitions_bitset);
-        h_t = composition(sdd::carrier(o, var, f), h_t);
+        h_t = composition(f, h_t);
       }
     }
 
@@ -280,7 +280,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
       if (conf.one_safe and shared_pre_post.empty() and not u_has_inhibitor)
       {
         assert(not shared_pre.empty());
-        h_t = composition(sdd::carrier(o, u.id, function(o, u.id, set(pn::sharp))), h_t);
+        h_t = composition(function(o, u.id, set(pn::sharp)), h_t);
         continue; // to next u
       }
 
@@ -307,7 +307,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
                 throw std::runtime_error("Unsupported arc type.");
             }
           }();
-          enabled_predicate = composition(sdd::carrier(o, u_arc.first, e), enabled_predicate);
+          enabled_predicate = composition(e, enabled_predicate);
         }
 
         // Check if pre places (of u) potentially marked by t enable u, by "simulating" Post(t).
@@ -332,7 +332,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
                 throw std::runtime_error("Unsupported arc type.");
             }
           }();
-          enabled_predicate = composition(sdd::carrier(o, u_arc.first, e), enabled_predicate);
+          enabled_predicate = composition(e, enabled_predicate);
         }
 
         return enabled_predicate;
@@ -444,25 +444,24 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
                     throw std::runtime_error("Unsupported arc type.");
                 }
               }();
-              persistence = composition(sdd::carrier(o, u_arc.first, f), persistence);
+              persistence = composition(f, persistence);
             } // for (const auto& u_arc : u.pre)
             return persistence;
           }();
 
           return sdd::if_then_else( u_is_persistent
                                   , sdd::id<sdd_conf>()
-                                  , sdd::carrier(o, u.id, function(o, u.id, set(0))));
+                                  , function(o, u.id, set(0)));
         }
         else // not u_persistence_possible
         {
-          return sdd::carrier(o, u.id, function(o, u.id, set(0)));
+          return function(o, u.id, set(0));
         }
       }();
 
       const auto ite_u = sdd::if_then_else( u_is_enabled
                                           , enabled_branch
-                                          , sdd::carrier( o, u.id
-                                                        , function(o, u.id, set(pn::sharp))));
+                                          , function(o, u.id, set(pn::sharp)));
 
       h_t = composition(ite_u, h_t);
 
@@ -479,7 +478,7 @@ post_and_advance_time:
                    ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
                    : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
                                                    , conf.marking_bound, arc.first);
-      post_t = composition(sdd::carrier(o, arc.first, p), post_t);
+      post_t = composition(p, post_t);
     }
     h_t = composition(post_t, h_t);
 
@@ -497,7 +496,7 @@ post_and_advance_time:
         const auto f = t.high == pn::inf
                      ? function(o, t.id, advance_capped(t.low, t.high))
                      : function(o, t.id, advance(t.high));
-        res = composition(sdd::carrier(o, t.id, f), res);
+        res = composition(f, res);
       }
     }
     return res;
