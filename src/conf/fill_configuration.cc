@@ -208,7 +208,7 @@ fill_configuration(int argc, char** argv)
     (libsdd_sdd_inter_cache_size_str , po::value<unsigned int>()->default_value(500000))
     (libsdd_sdd_sum_cache_size_str   , po::value<unsigned int>()->default_value(2000000))
     (libsdd_hom_ut_size_str          , po::value<unsigned int>()->default_value(25000))
-    (libsdd_hom_cache_size_str       , po::value<unsigned int>()->default_value(2000000))
+    (libsdd_hom_cache_size_str       , po::value<unsigned int>()->default_value(4000000))
   ;
 
   po::options_description hidden_options("Hidden options");
