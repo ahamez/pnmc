@@ -3,7 +3,6 @@
 #include <sdd/tools/dot/force_hypergraph.hh>
 #include <sdd/tools/dot/homomorphism.hh>
 #include <sdd/tools/dot/sdd.hh>
-#include <sdd/tools/lua.hh>
 #include <sdd/tools/sdd_statistics.hh>
 #include <sdd/tools/serialization.hh>
 
@@ -33,25 +32,6 @@ dump_sdd_dot( const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s
     else
     {
       std::cerr << "Can't export state space to " << *conf.export_final_sdd_dot_file << std::endl;
-    }
-  }
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-void
-dump_lua(const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s)
-{
-  if (conf.export_to_lua_file)
-  {
-    std::ofstream file(*conf.export_to_lua_file);
-    if (file.is_open())
-    {
-      file << sdd::tools::lua(s) << std::endl;
-    }
-    else
-    {
-      std::cerr << "Can't export Lua data structure to " << *conf.export_to_lua_file << std::endl;
     }
   }
 }

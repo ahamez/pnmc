@@ -111,7 +111,6 @@ const auto libsdd_hom_cache_size_str = "hom-cache-size";
 
 // Advanced options
 const auto limit_time_str = "time-limit";
-const auto export_to_lua_str = "export-lua";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
 const auto results_json_str = "results-json";
@@ -186,8 +185,6 @@ fill_configuration(int argc, char** argv)
                                 , "Number of identifiers per hierarchy")
     (order_only_str             , "Compute order only")
     (show_final_sdd_bytes_str   , "Show the number of bytes used by the final state space's SDD")
-    (export_to_lua_str          , po::value<std::string>()
-                                , "Export the final SDD to a Lua structure")
     (final_sdd_dot_export_str   , po::value<std::string>()
                                 , "Export the SDD state space to a DOT file")
     (hypergraph_dot_str         , po::value<std::string>()
@@ -362,10 +359,6 @@ fill_configuration(int argc, char** argv)
   conf.show_time = vm.count(show_time_str);
   conf.fast_exit = vm.count(fast_exit_str);
   conf.sample_nb_sdd = vm.count(sample_nb_sdd_str);
-  if (vm.count(export_to_lua_str))
-  {
-    conf.export_to_lua_file = vm[export_to_lua_str].as<std::string>();
-  }
   if (vm.count(final_sdd_dot_export_str))
   {
     conf.export_final_sdd_dot_file = vm[final_sdd_dot_export_str].as<std::string>();

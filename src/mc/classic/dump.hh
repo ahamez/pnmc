@@ -21,10 +21,6 @@ void
 dump_sdd_dot( const conf::configuration&, const sdd::SDD<sdd::conf1>&
             , const sdd::order<sdd::conf1>&);
 
-/// @brief Export SDD as a Lua data structure when required by the configuration.
-void
-dump_lua(const conf::configuration&, const sdd::SDD<sdd::conf1>&);
-
 /// @brief Export statistics to a JSON file when required by the configuration.
 void
 dump_json( const conf::configuration&, const statistics&, const sdd::manager<sdd::conf1>&
