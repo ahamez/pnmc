@@ -163,7 +163,6 @@ fill_configuration(int argc, char** argv)
   petri_options.add_options()
     (pn_marking_bound_str      , po::value<unsigned int>()->default_value(0)
                                , "Limit the marking")
-    (pn_one_safe_str           , "Optimize for 1-safe Petri nets")
   ;
 
   po::options_description mc_options("Model checking options");
@@ -199,6 +198,7 @@ fill_configuration(int argc, char** argv)
     (order_load_str             , po::value<std::string>()
                                 , "Load order from a JSON file")
     (sample_nb_sdd_str          , "Sample the number of SDD regularly")
+    (pn_one_safe_str           , "Optimize for 1-safe Petri nets")
   ;
 
   po::options_description hidden_libsdd_options("Hidden libsdd options");
