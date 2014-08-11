@@ -292,7 +292,7 @@ const
   {
     m = state_space(conf, o, m0, h, stats, stop, manager);
   }
-  catch (const bound_error<sdd_conf>& e)
+  catch (const bound_error& e)
   {
     std::cout << "Marking limit (" << conf.marking_bound << ") reached for place " << e.place << "."
               << std::endl;
@@ -301,7 +301,7 @@ const
     dump_hom_dot(conf, h_classic, h);
     return;
   }
-  catch (const interrupted<sdd_conf>& e)
+  catch (const interrupted&)
   {
     std::cout << "State space computation interrupted after " << stats.state_space_duration.count()
               << "s." << std::endl;

@@ -37,7 +37,7 @@ struct interruptible
   {
     if (stop_)
     {
-      throw interrupted<C>();
+      throw interrupted();
     }
     return fun_(x);
   }
