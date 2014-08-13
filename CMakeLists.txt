@@ -8,16 +8,11 @@ project (pnmc)
 
 option (PACKED "Pack structures" OFF)
 option (LIBSDD_PATH "Path to libsdd")
-option (NO_COROUTINE "Don't use Boost.Coroutine" OFF)
 
 ################################################################################
 
 set(Boost_USE_STATIC_LIBS ON)
-if (NOT NO_COROUTINE)
-  find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options coroutine context system)
-else ()
-  find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options)
-endif ()
+find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options coroutine context system thread)
 
 if (NOT Boost_FOUND)
   message(FATAL_ERROR "Boost not found")

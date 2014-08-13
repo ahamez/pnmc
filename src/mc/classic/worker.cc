@@ -369,8 +369,13 @@ const
       std::deque<std::reference_wrapper<const std::string>> identifiers;
       o.flat(std::back_inserter(identifiers));
 
-      for (const auto& path : dead.paths())
+      // We can't use the range-based for loop as it produces an ambiguity with clang when
+      // using Boost 1.56.
+      auto path_generator = dead.paths();
+      while (path_generator)
       {
+        const auto& path = path_generator.get();
+        path_generator(); // advance generator
         auto id_cit = identifiers.cbegin();
         auto path_cit = path.cbegin();
         for (; path_cit != std::prev(path.cend()); ++path_cit, ++id_cit)
