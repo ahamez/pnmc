@@ -1,13 +1,11 @@
-################################################################################
-
 cmake_minimum_required (VERSION 2.8.9)
 
 ################################################################################
 
 project (pnmc)
 
-option (PACKED "Pack structures" OFF)
 option (LIBSDD_PATH "Path to libsdd")
+option (PACKED "Pack structs in memory (experimental)" OFF)
 
 ################################################################################
 
@@ -29,15 +27,18 @@ endif ()
 
 ################################################################################
 
-if (NO_COROUTINE)
-  add_definitions("-DHAS_NO_BOOST_COROUTINE")
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+if(NOT COMPILER_SUPPORTS_CXX11)
+  message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support.")
 endif ()
+
+################################################################################
 
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, default to Release")
   set(CMAKE_BUILD_TYPE "Release")
 endif()
-
 
 find_path(LIBSDD_INCLUDE_DIR sdd/sdd.hh PATHS ${LIBSDD_PATH})
 if (NOT LIBSDD_INCLUDE_DIR)
@@ -51,15 +52,14 @@ add_definitions("-ftemplate-depth=256")
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_definitions("-stdlib=libc++")
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -std=c++11 -stdlib=libc++")
-  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+  if (CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
+  endif ()
 endif ()
 
-set( CMAKE_CXX_FLAGS_RELEASE
-     "${CMAKE_CXX_FLAGS_RELEASE} -fstrict-aliasing -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -O3")
 
-set( CMAKE_CXX_FLAGS_DEBUG
-     "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 
 ################################################################################
 
