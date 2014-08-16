@@ -235,11 +235,15 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
       // Indicates that u has an inhibitor arc to a place shared with t.
       bool u_has_inhibitor = false;
 
-      // Seperate places which are post of t and pre of u from those which are unshared.
-      // Also keep places that are pre of both transitions.
+      // Pre places of u which are post of t.
       std::vector<std::string> shared_pre_post;
+
+      // Pre places of u which are not post of t.
       std::vector<std::string> unshared_pre_post;
+
+      // Pre places of u which are also pre of t.
       std::vector<std::string> shared_pre;
+
       for (const auto& u_arc : u.pre)
       {
         const auto& u_pre_place = u_arc.first;
@@ -382,20 +386,21 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
           // The predicate that checks if u is persistent vs t (pre of t have already been fired).
           const auto u_is_persistent = [&]
           {
+            // Transition u might be always persistent.
             if (shared_pre_post.empty())
             {
-              bool shortcut = true;
+              bool u_necessarily_persistent = true;
               for (const auto& shared_pre_place_id : shared_pre)
               {
                 const auto u_search = u.pre.find(shared_pre_place_id);
                 assert(u_search != u.pre.cend());
                 if (u_search->second.kind == pn::arc::type::inhibitor)
                 {
-                  shortcut = false;
+                  u_necessarily_persistent = false;
                   break;
                 }
               }
-              if (shortcut)
+              if (u_necessarily_persistent)
               {
                 // Transition u is enabled at m' and t doesn't mark a pre place of u. Thus, u is
                 // necessarily persistent.
@@ -457,7 +462,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
         {
           return function(o, u.id, set(0));
         }
-      }();
+      }(); // enabled_branch
 
       const auto ite_u = sdd::if_then_else( u_is_enabled
                                           , enabled_branch
