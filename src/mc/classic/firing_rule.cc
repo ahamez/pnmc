@@ -235,6 +235,9 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
       // Indicates that u has an inhibitor arc to a place shared with t.
       bool u_has_inhibitor = false;
 
+      // Indicates that t has a read arc to place shared with u.
+      bool t_has_read = false;
+
       // Pre places of u which are post of t.
       std::vector<std::string> shared_pre_post;
 
@@ -244,30 +247,32 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
       // Pre places of u which are also pre of t.
       std::vector<std::string> shared_pre;
 
-      for (const auto& u_arc : u.pre)
+      for (const auto& u_pre_arc : u.pre)
       {
-        const auto& u_pre_place = u_arc.first;
-        bool shared_arc = false;
+        const auto& u_pre_place = u_pre_arc.first;
 
         if (t.post.find(u_pre_place) != t.post.cend()) // pre of u exists in t.post
         {
           shared_pre_post.emplace_back(u_pre_place);
-          shared_arc = true;
         }
         else
         {
           unshared_pre_post.emplace_back(u_pre_place);
         }
 
-        if (t.pre.find(u_pre_place) != t.pre.cend()) // pre of u exists in t.pre
+        const auto t_pre_find = t.pre.find(u_pre_place);
+        if (t_pre_find != t.pre.cend()) // pre of u exists in t.pre
         {
           shared_pre.emplace_back(u_pre_place);
-          shared_arc = true;
-        }
+          if (t_pre_find->second.kind == pn::arc::type::read)
+          {
+            t_has_read = true;
+          }
 
-        if (u_arc.second.kind == pn::arc::type::inhibitor and shared_arc)
-        {
-          u_has_inhibitor = true;
+          if (u_pre_arc.second.kind == pn::arc::type::inhibitor)
+          {
+            u_has_inhibitor = true;
+          }
         }
       }
 
@@ -281,9 +286,8 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
 
       // If the Petri net is 1-safe and if t cannot mark a pre place of u, then u can't be
       // newly enabled neither persistent, as t will consume tokens of some pre places of u.
-      if (conf.one_safe and shared_pre_post.empty() and not u_has_inhibitor)
+      if (conf.one_safe and shared_pre_post.empty() and not u_has_inhibitor and not t_has_read)
       {
-        assert(not shared_pre.empty());
         h_t = composition(function(o, u.id, set(pn::sharp)), h_t);
         continue; // to next u
       }
@@ -345,16 +349,6 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
       const auto u_persistence_possible = [&]
       {
         if (t.id == u.id) // by convention, t cannot be persistent vs itself.
-        {
-          return false;
-        }
-
-        // If the Petri net is safe and if:
-        // - Some pre places are shared, then firing t will consume tokens of these places, making
-        //   u not persistent.
-        // - Some post places of t are pre of u, by construction these places cannot have more
-        //   than one token. Thus, u cannot possibly be enabled at the same marking as t.
-        if (conf.one_safe)
         {
           return false;
         }
