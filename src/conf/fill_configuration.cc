@@ -147,9 +147,9 @@ fill_configuration(int argc, char** argv)
 
   po::options_description order_options("Order options");
   order_options.add_options()
-    (order_show_str             , "Show the order")
+    (order_show_str             , "Show order")
     (order_flat_str             , "Don't use hierarchy informations")
-    (order_force_str            , "Use the FORCE ordering heuristic")
+    (order_force_str            , "Use FORCE ordering heuristic")
   ;
 
   po::options_description stats_options("Statistics options");
@@ -162,7 +162,8 @@ fill_configuration(int argc, char** argv)
   po::options_description petri_options("Petri net options");
   petri_options.add_options()
     (pn_marking_bound_str      , po::value<unsigned int>()->default_value(0)
-                               , "Limit the marking")
+                               , "Limit marking")
+    (pn_one_safe_str           , "Optimize for 1-safe Petri nets")
   ;
 
   po::options_description mc_options("Model checking options");
@@ -198,7 +199,6 @@ fill_configuration(int argc, char** argv)
     (order_load_str             , po::value<std::string>()
                                 , "Load order from a JSON file")
     (sample_nb_sdd_str          , "Sample the number of SDD regularly")
-    (pn_one_safe_str           , "Optimize for 1-safe Petri nets")
   ;
 
   po::options_description hidden_libsdd_options("Hidden libsdd options");
