@@ -63,9 +63,8 @@ mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_
 
 /// @brief Compute the transition relation corresponding to a petri net.
 homomorphism
-untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
-       , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-       , statistics& stats, const bool& stop)
+untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
+       , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
   // Each transition will produce an operand.
   std::set<homomorphism> operands;
@@ -141,9 +140,8 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
 
 /// @brief Compute the transition relation corresponding to a petri net.
 homomorphism
-timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o
-     , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-     , statistics& stats, const bool& stop)
+timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
+     , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
   // Each transition will produce an operand.
   std::set<homomorphism> operands;
@@ -519,8 +517,8 @@ firing_rule( const conf::configuration& conf, const sdd::order<sdd_conf>& o
 {
   util::timer timer;
   const auto h = net.timed()
-               ? timed(conf, o, net, transitions_bitset, stats, stop)
-               : untimed(conf, o, net, transitions_bitset, stats, stop);
+               ? timed(conf, o, net, transitions_bitset, stop)
+               : untimed(conf, o, net, transitions_bitset, stop);
   stats.relation_duration = timer.duration();
   return h;
 }
