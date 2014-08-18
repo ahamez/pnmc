@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #pragma GCC diagnostic push
@@ -267,10 +268,10 @@ fill_configuration(int argc, char** argv)
   {
     if (unrecognized.size() > 0)
     {
-      std::cout << "Unknown option(s):";
+      std::stringstream ss;
       std::copy( unrecognized.cbegin(), unrecognized.cend()
-               , std::ostream_iterator<std::string>(std::cout, " "));
-      std::cout << std::endl << std::endl;
+               , std::ostream_iterator<std::string>(ss, " "));
+      throw po::error("Unknown option(s): " + ss.str());
     }
 
     std::cout << version << std::endl;
