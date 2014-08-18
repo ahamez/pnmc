@@ -1,7 +1,7 @@
 #ifndef _PNMC_MC_CLASSIC_RESULTS_HH_
 #define _PNMC_MC_CLASSIC_RESULTS_HH_
 
-#include <sdd/util/boost_multiprecision_no_warnings.hh>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "conf/configuration.hh"
 

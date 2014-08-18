@@ -25,7 +25,7 @@ main(int argc, char** argv)
 
     if (not conf_opt) // --help or --version
     {
-      return 0;
+      return 1;
     }
 
     const auto& conf = *conf_opt;
@@ -40,28 +40,28 @@ main(int argc, char** argv)
   {
     std::cerr << e.what() << std::endl;
     std::cerr << "Exiting." << std::endl;
-    return 1;
+    return 2;
   }
   catch (const parsers::parse_error& e)
   {
     std::cerr << "Error when parsing input:" << std::endl;
     std::cerr << e.what() << std::endl;
     std::cerr << "Exiting." << std::endl;
-    return 2;
+    return 3;
   }
   catch (const sdd::order_error& e)
   {
     std::cerr << "Order error:" << std::endl;
     std::cerr << e.what() << std::endl;
     std::cerr << "Exiting." << std::endl;
-    return 3;
+    return 4;
   }
   catch (const std::runtime_error& e)
   {
     std::cerr << "Error:" << std::endl;
     std::cerr << e.what() << std::endl;
     std::cerr << "Exiting." << std::endl;
-    return 4;
+    return 5;
   }
   catch (std::exception& e)
   {

@@ -93,7 +93,8 @@ const auto hom_show_relation_str = "hom-show-relation";
 const auto show_final_sdd_bytes_str = "show-final-sdd-bytes";
 
 // Petri net options
-const auto pn_marking_bound_str = "pn-marking-bound";
+const auto pn_marking_bound_str = "marking-bound";
+const auto pn_one_safe_str = "1-safe";
 
 // Model checking options
 const auto mc_dead_transitions_str = "dead-transitions";
@@ -110,7 +111,6 @@ const auto libsdd_hom_cache_size_str = "hom-cache-size";
 
 // Advanced options
 const auto limit_time_str = "time-limit";
-const auto export_to_lua_str = "export-lua";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
 const auto results_json_str = "results-json";
@@ -147,9 +147,9 @@ fill_configuration(int argc, char** argv)
 
   po::options_description order_options("Order options");
   order_options.add_options()
-    (order_show_str             , "Show the order")
+    (order_show_str             , "Show order")
     (order_flat_str             , "Don't use hierarchy informations")
-    (order_force_str            , "Use the FORCE ordering heuristic")
+    (order_force_str            , "Use FORCE ordering heuristic")
   ;
 
   po::options_description stats_options("Statistics options");
@@ -162,7 +162,8 @@ fill_configuration(int argc, char** argv)
   po::options_description petri_options("Petri net options");
   petri_options.add_options()
     (pn_marking_bound_str      , po::value<unsigned int>()->default_value(0)
-                               , "Limit the marking")
+                               , "Limit marking")
+    (pn_one_safe_str           , "Optimize for 1-safe Petri nets")
   ;
 
   po::options_description mc_options("Model checking options");
@@ -184,8 +185,6 @@ fill_configuration(int argc, char** argv)
                                 , "Number of identifiers per hierarchy")
     (order_only_str             , "Compute order only")
     (show_final_sdd_bytes_str   , "Show the number of bytes used by the final state space's SDD")
-    (export_to_lua_str          , po::value<std::string>()
-                                , "Export the final SDD to a Lua structure")
     (final_sdd_dot_export_str   , po::value<std::string>()
                                 , "Export the SDD state space to a DOT file")
     (hypergraph_dot_str         , po::value<std::string>()
@@ -209,7 +208,7 @@ fill_configuration(int argc, char** argv)
     (libsdd_sdd_inter_cache_size_str , po::value<unsigned int>()->default_value(500000))
     (libsdd_sdd_sum_cache_size_str   , po::value<unsigned int>()->default_value(2000000))
     (libsdd_hom_ut_size_str          , po::value<unsigned int>()->default_value(25000))
-    (libsdd_hom_cache_size_str       , po::value<unsigned int>()->default_value(2000000))
+    (libsdd_hom_cache_size_str       , po::value<unsigned int>()->default_value(4000000))
   ;
 
   po::options_description hidden_options("Hidden options");
@@ -341,6 +340,7 @@ fill_configuration(int argc, char** argv)
 
   // Petri net options
   conf.marking_bound = vm[pn_marking_bound_str].as<unsigned int>();
+  conf.one_safe = vm.count(pn_one_safe_str);
 
   // Hidden libsdd options
   conf.sdd_ut_size= vm[libsdd_sdd_ut_size_str].as<unsigned int>();
@@ -359,10 +359,6 @@ fill_configuration(int argc, char** argv)
   conf.show_time = vm.count(show_time_str);
   conf.fast_exit = vm.count(fast_exit_str);
   conf.sample_nb_sdd = vm.count(sample_nb_sdd_str);
-  if (vm.count(export_to_lua_str))
-  {
-    conf.export_to_lua_file = vm[export_to_lua_str].as<std::string>();
-  }
   if (vm.count(final_sdd_dot_export_str))
   {
     conf.export_final_sdd_dot_file = vm[final_sdd_dot_export_str].as<std::string>();

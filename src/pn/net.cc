@@ -1,3 +1,5 @@
+#include <algorithm> // any_of
+
 #include "pn/net.hh"
 
 namespace pnmc { namespace pn {
@@ -50,6 +52,13 @@ void
 net::add_post_place(const std::string& tid, const std::string& post, const arc& a)
 {
   const auto it = transitions_set.get<id_index>().find(tid);
+  const auto arc_search = it->post.find(post);
+  if (arc_search != it->post.cend() and arc_search->second.kind != a.kind)
+  {
+    throw std::runtime_error
+      ("Arcs of different types between a place and a transition are not supported.");
+  }
+
   transitions_set.modify( it
                         , [&](transition& t){t.post.insert({post , a});});
   if (places_by_id().find(post) == places_by_id().end())
@@ -67,6 +76,12 @@ void
 net::add_pre_place(const std::string& tid, const std::string& pre, const arc& a)
 {
   const auto it = transitions_set.get<id_index>().find(tid);
+  const auto arc_search = it->pre.find(pre);
+  if (arc_search != it->pre.cend() and arc_search->second.kind != a.kind)
+  {
+    throw std::runtime_error
+      ("Arcs of different types between a place and a transition are not supported.");
+  }
   transitions_set.modify( it
                         , [&](transition& t){t.pre.insert({pre, a});});
   if (places_by_id().find(pre) == places_by_id().end())
@@ -122,6 +137,66 @@ net::add_time_interval(const std::string& tid, unsigned int low, unsigned int hi
 {
   const auto it = transitions_set.get<id_index>().find(tid);
   transitions_set.modify(it, [&](transition& t){t.low = low; t.high = high;});
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+bool
+net::timed()
+const noexcept
+{
+  return std::any_of( transitions().cbegin(), transitions().cend()
+                    , [](const transition& t){return t.timed();});
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+bool
+net::enabled(const std::string& tid)
+const
+{
+  const auto search = transitions().find(tid);
+  if (search == transitions().cend())
+  {
+    throw std::invalid_argument("Transition " + tid + " doesn't exist");
+  }
+  const auto& t = *search;
+
+  for (const auto& arc : t.pre)
+  {
+    const auto place_cit = places_by_id().find(arc.first);
+    if (place_cit == places_by_id().cend())
+    {
+      throw std::runtime_error("Place " + arc.first + " doesn't exist");
+    }
+    const auto& place = *place_cit;
+    switch (arc.second.kind)
+    {
+      case pn::arc::type::normal:
+      case pn::arc::type::read:
+      {
+        if (place.marking < arc.second.weight)
+        {
+          return false;
+        }
+        break;
+      }
+
+      case pn::arc::type::inhibitor:
+      {
+        if (place.marking >= arc.second.weight)
+        {
+          return false;
+        }
+        break;
+      }
+
+      default:
+        throw std::runtime_error("Unsupported arc type.");
+    }
+
+  }
+  return true;
 }
 
 /*------------------------------------------------------------------------------------------------*/

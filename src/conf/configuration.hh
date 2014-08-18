@@ -77,6 +77,9 @@ struct configuration
   /// @brief Compute the maximal markings.
   bool count_tokens;
 
+  /// @brief The processed Petri net is 1-safe.
+  bool one_safe;
+
   std::size_t sdd_ut_size;
   std::size_t sdd_diff_cache_size;
   std::size_t sdd_inter_cache_size;

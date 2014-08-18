@@ -181,11 +181,19 @@ tina(std::istream& in)
           or peek == std::char_traits<char>::to_int_type(']'))
       {
         s1.clear();
-        char c = ss.get(); // '[' or ']';
+
+        const bool open_lower_endpoint = ss.get() == ']';
+        bool open_upper_endpoint = false;
+
         while (ss.good())
         {
-          c = ss.get();
-          if (c == '[' or c == ']')
+          auto c = ss.get();
+          if (c == '[')
+          {
+            open_upper_endpoint = true;
+            break;
+          }
+          if (c == ']')
           {
             break;
           }
@@ -211,7 +219,29 @@ tina(std::istream& in)
         ss1 >> s2;
         try
         {
+
           last = std::stoi(s2);
+          const auto old_first = first;
+          const auto old_last = last;
+
+          if (open_lower_endpoint)
+          {
+            first += 1;
+          }
+
+          if (open_upper_endpoint)
+          {
+            last -= 1;
+          }
+
+          if (last < first)
+          {
+            throw parse_error( "Invalid time interval '"
+                             + (open_lower_endpoint ? std::string("]") : std::string("["))
+                             + std::to_string(old_first) + "," + std::to_string(old_last)
+                             + (open_upper_endpoint ? std::string("[") : std::string("]"))
+                             + "'");
+          }
         }
         catch (const std::invalid_argument& e)
         {

@@ -1,4 +1,4 @@
-#include <algorithm> // sort, transform
+#include <algorithm> // for_each, sort, transform
 #include <cassert>
 #include <chrono>
 #include <iostream>
@@ -6,22 +6,15 @@
 #include <set>
 #include <thread>
 
-#include <boost/dynamic_bitset.hpp>
-
 #include <sdd/sdd.hh>
 #include <sdd/tools/size.hh>
 
-#include "mc/classic/bounded_post.hh"
 #include "mc/classic/count_tokens.hh"
 #include "mc/classic/dead.hh"
 #include "mc/classic/dump.hh"
 #include "mc/classic/exceptions.hh"
-#include "mc/classic/inhibitor.hh"
-#include "mc/classic/interruptible.hh"
-#include "mc/classic/live.hh"
+#include "mc/classic/firing_rule.hh"
 #include "mc/classic/make_order.hh"
-#include "mc/classic/post.hh"
-#include "mc/classic/pre.hh"
 #include "mc/classic/results.hh"
 #include "mc/classic/statistics.hh"
 #include "mc/classic/worker.hh"
@@ -35,144 +28,42 @@ using sdd_conf = sdd::conf1 ;
 using SDD = sdd::SDD<sdd_conf>;
 using homomorphism = sdd::homomorphism<sdd_conf>;
 
-using sdd::composition;
-using sdd::fixpoint;
-using sdd::intersection;
-using sdd::sum;
-using sdd::function;
-
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
 initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 {
+  std::map<std::string, std::reference_wrapper<const pn::transition>> timed;
+  for (const auto& t : net.transitions())
+  {
+    if (t.timed())
+    {
+      timed.emplace(t.id, t);
+    }
+  }
+
   return SDD(order, [&](const std::string& id)
-                        -> sdd::values::flat_set<unsigned int>
-                       {
-                         assert(net.places_by_id().find(id) != net.places_by_id().end());
-                         return {net.places_by_id().find(id)->marking};
-                       });
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Create a timed function if required by the configuration, a normal function otherwise.
-template <typename Fun, typename... Args>
-homomorphism
-mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_conf>& o
-      , const sdd_conf::Identifier& id, Args&&... args)
-{
-  if (conf.max_time > chrono::duration<double>(0))
-  {
-    return function(o, id, interruptible<sdd_conf, Fun>(stop, std::forward<Args>(args)...));
-  }
-  else
-  {
-    return function(o, id, Fun(std::forward<Args>(args)...));;
-  }
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Compute the transition relation corresponding to a petri net.
-homomorphism
-transition_relation( const conf::configuration& conf, const sdd::order<sdd_conf>& o
-                   , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-                   , statistics& stats, const bool& stop)
-{
-  util::timer timer;
-
-  std::set<homomorphism> operands;
-  operands.insert(sdd::id<sdd_conf>());
-
-  // Temporary storage to sort post and pre arcs.
-  std::vector<const std::pair<const std::string, pn::arc>*> arcs_tmp;
-  arcs_tmp.reserve(128);
-
-  for (const auto& transition : net.transitions())
-  {
-    if (transition.pre.empty() and transition.post.empty())
-    {
-      continue; // A transition with no pre or post places, no need to keep it.
-    }
-
-    homomorphism h_t = sdd::id<sdd_conf>();
-
-    // Sort post arcs using the variable order.
-    arcs_tmp.clear();
-    std::transform( transition.post.cbegin(), transition.post.cend()
-                  , std::back_inserter(arcs_tmp)
-                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
-    std::sort( arcs_tmp.begin(), arcs_tmp.end()
-             , [&]( const std::pair<const std::string, pn::arc>* lhs
-                  , const std::pair<const std::string, pn::arc>* rhs)
-                  {
-//                    return o.node(lhs->first) < o.node(rhs->first);
-                    return o.node(rhs->first) < o.node(lhs->first);
-                  }
-             );
-
-    // Post actions.
-    for (const auto& arc : arcs_tmp)
-    {
-      // Is the maximal marking limited?
-      homomorphism f = conf.marking_bound == 0
-                     ? mk_fun<post>(conf, stop, o, arc->first, arc->second.weight)
-                     : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc->first, arc->second.weight
-                                                     , conf.marking_bound, arc->first);
-      h_t = composition(h_t, sdd::carrier(o, arc->first, f));
-    }
-
-    // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
-    if (conf.compute_dead_transitions)
-    {
-      // Target the same variable as the last pre or post to be fired to avoid evaluations.
-      // @todo Target the same variable as the sorted pre or post.
-      const auto var = transition.pre.empty()
-                     ? std::prev(transition.post.cend())->first
-                     : transition.pre.cbegin()->first;
-
-      const auto f = mk_fun<live>(conf, stop, o, var, transition.index, transitions_bitset);
-      h_t = composition(h_t, sdd::carrier(o, var, f));
-    }
-
-    // Sort pre arcs using the variable order.
-    arcs_tmp.clear();
-    std::transform( transition.pre.cbegin(), transition.pre.cend()
-                  , std::back_inserter(arcs_tmp)
-                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
-    std::sort( arcs_tmp.begin(), arcs_tmp.end()
-             , [&]( const std::pair<const std::string, pn::arc>* lhs
-                  , const std::pair<const std::string, pn::arc>* rhs)
-                  {
-//                    return o.node(lhs->first) < o.node(rhs->first);
-                    return o.node(rhs->first) < o.node(lhs->first);
-                  }
-             );
-
-    // Pre actions.
-    for (const auto& arc : arcs_tmp)
-    {
-      const homomorphism f = [&]{
-        switch (arc->second.kind)
-        {
-          case pn::arc::type::normal:
-            return mk_fun<pre>(conf, stop, o, arc->first, arc->second.weight);
-
-          case pn::arc::type::inhibitor:
-            return mk_fun<inhibitor>(conf, stop, o, arc->first, arc->second.weight);
-
-          default:
-            throw std::runtime_error("Unsupported arc type.");
-        }
-      }();
-      h_t = composition(h_t, sdd::carrier(o, arc->first, f));
-    }
-
-    operands.insert(h_t);
-  }
-  stats.relation_duration = timer.duration();
-  return fixpoint(sum(o, operands.cbegin(), operands.cend()));
+             -> sdd::values::flat_set<unsigned int>
+             {
+               const auto cit = net.places_by_id().find(id);
+               if (cit != net.places_by_id().end())
+               {
+                 return {cit->marking};
+               }
+               else
+               {
+                 const auto t_cit = timed.find(id);
+                 assert(t_cit != timed.end());
+                 if (net.enabled(t_cit->second.get().id))
+                 {
+                   return {0};
+                 }
+                 else
+                 {
+                   return {pn::sharp};
+                 }
+               }
+             });
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -197,9 +88,7 @@ struct threads
 
   threads( const conf::configuration& conf, statistics& stats, bool& stop
          , const sdd::manager<sdd_conf>& manager, util::timer& beginnning)
-    : finished(false)
-    , clock()
-    , sdd_sampling()
+    : finished(false), clock(), sdd_sampling()
   {
     if (conf.max_time > chrono::duration<double>(0))
     {
@@ -297,14 +186,14 @@ dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn
     // We are only interested in pre actions.
     for (const auto& arc : transition.pre)
     {
-      const auto h = function(o, arc.first, dead(arc.second.weight));
+      const auto h = sdd::function(o, arc.first, dead(arc.second.weight));
       or_operands.insert(sdd::carrier(o, arc.first, h));
     }
 
-    and_operands.insert(sum(o, or_operands.cbegin(), or_operands.cend()));
+    and_operands.insert(sdd::sum(o, or_operands.cbegin(), or_operands.cend()));
     or_operands.clear();
   }
-  const auto tmp = intersection(o, and_operands.cbegin(), and_operands.cend());
+  const auto tmp = sdd::intersection(o, and_operands.cbegin(), and_operands.cend());
   stats.dead_states_relation_duration = timer.duration();
 
   // Rewrite the relation
@@ -359,12 +248,6 @@ const
     std::cout << o << std::endl;
   }
 
-  if (conf.order_only)
-  {
-    dump_json(conf, stats, manager, sdd::zero<sdd_conf>(), net);
-    return;
-  }
-
   // Get the initial state.
   const SDD m0 = initial_state(o, net);
 
@@ -372,7 +255,7 @@ const
   boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
 
   // Compute the transition relation.
-  const auto h_classic = transition_relation(conf, o, net, transitions_bitset, stats, stop);
+  const auto h_classic = firing_rule(conf, o, net, transitions_bitset, stats, stop);
   if (conf.show_relation)
   {
     std::cout << h_classic << std::endl;
@@ -385,14 +268,20 @@ const
     std::cout << h << std::endl;
   }
 
+  if (conf.order_only)
+  {
+    dump_json(conf, stats, manager, sdd::zero<sdd_conf>(), net);
+    dump_hom_dot(conf, h_classic, h);
+    return;
+  }
+
   // Compute the state space.
   auto m = sdd::zero<sdd_conf>();
-
   try
   {
     m = state_space(conf, o, m0, h, stats, stop, manager);
   }
-  catch (const bound_error<sdd_conf>& e)
+  catch (const bound_error& e)
   {
     std::cout << "Marking limit (" << conf.marking_bound << ") reached for place " << e.place << "."
               << std::endl;
@@ -401,7 +290,7 @@ const
     dump_hom_dot(conf, h_classic, h);
     return;
   }
-  catch (const interrupted<sdd_conf>& e)
+  catch (const interrupted&)
   {
     std::cout << "State space computation interrupted after " << stats.state_space_duration.count()
               << "s." << std::endl;
@@ -448,7 +337,12 @@ const
     }
   }
 
-  if (conf.compute_dead_states)
+  if (conf.compute_dead_states and net.timed())
+  {
+    std::cerr << "Computation of dead states for Time Petri Nets is not supported yet."
+              << std::endl;
+  }
+  else if (conf.compute_dead_states)
   {
     const auto dead = dead_states(conf, o, net, m, stats);
     if (dead.empty())
@@ -464,8 +358,13 @@ const
       std::deque<std::reference_wrapper<const std::string>> identifiers;
       o.flat(std::back_inserter(identifiers));
 
-      for (const auto& path : dead.paths())
+      // We can't use the range-based for loop as it produces an ambiguity with clang when
+      // using Boost 1.56.
+      auto path_generator = dead.paths();
+      while (path_generator)
       {
+        const auto& path = path_generator.get();
+        path_generator(); // advance generator
         auto id_cit = identifiers.cbegin();
         auto path_cit = path.cbegin();
         for (; path_cit != std::prev(path.cend()); ++path_cit, ++id_cit)
@@ -511,8 +410,7 @@ const
 
   stats.total_duration = total_timer.duration();
 
-  dump_sdd_dot(conf, m);
-  dump_lua(conf, m);
+  dump_sdd_dot(conf, m, o);
   dump_json(conf, stats, manager, m, net);
   dump_results(conf, res);
   dump_hom_dot(conf, h_classic, h);

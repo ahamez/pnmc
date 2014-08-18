@@ -3,7 +3,6 @@
 #include <sdd/tools/dot/force_hypergraph.hh>
 #include <sdd/tools/dot/homomorphism.hh>
 #include <sdd/tools/dot/sdd.hh>
-#include <sdd/tools/lua.hh>
 #include <sdd/tools/sdd_statistics.hh>
 #include <sdd/tools/serialization.hh>
 
@@ -20,37 +19,19 @@ namespace pnmc { namespace mc { namespace classic {
 /*------------------------------------------------------------------------------------------------*/
 
 void
-dump_sdd_dot(const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s)
+dump_sdd_dot( const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s
+            , const sdd::order<sdd::conf1>& o)
 {
   if (conf.export_final_sdd_dot_file)
   {
     std::ofstream file(*conf.export_final_sdd_dot_file);
     if (file.is_open())
     {
-      file << sdd::tools::dot(s) << std::endl;
+      file << sdd::tools::dot(s, o) << std::endl;
     }
     else
     {
       std::cerr << "Can't export state space to " << *conf.export_final_sdd_dot_file << std::endl;
-    }
-  }
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-void
-dump_lua(const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s)
-{
-  if (conf.export_to_lua_file)
-  {
-    std::ofstream file(*conf.export_to_lua_file);
-    if (file.is_open())
-    {
-      file << sdd::tools::lua(s) << std::endl;
-    }
-    else
-    {
-      std::cerr << "Can't export Lua data structure to " << *conf.export_to_lua_file << std::endl;
     }
   }
 }
@@ -161,3 +142,29 @@ dump_hom_dot( const conf::configuration& conf, const sdd::homomorphism<sdd::conf
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
+
+namespace sdd { namespace values {
+
+/*------------------------------------------------------------------------------------------------*/
+
+template <>
+struct display_value<unsigned int>
+{
+  void
+  operator()(std::ostream& os, unsigned int v)
+  const
+  {
+    if (v == pnmc::pn::sharp)
+    {
+      os << "#";
+    }
+    else
+    {
+      os << v;
+    }
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+}} // namespace sdd::values

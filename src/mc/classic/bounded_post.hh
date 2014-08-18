@@ -33,7 +33,7 @@ struct bounded_post
     {
       if (v > bound_)
       {
-        throw bound_error<C>(place_);
+        throw bound_error(place_);
       }
       builder.insert(v + valuation_);
     }

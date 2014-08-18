@@ -13,6 +13,8 @@ namespace pnmc { namespace pn {
 
 struct place
 {
+  using arcs_type = std::multimap<std::string, arc>;
+
   /// @brief This place's id.
   const std::string id;
 
@@ -20,10 +22,10 @@ struct place
   unsigned int marking;
 
   /// @brief Pre transitions.
-  std::multimap<std::string, arc> pre;
+  arcs_type pre;
 
   /// @brief Post transitions.
-  std::multimap<std::string, arc> post;
+  arcs_type post;
 
   /// @brief Constructor.
   place(const std::string& id, unsigned int m);
