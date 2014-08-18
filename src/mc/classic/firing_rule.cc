@@ -70,24 +70,42 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
   std::set<homomorphism> operands;
   operands.insert(sdd::id<sdd_conf>());
 
+  // Temporary storage to sort post and pre arcs.
+  std::vector<const std::pair<const std::string, pn::arc>*> arcs_tmp;
+  arcs_tmp.reserve(128);
+
   for (const pn::transition& transition : net.transitions())
   {
     if (transition.pre.empty() and transition.post.empty())
     {
-      continue; // A transition with no pre or post plsaces, no need to keep it.
+      continue; // A transition with no pre or post places, no need to keep it.
     }
+
+   // Sort post arcs using the variable order.
+    arcs_tmp.clear();
+    std::transform( transition.post.cbegin(), transition.post.cend()
+                  , std::back_inserter(arcs_tmp)
+                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
+    std::sort( arcs_tmp.begin(), arcs_tmp.end()
+             , [&]( const std::pair<const std::string, pn::arc>* lhs
+                  , const std::pair<const std::string, pn::arc>* rhs)
+                  {
+//                    return o.node(lhs->first) < o.node(rhs->first);
+                    return o.node(rhs->first) < o.node(lhs->first);
+                  }
+             );
 
     // compose from left to right
     auto h_t = sdd::id<sdd_conf>();
 
     // Post actions.
-    for (const auto& arc : transition.post)
+    for (const auto& arc : arcs_tmp)
     {
       // Is the maximal marking limited?
       const auto f = conf.marking_bound == 0
-                   ? function(o, arc.first, post(arc.second.weight))
-                   : function(o, arc.first, bounded_post<sdd_conf>( arc.second.weight
-                                                                  , conf.marking_bound, arc.first));
+                   ? function(o, arc->first, post(arc->second.weight))
+                   : function(o, arc->first, bounded_post<sdd_conf>( arc->second.weight
+                                                                  , conf.marking_bound, arc->first));
       h_t = composition(h_t, f);
     }
 
@@ -108,20 +126,34 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
       }
     }
 
+    // Sort pre arcs using the variable order.
+    arcs_tmp.clear();
+    std::transform( transition.pre.cbegin(), transition.pre.cend()
+                  , std::back_inserter(arcs_tmp)
+                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
+    std::sort( arcs_tmp.begin(), arcs_tmp.end()
+             , [&]( const std::pair<const std::string, pn::arc>* lhs
+                  , const std::pair<const std::string, pn::arc>* rhs)
+                  {
+//                    return o.node(lhs->first) < o.node(rhs->first);
+                    return o.node(rhs->first) < o.node(lhs->first);
+                  }
+             );
+
     // Pre actions.
-    for (const auto& arc : transition.pre)
+    for (const auto& arc : arcs_tmp)
     {
       const auto f = [&]{
-        switch (arc.second.kind)
+        switch (arc->second.kind)
         {
           case pn::arc::type::normal:
-            return mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
+            return mk_fun<pre>(conf, stop, o, arc->first, arc->second.weight);
 
           case pn::arc::type::inhibitor:
-            return mk_fun<inhibitor>(conf, stop, o, arc.first, arc.second.weight);
+            return mk_fun<inhibitor>(conf, stop, o, arc->first, arc->second.weight);
 
           case pn::arc::type::read:
-            return mk_fun<filter_ge>(conf, stop, o, arc.first, arc.second.weight);
+            return mk_fun<filter_ge>(conf, stop, o, arc->first, arc->second.weight);
 
           default:
             throw std::runtime_error("Unsupported arc type.");
