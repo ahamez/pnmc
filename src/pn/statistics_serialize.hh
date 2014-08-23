@@ -16,7 +16,7 @@ save(Archive& archive, const statistics& s)
 {
   archive( cereal::make_nvp("places", s.nb_places)
          , cereal::make_nvp("transitions", s.nb_transitions)
-         , cereal::make_nvp("place transition ratio", s.place_transition_ratio));
+         , cereal::make_nvp("transition by place", s.place_transition));
 }
 
 /*------------------------------------------------------------------------------------------------*/

@@ -114,6 +114,7 @@ const auto libsdd_hom_cache_size_str = "hom-cache-size";
 const auto limit_time_str = "time-limit";
 const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
+const auto final_sdd_stats_str = "final-sdd-stats";
 const auto results_json_str = "results-json";
 const auto show_time_str = "show-time";
 const auto hypergraph_dot_str = "hypergraph-force-dot";
@@ -122,6 +123,7 @@ const auto hom_dot_export_str = "hom-dot";
 const auto hom_sat_dot_export_str = "sat-hom-dot";
 const auto export_tina_str = "export-tina";
 const auto sample_nb_sdd_str = "sample-nb-sdd";
+const auto pn_stats_str = "pn-stats";
 
 boost::optional<configuration>
 fill_configuration(int argc, char** argv)
@@ -200,6 +202,8 @@ fill_configuration(int argc, char** argv)
     (order_load_str             , po::value<std::string>()
                                 , "Load order from a JSON file")
     (sample_nb_sdd_str          , "Sample the number of SDD regularly")
+    (final_sdd_stats_str        , "Export final SDD's statistics (may be costly) to JSON file")
+    (pn_stats_str               , "Export model's statistics to JSON file")
   ;
 
   po::options_description hidden_libsdd_options("Hidden libsdd options");
@@ -360,6 +364,8 @@ fill_configuration(int argc, char** argv)
   conf.show_time = vm.count(show_time_str);
   conf.fast_exit = vm.count(fast_exit_str);
   conf.sample_nb_sdd = vm.count(sample_nb_sdd_str);
+  conf.final_sdd_statistics = vm.count(final_sdd_stats_str);
+  conf.pn_statistics = vm.count(pn_stats_str);
   if (vm.count(final_sdd_dot_export_str))
   {
     conf.export_final_sdd_dot_file = vm[final_sdd_dot_export_str].as<std::string>();

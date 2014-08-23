@@ -48,17 +48,21 @@ dump_json( const conf::configuration& conf, const statistics& stats
     std::ofstream file(*conf.json_file);
     if (file.is_open())
     {
-      const sdd::tools::sdd_statistics<sdd::conf1> final_sdd_stats(s);
-      const pn::statistics pn_stats(net);
-
       cereal::JSONOutputArchive archive(file);
       if (not conf.read_stdin)
       {
         archive(cereal::make_nvp("file", conf.file_name));
       }
       archive( cereal::make_nvp("pnmc", stats)
-             , cereal::make_nvp("libsdd", manager)
-             , cereal::make_nvp("final sdd", final_sdd_stats));
+             , cereal::make_nvp("libsdd", manager));
+      if (conf.final_sdd_statistics)
+      {
+        archive(cereal::make_nvp("final sdd", sdd::tools::sdd_statistics<sdd::conf1>(s)));
+      }
+      if (conf.pn_statistics)
+      {
+        archive(cereal::make_nvp("pn", pn::statistics(net)));
+      }
     }
     else
     {
