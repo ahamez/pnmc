@@ -179,6 +179,10 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
   std::set<homomorphism> operands;
   operands.insert(sdd::id<sdd_conf>());
 
+  // Temporary storage to sort post and pre arcs.
+  std::vector<const std::pair<const std::string, pn::arc>*> arcs_tmp;
+  arcs_tmp.reserve(128);
+
   for (const pn::transition& t : net.transitions())
   {
     // Compose from right to left into this homomorphism.
@@ -191,20 +195,33 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
       h_t = mk_fun<pre_clock>(conf, stop, o, t.id, t.low);
     }
 
+    // Sort pre arcs using the variable order.
+    arcs_tmp.clear();
+    std::transform( t.pre.cbegin(), t.pre.cend()
+                  , std::back_inserter(arcs_tmp)
+                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
+    std::sort( arcs_tmp.begin(), arcs_tmp.end()
+             , [&]( const std::pair<const std::string, pn::arc>* lhs
+                  , const std::pair<const std::string, pn::arc>* rhs)
+                  {
+                    return o.node(rhs->first) < o.node(lhs->first);
+                  }
+             );
+
     // All pre arcs.
-    for (const auto& arc : t.pre)
+    for (const auto& arc : arcs_tmp)
     {
       const homomorphism p = [&]{
-        switch (arc.second.kind)
+        switch (arc->second.kind)
         {
           case pn::arc::type::normal:
-            return function(o, arc.first, pre(arc.second.weight));
+            return function(o, arc->first, pre(arc->second.weight));
 
           case pn::arc::type::inhibitor:
-            return function(o, arc.first, inhibitor(arc.second.weight));
+            return function(o, arc->first, inhibitor(arc->second.weight));
 
           case pn::arc::type::read:
-            return function(o, arc.first, filter_ge(arc.second.weight));
+            return function(o, arc->first, filter_ge(arc->second.weight));
 
           default:
             throw std::runtime_error("Unsupported arc type.");
@@ -498,15 +515,28 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
 
 post_and_advance_time:
 
+    // Sort post arcs using the variable order.
+    arcs_tmp.clear();
+    std::transform( t.post.cbegin(), t.post.cend()
+                  , std::back_inserter(arcs_tmp)
+                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
+    std::sort( arcs_tmp.begin(), arcs_tmp.end()
+             , [&]( const std::pair<const std::string, pn::arc>* lhs
+                  , const std::pair<const std::string, pn::arc>* rhs)
+                  {
+                    return o.node(rhs->first) < o.node(lhs->first);
+                  }
+             );
+
     // Finally, apply the post operations.
     auto post_t = sdd::id<sdd_conf>();
-    for (const auto& arc : t.post)
+    for (const auto& arc : arcs_tmp)
     {
       // Is the maximal marking limited?
       const auto p = conf.marking_bound == 0
-                   ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
-                   : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
-                                                   , conf.marking_bound, arc.first);
+                   ? mk_fun<post>(conf, stop, o, arc->first, arc->second.weight)
+                   : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc->first, arc->second.weight
+                                                   , conf.marking_bound, arc->first);
       post_t = composition(p, post_t);
     }
     h_t = composition(post_t, h_t);
