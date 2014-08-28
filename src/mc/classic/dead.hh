@@ -68,7 +68,8 @@ struct hash<pnmc::mc::classic::dead>
   operator()(const pnmc::mc::classic::dead& d)
   const noexcept
   {
-    return sdd::util::hash(d.valuation);
+    using namespace sdd::hash;
+    return seed(586486319) (val(d.valuation));
   }
 };
 

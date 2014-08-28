@@ -73,7 +73,8 @@ struct hash<pnmc::mc::classic::inhibitor>
   operator()(const pnmc::mc::classic::inhibitor& i)
   const noexcept
   {
-    return sdd::util::hash(i.valuation);
+    using namespace sdd::hash;
+    return seed(9967321975) (val(i.valuation));
   }
 };
 

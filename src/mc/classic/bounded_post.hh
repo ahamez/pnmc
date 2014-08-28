@@ -74,10 +74,8 @@ struct hash<pnmc::mc::classic::bounded_post<C>>
   operator()(const pnmc::mc::classic::bounded_post<C>& p)
   const noexcept
   {
-    std::size_t seed = 98678683;
-    sdd::util::hash_combine(seed, p.valuation_);
-    sdd::util::hash_combine(seed, p.bound_);
-    return seed;
+    using namespace sdd::hash;
+    return seed(98678683) (val(p.valuation_)) (val(p.bound_));
   }
 };
 
