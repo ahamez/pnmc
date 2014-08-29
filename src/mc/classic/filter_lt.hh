@@ -72,9 +72,8 @@ struct hash<pnmc::mc::classic::filter_lt>
   operator()(const pnmc::mc::classic::filter_lt& e)
   const noexcept
   {
-    std::size_t seed = 7247563421;
-    sdd::util::hash_combine(seed, e.value);
-    return seed;
+    using namespace sdd::hash;
+    return seed(7247563421) (val(e.value));
   }
 };
 

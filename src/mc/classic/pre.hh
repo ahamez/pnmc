@@ -77,9 +77,8 @@ struct hash<pnmc::mc::classic::pre>
   operator()(const pnmc::mc::classic::pre& p)
   const noexcept
   {
-    std::size_t seed = 3464152273;
-    sdd::util::hash_combine(seed, p.valuation);
-    return seed;
+    using namespace sdd::hash;
+    return seed(3464152273) (val(p.valuation));
   }
 };
 

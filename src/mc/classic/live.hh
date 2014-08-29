@@ -63,9 +63,8 @@ struct hash<pnmc::mc::classic::live>
   operator()(const pnmc::mc::classic::live& l)
   const noexcept
   {
-    std::size_t seed = 49979687;
-    sdd::util::hash_combine(seed, l.index);
-    return seed;
+    using namespace sdd::hash;
+    return seed(49979687) (val(l.index));
   }
 };
 

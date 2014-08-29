@@ -82,9 +82,8 @@ struct hash<pnmc::mc::classic::advance>
   operator()(const pnmc::mc::classic::advance& a)
   const noexcept
   {
-    std::size_t seed = 1790863982;
-    sdd::util::hash_combine(seed, a.upper_clock);
-    return seed;
+    using namespace sdd::hash;
+    return seed(1790863982) (val(a.upper_clock));
   }
 };
 

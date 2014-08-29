@@ -77,9 +77,8 @@ struct hash<pnmc::mc::classic::pre_clock>
   operator()(const pnmc::mc::classic::pre_clock& p)
   const noexcept
   {
-    std::size_t seed = 3567850027;
-    sdd::util::hash_combine(seed, p.lower_clock);
-    return seed;
+    using namespace sdd::hash;
+    return seed(3567850027) (val(p.lower_clock));
   }
 };
 

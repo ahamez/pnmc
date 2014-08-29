@@ -76,10 +76,8 @@ struct hash<pnmc::mc::classic::enabled_inhibitor>
   operator()(const pnmc::mc::classic::enabled_inhibitor& e)
   const noexcept
   {
-    std::size_t seed = 6067551962;
-    sdd::util::hash_combine(seed, e.pre);
-    sdd::util::hash_combine(seed, e.post);
-    return seed;
+    using namespace sdd::hash;
+    return seed(6067551962) (val(e.pre)) (val(e.post));
   }
 };
 

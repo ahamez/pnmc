@@ -60,9 +60,8 @@ struct hash<pnmc::mc::classic::set>
   operator()(const pnmc::mc::classic::set& s)
   const noexcept
   {
-    std::size_t seed = 1569850987;
-    sdd::util::hash_combine(seed, s.value);
-    return seed;
+    using namespace sdd::hash;
+    return seed(1569850987) (val(s.value));
   }
 };
 

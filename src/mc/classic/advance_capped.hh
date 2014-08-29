@@ -80,10 +80,8 @@ struct hash<pnmc::mc::classic::advance_capped>
   operator()(const pnmc::mc::classic::advance_capped& a)
   const noexcept
   {
-    std::size_t seed = 7320863981;
-    sdd::util::hash_combine(seed, a.lower_clock);
-    sdd::util::hash_combine(seed, a.upper_clock);
-    return seed;
+    using namespace sdd::hash;
+    return seed (7320863981) (val(a.lower_clock)) (val(a.upper_clock));
   }
 };
 
