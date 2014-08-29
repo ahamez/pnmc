@@ -45,6 +45,8 @@ if (NOT LIBSDD_INCLUDE_DIR)
   message(FATAL_ERROR "libsdd not found")
 endif ()
 
+find_package (Threads)
+
 add_definitions("-Wall")
 add_definitions("-std=c++1y")
 add_definitions("-ftemplate-depth=256")
@@ -56,8 +58,6 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
   endif ()
 endif ()
-
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG -O3")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
 
