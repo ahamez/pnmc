@@ -2,10 +2,11 @@
 #include <cassert>
 #include <deque>
 #include <chrono>
-#include <fstream>
 #include <random>
 #include <set>
 #include <sstream>
+
+#include <boost/filesystem/fstream.hpp>
 
 #include <sdd/order/order.hh>
 #include <sdd/order/strategies/force.hh>
@@ -14,6 +15,7 @@
 
 #include "mc/classic/dump.hh"
 #include "mc/classic/make_order.hh"
+#include "util/paths.hh"
 #include "util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
@@ -80,7 +82,8 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   // We don't try to apply any heuristic on this order.
   if (conf.load_order_file)
   {
-    std::fstream file(*conf.load_order_file);
+    auto path = util::canonize_path(*conf.load_order_file);
+    boost::filesystem::ifstream file(path);
     if (file.is_open())
     {
       sdd::order<sdd_conf> o = sdd::tools::load_order<sdd_conf>(file);

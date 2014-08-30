@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include <string>
 
+#include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 
 namespace pnmc { namespace conf {
@@ -93,14 +94,13 @@ struct configuration
   std::size_t hom_ut_size;
   std::size_t hom_cache_size;
 
-  boost::optional<std::string> export_final_sdd_dot_file;
-  boost::optional<std::string> export_to_lua_file;
-  boost::optional<std::string> json_file;
-  boost::optional<std::string> results_json_file;
-  boost::optional<std::string> hypergraph_dot_file;
-  boost::optional<std::string> export_hom_to_dot_file;
-  boost::optional<std::string> export_sat_hom_to_dot_file;
-  boost::optional<std::string> export_tina_file;
+  boost::optional<boost::filesystem::path> export_final_sdd_dot_file;
+  boost::optional<boost::filesystem::path> json_file;
+  boost::optional<boost::filesystem::path> results_json_file;
+  boost::optional<boost::filesystem::path> hypergraph_dot_file;
+  boost::optional<boost::filesystem::path> export_hom_to_dot_file;
+  boost::optional<boost::filesystem::path> export_sat_hom_to_dot_file;
+  boost::optional<boost::filesystem::path> export_tina_file;
   boost::optional<std::string> load_order_file;
 
   /// @brief Stop state space generation after this much time.

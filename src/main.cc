@@ -9,7 +9,7 @@
 #include "parsers/parse_error.hh"
 #include "pn/tina.hh"
 #include "util/export_to_tina.hh"
-#include "util/select_input.hh"
+#include "util/paths.hh"
 
 /*------------------------------------------------------------------------------------------------*/
 

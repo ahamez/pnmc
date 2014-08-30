@@ -6,6 +6,8 @@
 #include <sdd/tools/sdd_statistics.hh>
 #include <sdd/tools/serialization.hh>
 
+#include <boost/filesystem/fstream.hpp>
+
 #include <cereal/archives/json.hpp>
 
 #include "mc/classic/dump.hh"
@@ -13,6 +15,7 @@
 #include "mc/classic/statistics_serialize.hh"
 #include "pn/statistics.hh"
 #include "pn/statistics_serialize.hh"
+#include "util/paths.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -24,7 +27,7 @@ dump_sdd_dot( const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s
 {
   if (conf.export_final_sdd_dot_file)
   {
-    std::ofstream file(*conf.export_final_sdd_dot_file);
+    boost::filesystem::ofstream file(*conf.export_final_sdd_dot_file);
     if (file.is_open())
     {
       file << sdd::tools::dot(s, o) << std::endl;
@@ -45,7 +48,7 @@ dump_json( const conf::configuration& conf, const statistics& stats
 {
   if (conf.json_file)
   {
-    std::ofstream file(*conf.json_file);
+    boost::filesystem::ofstream file(*conf.json_file);
     if (file.is_open())
     {
       cereal::JSONOutputArchive archive(file);
@@ -78,7 +81,7 @@ dump_results(const conf::configuration& conf, const results& res)
 {
   if (conf.results_json_file)
   {
-    std::ofstream file(*conf.results_json_file);
+    boost::filesystem::ofstream file(*conf.results_json_file);
     if (file.is_open())
     {
       cereal::JSONOutputArchive archive(file);
@@ -99,7 +102,7 @@ dump_hypergraph_dot( const conf::configuration& conf
 {
   if (conf.hypergraph_dot_file)
   {
-    std::ofstream file(*conf.hypergraph_dot_file);
+    boost::filesystem::ofstream file(*conf.hypergraph_dot_file);
     if (file.is_open())
     {
       file << sdd::tools::dot(graph) << std::endl;
@@ -119,7 +122,7 @@ dump_hom_dot( const conf::configuration& conf, const sdd::homomorphism<sdd::conf
 {
   if (conf.export_hom_to_dot_file)
   {
-    std::ofstream file(*conf.export_hom_to_dot_file);
+    boost::filesystem::ofstream file(*conf.export_hom_to_dot_file);
     if (file.is_open())
     {
       file << sdd::tools::dot(classic) << std::endl;
@@ -131,7 +134,7 @@ dump_hom_dot( const conf::configuration& conf, const sdd::homomorphism<sdd::conf
   }
   if (conf.export_sat_hom_to_dot_file)
   {
-    std::ofstream file(*conf.export_sat_hom_to_dot_file);
+    boost::filesystem::ofstream file(*conf.export_sat_hom_to_dot_file);
     if (file.is_open())
     {
       file << sdd::tools::dot(sat) << std::endl;

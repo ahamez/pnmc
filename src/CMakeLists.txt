@@ -21,7 +21,7 @@ set(SOURCES
     pn/tina.cc
     pn/transition.cc
     util/export_to_tina.cc
-    util/select_input.cc
+    util/paths.cc
     )
 
 add_executable(pnmc ${SOURCES})

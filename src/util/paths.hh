@@ -1,12 +1,24 @@
-#ifndef _PNMC_UTIL_SELECT_INPUT_HH_
-#define _PNMC_UTIL_SELECT_INPUT_HH_
+#ifndef _PNMC_UTIL_PATHS_HH_
+#define _PNMC_UTIL_PATHS_HH_
 
 #include <iosfwd>
 #include <memory>
 
+#include <boost/filesystem.hpp>
+
 #include "conf/configuration.hh"
 
 namespace pnmc { namespace util {
+
+/*------------------------------------------------------------------------------------------------*/
+
+boost::filesystem::path
+canonize_path(const std::string&);
+
+/*------------------------------------------------------------------------------------------------*/
+
+boost::filesystem::path
+output_file(const std::string&);
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -18,4 +30,4 @@ select_input(const conf::configuration&);
 
 }} // namespace pnmc::util
 
-#endif // _PNMC_UTIL_SELECT_INPUT_HH_
+#endif // _PNMC_UTIL_PATHS_HH_

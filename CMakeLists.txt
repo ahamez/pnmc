@@ -10,7 +10,7 @@ option (PACKED "Pack structs in memory (experimental)" OFF)
 ################################################################################
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options coroutine context system thread)
+find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options coroutine context system thread filesystem)
 
 if (NOT Boost_FOUND)
   message(FATAL_ERROR "Boost not found")

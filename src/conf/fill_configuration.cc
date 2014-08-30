@@ -12,6 +12,7 @@
 
 #include "conf/configuration.hh"
 #include "conf/fill_configuration.hh"
+#include "util/paths.hh"
 
 namespace pnmc { namespace conf {
 
@@ -372,11 +373,11 @@ fill_configuration(int argc, char** argv)
   }
   if (vm.count(json_str))
   {
-    conf.json_file = vm[json_str].as<std::string>();
+    conf.json_file = util::output_file(vm[json_str].as<std::string>());
   }
   if (vm.count(results_json_str))
   {
-    conf.results_json_file = vm[results_json_str].as<std::string>();
+    conf.results_json_file = util::output_file(vm[results_json_str].as<std::string>());
   }
   if (conf.order_ordering_force)
   {
@@ -385,19 +386,20 @@ fill_configuration(int argc, char** argv)
   conf.max_time = std::chrono::duration<double>(vm[limit_time_str].as<unsigned int>());
   if (vm.count(hypergraph_dot_str))
   {
-    conf.hypergraph_dot_file = vm[hypergraph_dot_str].as<std::string>();
+    conf.hypergraph_dot_file = util::output_file(vm[hypergraph_dot_str].as<std::string>());
   }
   if (vm.count(hom_dot_export_str))
   {
-    conf.export_hom_to_dot_file = vm[hom_dot_export_str].as<std::string>();
+    conf.export_hom_to_dot_file = util::output_file(vm[hom_dot_export_str].as<std::string>());
   }
   if (vm.count(hom_sat_dot_export_str))
   {
-    conf.export_sat_hom_to_dot_file = vm[hom_sat_dot_export_str].as<std::string>();
+    conf.export_sat_hom_to_dot_file
+      = util::output_file(vm[hom_sat_dot_export_str].as<std::string>());
   }
   if (vm.count(export_tina_str))
   {
-    conf.export_tina_file = vm[export_tina_str].as<std::string>();
+    conf.export_tina_file = util::output_file(vm[export_tina_str].as<std::string>());
   }
   if (vm.count(order_load_str))
   {
