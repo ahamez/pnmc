@@ -24,6 +24,11 @@ pnml(std::istream& in)
     }
   }
 
+  if (buffer.empty())
+  {
+    throw parse_error("PNML parser: empty file");
+  }
+
   rapidxml::xml_document<> doc;
   try
   {

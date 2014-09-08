@@ -31,6 +31,7 @@ const auto pnml_str = "pnml";
 const auto prod_str = "prod";
 const auto tina_str = "tina";
 const auto xml_str  = "xml";
+const auto decompress_str = "decompress";
 
 input_format
 file_type(const po::variables_map& vm)
@@ -142,11 +143,12 @@ fill_configuration(int argc, char** argv)
 
   po::options_description file_options("Input file format options");
   file_options.add_options()
-    (bpn_str  , "Parse BPN format")
-    (pnml_str , "Parse PNML format")
-    (prod_str , "Parse PROD format")
-    (tina_str , "Parse TINA format")
-    (xml_str  , "Parse pnmc's XML format (default)")
+    (bpn_str        , "Parse BPN format")
+    (pnml_str       , "Parse PNML format")
+    (prod_str       , "Parse PROD format")
+    (tina_str       , "Parse TINA format")
+    (xml_str        , "Parse pnmc's XML format (default)")
+    (decompress_str , "Decompress file to read")
   ;
 
   po::options_description order_options("Order options");
@@ -327,6 +329,7 @@ fill_configuration(int argc, char** argv)
   conf.file_name = vm["input-file"].as<std::string>();
   conf.file_type = file_type(vm);
   conf.read_stdin = conf.file_name == "-";
+  conf.decompress = vm.count(decompress_str);
 
   // Order options
   conf.order_show = vm.count(order_show_str);

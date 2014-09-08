@@ -1,11 +1,5 @@
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
 #include <stdexcept>
 #include <string>
-
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include "util/paths.hh"
 
@@ -57,27 +51,6 @@ output_file(const std::string& p)
   boost::filesystem::path path(p);
   auto parent_dir = util::canonize_path(path.parent_path().string());
   return parent_dir / path.filename();
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-std::shared_ptr<std::istream>
-select_input(const conf::configuration& conf)
-{
-  if (conf.read_stdin)
-  {
-    std::ios_base::sync_with_stdio(false);
-    return std::shared_ptr<std::istream>(&std::cin, [](std::istream*){}); // Don't erase cin.
-  }
-  else
-  {
-    auto path = canonize_path(conf.file_name);
-    if (not boost::filesystem::is_regular_file(path))
-    {
-      throw std::runtime_error(conf.file_name + ": not a regular file");
-    }
-    return std::shared_ptr<std::istream>(new boost::filesystem::ifstream((path)));
-  }
 }
 
 /*------------------------------------------------------------------------------------------------*/

@@ -87,6 +87,9 @@ struct configuration
   /// @brief Compute
   bool pn_statistics;
 
+  /// @brief Decompress input files
+  bool decompress;
+
   std::size_t sdd_ut_size;
   std::size_t sdd_diff_cache_size;
   std::size_t sdd_inter_cache_size;

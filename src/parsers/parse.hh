@@ -12,7 +12,7 @@ namespace pnmc { namespace parsers {
 /*------------------------------------------------------------------------------------------------*/
 
 std::shared_ptr<pn::net>
-parse(const conf::configuration&, std::istream&);
+parse(const conf::configuration&);
 
 /*------------------------------------------------------------------------------------------------*/
 

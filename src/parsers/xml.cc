@@ -4,6 +4,8 @@
 #include <istream>
 #include <string>
 
+#include <iostream>
+
 #include "parsers/parse_error.hh"
 #include "parsers/xml.hh"
 #include "parsers/rapidxml/rapidxml.hpp"
@@ -111,6 +113,11 @@ xml(std::istream& in)
     {
       buffer += line;
     }
+  }
+
+  if (buffer.empty())
+  {
+    throw parse_error("XML parser: empty file");
   }
 
   rapidxml::xml_document<> doc;

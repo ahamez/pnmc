@@ -25,5 +25,5 @@ set(SOURCES
     )
 
 add_executable(pnmc ${SOURCES})
-target_link_libraries(pnmc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(pnmc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
 install(TARGETS pnmc DESTINATION bin)
