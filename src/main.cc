@@ -29,8 +29,11 @@ main(int argc, char** argv)
     }
 
     const auto& conf = *conf_opt;
-    auto in = util::select_input(conf);
-    const auto net_ptr = parsers::parse(conf, *in);
+    const auto net_ptr = [&]
+    {
+      auto in = util::select_input(conf);
+      return parsers::parse(conf, *in);
+    }();
     util::export_to_tina(conf, *net_ptr);
     mc::mc worker(conf);
     worker(*net_ptr);
