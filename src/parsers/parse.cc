@@ -11,7 +11,6 @@
 #include "parsers/bpn.hh"
 #include "parsers/parse.hh"
 #include "parsers/pnml.hh"
-#include "parsers/prod.hh"
 #include "parsers/tina.hh"
 #include "parsers/xml.hh"
 #include "util/paths.hh"
@@ -80,7 +79,6 @@ parse(const conf::configuration& conf)
   {
     case (conf::input_format::bpn)  : return parsers::bpn(*in);
     case (conf::input_format::pnml) : return parsers::pnml(*in);
-    case (conf::input_format::prod) : return parsers::prod(*in);
     case (conf::input_format::tina) : return parsers::tina(*in);
     case (conf::input_format::xml)  : break;
   }

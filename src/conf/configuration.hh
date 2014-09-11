@@ -13,7 +13,7 @@ namespace pnmc { namespace conf {
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief The accepted input formats.
-enum class input_format {bpn, pnml, prod, tina, xml};
+enum class input_format {bpn, pnml, tina, xml};
 
 /*------------------------------------------------------------------------------------------------*/
 
