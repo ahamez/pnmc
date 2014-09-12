@@ -25,11 +25,12 @@ struct enabled
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    builder.reserve(val.size());
     for (const auto v : val)
     {
       if ((v + post) >= pre)
       {
-        builder.insert(v);
+        builder.insert(builder.end(), v);
       }
     }
     return std::move(builder);

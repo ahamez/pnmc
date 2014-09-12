@@ -27,12 +27,13 @@ struct pre
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    builder.reserve(val.size());
 
     // Find the first entry in val that is greater or equal than valuation.
     // Will cut the path if cit == end.
     for (auto cit = val.lower_bound(valuation); cit != val.cend(); ++cit)
     {
-      builder.insert(*cit - valuation);
+      builder.insert(builder.end(), *cit - valuation);
     }
     return std::move(builder);
   }

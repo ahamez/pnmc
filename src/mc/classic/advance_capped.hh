@@ -27,14 +27,15 @@ struct advance_capped
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    builder.reserve(val.size());
     for (auto cit = val.cbegin(); cit != val.lower_bound(upper_clock); ++cit)
     {
-      builder.insert(*cit >= lower_clock ? *cit : *cit + 1);
+      builder.insert(builder.end(), *cit >= lower_clock ? *cit : *cit + 1);
     }
     // As a flat_set is sorted, # is always the last, if it exists
     if (*val.crbegin() == pn::sharp)
     {
-      builder.insert(pn::sharp);
+      builder.insert(builder.end(), pn::sharp);
     }
     return std::move(builder);
   }

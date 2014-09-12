@@ -25,6 +25,7 @@ struct post
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    builder.reserve(val.size());
     std::transform( val.cbegin(), val.cend(), std::inserter(builder, builder.end())
                   , [this](unsigned int v){return v + valuation;});
     return std::move(builder);

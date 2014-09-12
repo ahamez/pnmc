@@ -24,9 +24,10 @@ struct filter_lt
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    builder.reserve(val.size());
     for (auto cit = val.cbegin(); cit != val.lower_bound(value); ++cit)
     {
-      builder.insert(*cit);
+      builder.insert(builder.end(), *cit);
     }
     return std::move(builder);
   }

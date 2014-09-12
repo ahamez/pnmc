@@ -26,11 +26,12 @@ struct pre_clock
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    builder.reserve(val.size());
     for (auto cit = val.lower_bound(lower_clock); cit != val.cend(); ++cit)
     {
       if (*cit != pn::sharp)
       {
-        builder.insert(*cit);
+        builder.insert(builder.end(), *cit);
       }
     }
     return std::move(builder);

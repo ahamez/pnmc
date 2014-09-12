@@ -26,17 +26,18 @@ struct advance
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    builder.reserve(val.size());
     for (const auto v : val)
     {
       if ((v + 1) <= upper_clock)
       {
-        builder.insert(v + 1);
+        builder.insert(builder.end(), v + 1);
       }
     }
     // As a flat_set is sorted, # is always the last, if it exists
     if (*val.crbegin() == pn::sharp)
     {
-      builder.insert(pn::sharp);
+      builder.insert(builder.end(), pn::sharp);
     }
     return std::move(builder);
   }

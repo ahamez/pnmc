@@ -29,13 +29,14 @@ struct bounded_post
   const
   {
     sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    builder.reserve(val.size());
     for (const auto& v : val)
     {
       if (v > bound_)
       {
         throw bound_error(place_);
       }
-      builder.insert(v + valuation_);
+      builder.insert(builder.end(), v + valuation_);
     }
     return std::move(builder);
   }
