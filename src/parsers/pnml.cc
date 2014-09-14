@@ -14,16 +14,7 @@ pnml(std::istream& in)
 {
   using namespace rapidxml;
 
-  std::string buffer;
-  buffer.reserve(16384);
-  {
-    std::string line;
-    while(std::getline(in,line))
-    {
-      buffer += line;
-    }
-  }
-
+  std::string buffer(std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>{});
   if (buffer.empty())
   {
     throw parse_error("PNML parser: empty file");
