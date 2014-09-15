@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <deque>
 #include <iostream>
 #include <limits>
 #include <regex>
@@ -434,11 +435,13 @@ place(parse_cxt& cxt, pn::net& n)
 std::shared_ptr<pn::net>
 tina(std::istream& in)
 {
-  std::shared_ptr<pn::net> net_ptr = std::make_shared<pn::net>();
+  auto net_ptr = std::make_shared<pn::net>();
 
-  std::string text{std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}};
-
-  const auto tks = tokens(text.cbegin(), text.cend());
+  const auto tks = [&]
+  {
+    std::string text{std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}};
+    return tokens(text.cbegin(), text.cend());
+  }();
   parse_cxt cxt {tks.cbegin()};
 
   while (cxt.current().ty != token_t::eof)
