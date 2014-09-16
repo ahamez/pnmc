@@ -28,8 +28,7 @@ static constexpr auto keywords_gap = 1000u;
 enum class token_t { skip = 1u, newline, number, qname, name, colon, comma
                    , lbracket, rbracket, arrow, lparen, rparen, question, exclamation, minus, mult
                    , comment
-                   , net = keywords_gap, transition, place
-                   , eof};
+                   , net = keywords_gap, transition, place};
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -97,11 +96,7 @@ tokens(InputIterator&& begin, InputIterator&& end)
 
   while (true)
   {
-    if (begin == end)
-    {
-      tokens.emplace_back(token {token_t::eof, "", line, column});
-      break;
-    }
+    if (begin == end) {break;}
 
     std::regex_search(begin, end, match, regex);
 
@@ -197,6 +192,8 @@ tokens(InputIterator&& begin, InputIterator&& end)
 struct parse_cxt
 {
   std::deque<token>::const_iterator curr;
+  std::deque<token>::const_iterator end;
+  auto eof()      const noexcept {return curr == end;}
   auto val()      const noexcept {return (curr - 1)->val;}
   auto previous() const noexcept {return *(curr - 1);}
   auto current()  const noexcept {return *curr;}
@@ -442,9 +439,9 @@ tina(std::istream& in)
     std::string text{std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}};
     return tokens(text.cbegin(), text.cend());
   }();
-  parse_cxt cxt {tks.cbegin()};
+  parse_cxt cxt {tks.cbegin(), tks.cend()};
 
-  while (cxt.current().ty != token_t::eof)
+  while (not cxt.eof())
   {
     if      (accept(cxt, token_t::net))        {net_ptr->name = id(cxt);}
     else if (accept(cxt, token_t::transition)) {transition(cxt, *net_ptr);}
