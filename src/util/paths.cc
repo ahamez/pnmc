@@ -49,7 +49,12 @@ boost::filesystem::path
 output_file(const std::string& p)
 {
   boost::filesystem::path path(p);
-  auto parent_dir = util::canonize_path(path.parent_path().string());
+  const auto parent_dir_str = trim(path.parent_path().string());
+  boost::filesystem::path parent_dir;
+  if (not parent_dir_str.empty())
+  {
+    parent_dir = util::canonize_path(parent_dir_str);
+  }
   return parent_dir / path.filename();
 }
 
