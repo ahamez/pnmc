@@ -32,7 +32,7 @@ struct bounded_post
     builder.reserve(val.size());
     for (const auto& v : val)
     {
-      if (v > bound_)
+      if (v >= bound_)
       {
         throw bound_error(place_);
       }
