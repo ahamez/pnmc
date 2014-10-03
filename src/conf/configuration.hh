@@ -1,5 +1,4 @@
-#ifndef _PNMC_CONF_CONFIGURATION_HH_
-#define _PNMC_CONF_CONFIGURATION_HH_
+#pragma once
 
 #include <chrono>
 #include <iosfwd>
@@ -113,5 +112,3 @@ struct configuration
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::configuration
-
-#endif // _PNMC_CONF_CONFIGURATION_HH_

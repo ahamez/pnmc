@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_MODULE_HH_
-#define _PNMC_PN_MODULE_HH_
+#pragma once
 
 #include <memory> // shared_ptr
 #include <string>
@@ -47,5 +46,3 @@ make_module(const module_node&);
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::pn
-
-#endif // _PNMC_PN_MODULE_HH_

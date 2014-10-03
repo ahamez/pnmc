@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_TINA_HH_
-#define _PNMC_PN_TINA_HH_
+#pragma once
 
 #include <iosfwd>
 #include <string>
@@ -17,5 +16,3 @@ tina(std::ostream&, const net&);
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::pn
-
-#endif // _PNMC_PN_TINA_HH_

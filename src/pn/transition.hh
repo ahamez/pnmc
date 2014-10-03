@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_TRANSITION_HH_
-#define _PNMC_PN_TRANSITION_HH_
+#pragma once
 
 #include <iosfwd>
 #include <limits>
@@ -65,5 +64,3 @@ operator<<(std::ostream&, const transition&);
 /*------------------------------------------------------------------------------------------------*/
   
 }} // namespace pnmc::pn
-
-#endif // _PNMC_PN_TRANSITION_HH_

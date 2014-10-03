@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_STATISTICS_HH_
-#define _PNMC_PN_STATISTICS_HH_
+#pragma once
 
 #include <utility> // pair
 #include <vector>
@@ -41,5 +40,3 @@ private:
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::pn
-
-#endif // _PNMC_PN_STATISTICS_HH_

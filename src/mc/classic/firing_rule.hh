@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_FIRING_RULE_HH_
-#define _PNMC_MC_FIRING_RULE_HH_
+#pragma once
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -23,5 +22,3 @@ firing_rule( const conf::configuration& conf, const sdd::order<sdd::conf1>& o
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
-
-#endif // _PNMC_MC_FIRING_RULE_HH_

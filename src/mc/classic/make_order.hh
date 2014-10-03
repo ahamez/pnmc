@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_MAKE_ORDER_HH_
-#define _PNMC_MC_MAKE_ORDER_HH_
+#pragma once
 
 #include <sdd/conf/default_configurations.hh>
 #include <sdd/order/order.hh>
@@ -18,5 +17,3 @@ make_order(const conf::configuration&, statistics&, const pn::net&);
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
-
-#endif // _PNMC_MC_MAKE_ORDER_HH_

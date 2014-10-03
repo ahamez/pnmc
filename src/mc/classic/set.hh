@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_SET_HH_
-#define _PNMC_MC_SET_HH_
+#pragma once
 
 #include <functional> // hash
 #include <ostream>
@@ -68,5 +67,3 @@ struct hash<pnmc::mc::classic::set>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_SET_HH_

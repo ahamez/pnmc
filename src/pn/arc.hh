@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_ARC_HH_
-#define _PNMC_PN_ARC_HH_
+#pragma once
 
 namespace pnmc { namespace pn {
 
@@ -26,5 +25,3 @@ struct arc
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::pn
-
-#endif // _PNMC_PN_ARC_HH_

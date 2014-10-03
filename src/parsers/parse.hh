@@ -1,5 +1,4 @@
-#ifndef _PNMC_PARSERS_PARSE_HH_
-#define _PNMC_PARSERS_PARSE_HH_
+#pragma once
 
 #include <iosfwd>
 #include <memory>
@@ -17,5 +16,3 @@ parse(const conf::configuration&);
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::parsers
-
-#endif // _PNMC_PARSERS_PARSE_HH_

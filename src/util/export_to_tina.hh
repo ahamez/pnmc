@@ -1,5 +1,4 @@
-#ifndef _PNMC_UTIL_EXPORT_TO_TINA_HH_
-#define _PNMC_UTIL_EXPORT_TO_TINA_HH_
+#pragma once
 
 #include "conf/configuration.hh"
 #include "pn/net.hh"
@@ -15,5 +14,3 @@ export_to_tina(const conf::configuration&, const pn::net&);
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::util
-
-#endif // _PNMC_UTIL_EXPORT_TO_TINA_HH_

@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_NET_HH_
-#define _PNMC_PN_NET_HH_
+#pragma once
 
 #pragma GCC diagnostic push
 #if defined(__GNUC__) && !defined(__clang__)
@@ -137,5 +136,3 @@ public:
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::pn
-
-#endif // _PNMC_PN_NET_HH_

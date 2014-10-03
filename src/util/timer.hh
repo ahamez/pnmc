@@ -1,5 +1,4 @@
-#ifndef _PNMC_UTIL_TIMER_HH_
-#define _PNMC_UTIL_TIMER_HH_
+#pragma once
 
 #include <chrono>
 
@@ -36,5 +35,3 @@ public:
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::util
-
-#endif // _PNMC_UTIL_TIMER_HH_

@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_PARSERS_PNML_HH_
-#define _PNMC_PN_PARSERS_PNML_HH_
+#pragma once
 
 #include <iosfwd>
 #include <memory>
@@ -16,5 +15,3 @@ pnml(std::istream&);
 /*------------------------------------------------------------------------------------------------*/
 
 }} // pnmc::parsers
-
-#endif // _PNMC_PN_PARSERS_PNML_HH_

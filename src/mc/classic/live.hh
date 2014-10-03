@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_LIVE_HH
-#define _PNMC_MC_LIVE_HH
+#pragma once
 
 #include <functional> // hash
 #include <iosfwd>
@@ -71,5 +70,3 @@ struct hash<pnmc::mc::classic::live>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_LIVE_HH

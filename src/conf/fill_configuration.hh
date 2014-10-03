@@ -1,5 +1,4 @@
-#ifndef _PNMC_CONF_FILL_CONFIGURATION_HH_
-#define _PNMC_CONF_FILL_CONFIGURATION_HH_
+#pragma once
 
 #include <boost/optional.hpp>
 
@@ -15,5 +14,3 @@ fill_configuration(int, char**);
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::conf
-
-#endif // _PNMC_CONF_FILL_CONFIGURATION_HH_

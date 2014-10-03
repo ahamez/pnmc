@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_ADVANCE_HH_
-#define _PNMC_MC_ADVANCE_HH_
+#pragma once
 
 #include <functional> // hash
 #include <ostream>
@@ -91,5 +90,3 @@ struct hash<pnmc::mc::classic::advance>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_ADVANCE_HH_

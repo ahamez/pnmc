@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_CLASSIC_RESULTS_HH_
-#define _PNMC_MC_CLASSIC_RESULTS_HH_
+#pragma once
 
 #include <boost/multiprecision/cpp_int.hpp>
 
@@ -25,5 +24,3 @@ struct results
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
-
-#endif // _PNMC_MC_CLASSIC_RESULTS_HH_

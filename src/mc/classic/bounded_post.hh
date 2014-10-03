@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_BOUNDED_POST_HH_
-#define _PNMC_MC_BOUNDED_POST_HH_
+#pragma once
 
 #include <functional> // hash
 #include <iosfwd>
@@ -83,5 +82,3 @@ struct hash<pnmc::mc::classic::bounded_post<C>>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_BOUNDED_POST_HH_

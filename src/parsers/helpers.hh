@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_PARSERS_HELPERS_HH_
-#define _PNMC_PN_PARSERS_HELPERS_HH_
+#pragma once
 
 #include <istream>
 #include <string>
@@ -32,5 +31,3 @@ split(std::string::const_iterator cit, std::string::const_iterator cend, char de
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::parsers
-
-#endif // _PNMC_PN_PARSERS_HELPERS_HH_

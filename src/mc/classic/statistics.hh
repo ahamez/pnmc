@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_STATISTICS_HH_
-#define _PNMC_MC_STATISTICS_HH_
+#pragma once
 
 #include <chrono>
 #include <deque>
@@ -43,5 +42,3 @@ struct statistics
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
-
-#endif // _PNMC_MC_STATISTICS_HH_

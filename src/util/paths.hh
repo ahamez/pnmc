@@ -1,5 +1,4 @@
-#ifndef _PNMC_UTIL_PATHS_HH_
-#define _PNMC_UTIL_PATHS_HH_
+#pragma once
 
 #include <boost/filesystem.hpp>
 
@@ -18,5 +17,3 @@ output_file(const std::string&);
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::util
-
-#endif // _PNMC_UTIL_PATHS_HH_

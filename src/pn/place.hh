@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_PLACE_HH_
-#define _PNMC_PN_PLACE_HH_
+#pragma once
 
 #include <iosfwd>
 #include <map>
@@ -49,5 +48,3 @@ operator<<(std::ostream& os, const place& p);
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::pn
-
-#endif // _PNMC_PN_PLACE_HH_

@@ -1,12 +1,8 @@
-#ifndef _PNMC_MC_INHIBITOR_HH_
-#define _PNMC_MC_INHIBITOR_HH_
+#pragma once
 
 #include <algorithm>  // copy
 #include <functional> // hash
 #include <ostream>
-
-#include <sdd/util/hash.hh>
-#include <sdd/values/flat_set.hh>
 
 #include "conf/configuration.hh"
 
@@ -82,5 +78,3 @@ struct hash<pnmc::mc::classic::inhibitor>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_INHIBITOR_HH_

@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_FILTER_GE_HH_
-#define _PNMC_MC_FILTER_GE_HH_
+#pragma once
 
 #include <functional> // hash
 #include <ostream>
@@ -81,5 +80,3 @@ struct hash<pnmc::mc::classic::filter_ge>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_FILTER_GE_HH_

@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_CLASSIC_EXCEPTIONS_HH_
-#define _PNMC_MC_CLASSIC_EXCEPTIONS_HH_
+#pragma once
 
 #include <exception>
 #include <string>
@@ -27,5 +26,3 @@ struct interrupted final
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
-
-#endif // _PNMC_MC_CLASSIC_EXCEPTIONS_HH_

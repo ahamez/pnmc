@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_STATISTICS_SERIALIZE_HH_
-#define _PNMC_MC_STATISTICS_SERIALIZE_HH_
+#pragma once
 
 #include <cereal/archives/json.hpp>
 #include <cereal/types/deque.hpp>
@@ -57,5 +56,3 @@ save(Archive& archive, const statistics& s)
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
-
-#endif // _PNMC_MC_STATISTICS_SERIALIZE_HH_

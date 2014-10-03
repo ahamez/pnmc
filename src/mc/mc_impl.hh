@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_MC_IMPL_HH_
-#define _PNMC_MC_MC_IMPL_HH_
+#pragma once
 
 #include "pn/net.hh"
 
@@ -22,5 +21,3 @@ public:
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::mc
-
-#endif // _PNMC_MC_MC_IMPL_HH_

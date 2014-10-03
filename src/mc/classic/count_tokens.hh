@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_CLASSIC_COUNT_TOKENS_HH_
-#define _PNMC_MC_CLASSIC_COUNT_TOKENS_HH_
+#pragma once
 
 #include <sdd/dd/definition.hh>
 #include <sdd/conf/default_configurations.hh>
@@ -17,5 +16,3 @@ count_tokens(results&, const sdd::SDD<sdd::conf1>& state_space, const pn::net& n
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
-
-#endif // _PNMC_MC_CLASSIC_COUNT_TOKENS_HH_

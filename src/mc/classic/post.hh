@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_POST_HH_
-#define _PNMC_MC_POST_HH_
+#pragma once
 
 #include <algorithm>  // transform
 #include <functional> // hash
@@ -80,5 +79,3 @@ struct hash<pnmc::mc::classic::post>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_POST_HH_

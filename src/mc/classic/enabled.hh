@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_ENABLED_HH_
-#define _PNMC_MC_ENABLED_HH_
+#pragma once
 
 #include <functional> // hash
 #include <ostream>
@@ -85,5 +84,3 @@ struct hash<pnmc::mc::classic::enabled>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_ENABLED_HH_

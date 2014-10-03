@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_CLASSIC_RESULTS_SERIALIZE_HH_
-#define _PNMC_MC_CLASSIC_RESULTS_SERIALIZE_HH_
+#pragma once
 
 #include <cereal/archives/json.hpp>
 
@@ -25,5 +24,3 @@ save(Archive& archive, const results& r)
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
-
-#endif // _PNMC_MC_CLASSIC_RESULTS_SERIALIZE_HH_

@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_MC_HH_
-#define _PNMC_MC_MC_HH_
+#pragma once
 
 #include <memory>
 
@@ -35,5 +34,3 @@ private:
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::mc
-
-#endif // _PNMC_MC_MC_HH_

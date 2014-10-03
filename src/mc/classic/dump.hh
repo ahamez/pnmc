@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_DUMP_HH_
-#define _PNMC_MC_DUMP_HH_
+#pragma once
 
 #include <sdd/manager.hh>
 #include <sdd/conf/default_configurations.hh>
@@ -42,5 +41,3 @@ dump_hom_dot( const conf::configuration&, const sdd::homomorphism<sdd::conf1>& c
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::classic
-
-#endif // _PNMC_MC_DUMP_HH_

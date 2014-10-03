@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_INTERRUPTIBLE_HH_
-#define _PNMC_MC_INTERRUPTIBLE_HH_
+#pragma once
 
 #include <functional> // hash
 #include <ostream>
@@ -82,5 +81,3 @@ struct hash<pnmc::mc::classic::interruptible<C, Fun>>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_INTERRUPTIBLE_HH_

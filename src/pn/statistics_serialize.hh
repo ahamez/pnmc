@@ -1,5 +1,4 @@
-#ifndef _PNMC_PN_STATISTICS_SERIALIZE_HH_
-#define _PNMC_PN_STATISTICS_SERIALIZE_HH_
+#pragma once
 
 #include <cereal/archives/json.hpp>
 #include <cereal/types/vector.hpp>
@@ -22,5 +21,3 @@ save(Archive& archive, const statistics& s)
 /*------------------------------------------------------------------------------------------------*/
 
 }} // namespace pnmc::pn
-
-#endif // _PNMC_PN_STATISTICS_SERIALIZE_HH_

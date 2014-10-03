@@ -1,5 +1,4 @@
-#ifndef _PNMC_MC_PRE_CLOCK_HH_
-#define _PNMC_MC_PRE_CLOCK_HH_
+#pragma once
 
 #include <functional> // hash
 #include <ostream>
@@ -86,5 +85,3 @@ struct hash<pnmc::mc::classic::pre_clock>
 /*------------------------------------------------------------------------------------------------*/
 
 } // namespace std
-
-#endif // _PNMC_MC_PRE_CLOCK_HH_
