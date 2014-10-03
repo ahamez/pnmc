@@ -16,10 +16,6 @@ struct advance
 {
   const unsigned int upper_clock;
 
-  advance(unsigned int c)
-    : upper_clock(c)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const
@@ -48,7 +44,6 @@ struct advance
     return true;
   }
 
-  /// @brief Equality.
   friend
   bool
   operator==(const advance& lhs, const advance& rhs)
@@ -57,7 +52,6 @@ struct advance
     return lhs.upper_clock == rhs.upper_clock;
   }
 
-  /// @brief Textual output.
   friend
   std::ostream&
   operator<<(std::ostream& os, const advance& a)

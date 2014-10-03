@@ -15,10 +15,6 @@ struct enabled
   const unsigned int pre;
   const unsigned int post;
 
-  enabled(unsigned int pr, unsigned int po)
-    : pre(pr), post(po)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const
@@ -42,7 +38,6 @@ struct enabled
     return true;
   }
 
-  /// @brief Equality.
   friend
   bool
   operator==(const enabled& lhs, const enabled& rhs)
@@ -51,7 +46,6 @@ struct enabled
     return lhs.pre == rhs.pre and lhs.post == rhs.post;
   }
 
-  /// @brief Textual output.
   friend
   std::ostream&
   operator<<(std::ostream& os, const enabled& e)

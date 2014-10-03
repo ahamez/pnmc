@@ -25,7 +25,7 @@ struct interruptible
   /// Delegates to the contained function.
   template <typename... Args>
   interruptible(const bool& stop, Args&&... args)
-    : stop_(stop), fun_(std::forward<Args>(args)...)
+    : stop_(stop), fun_{std::forward<Args>(args)...}
   {}
 
   /// @brief Function application

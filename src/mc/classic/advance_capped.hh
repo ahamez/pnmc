@@ -17,10 +17,6 @@ struct advance_capped
   const unsigned int lower_clock;
   const unsigned int upper_clock;
 
-  advance_capped(unsigned int lower, unsigned int upper)
-    : lower_clock(lower), upper_clock(upper)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const

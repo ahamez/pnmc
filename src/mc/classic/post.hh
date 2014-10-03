@@ -15,10 +15,6 @@ struct post
 {
   const unsigned int valuation;
 
-  post(unsigned int v)
-    : valuation(v)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const
@@ -37,7 +33,6 @@ struct post
     return true;
   }
 
-  /// @brief Equality of two post.
   friend
   bool
   operator==(const post& lhs, const post& rhs)
@@ -46,7 +41,6 @@ struct post
     return lhs.valuation == rhs.valuation;
   }
 
-  /// @brief Textual output of a post.
   friend
   std::ostream&
   operator<<(std::ostream& os, const post& p)

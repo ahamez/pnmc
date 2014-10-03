@@ -16,10 +16,6 @@ struct pre_clock
 {
   const unsigned int lower_clock;
 
-  pre_clock(unsigned int c)
-    : lower_clock(c)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const
@@ -43,7 +39,6 @@ struct pre_clock
     return true;
   }
 
-  /// @brief Equality.
   friend
   bool
   operator==(const pre_clock& lhs, const pre_clock& rhs)
@@ -52,7 +47,6 @@ struct pre_clock
     return lhs.lower_clock == rhs.lower_clock;
   }
 
-  /// @brief Textual output.
   friend
   std::ostream&
   operator<<(std::ostream& os, const pre_clock& p)

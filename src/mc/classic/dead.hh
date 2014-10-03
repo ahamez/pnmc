@@ -14,10 +14,6 @@ struct dead
 {
   const unsigned int valuation;
 
-  dead(unsigned int v)
-    : valuation(v)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const
@@ -34,7 +30,6 @@ struct dead
     return std::move(builder);
   }
 
-  /// @brief Equality of two dead.
   friend
   bool
   operator==(const dead& lhs, const dead& rhs)
@@ -43,7 +38,6 @@ struct dead
     return lhs.valuation == rhs.valuation;
   }
 
-  /// @brief Textual output of a dead.
   friend
   std::ostream&
   operator<<(std::ostream& os, const dead& d)

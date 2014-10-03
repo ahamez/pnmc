@@ -17,10 +17,6 @@ struct pre
 {
   const unsigned int valuation;
 
-  pre(unsigned int v)
-    : valuation(v)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const
@@ -44,7 +40,6 @@ struct pre
     return true;
   }
 
-  /// @brief Equality of two pre.
   friend
   bool
   operator==(const pre& lhs, const pre& rhs)
@@ -53,7 +48,6 @@ struct pre
     return lhs.valuation == rhs.valuation;
   }
 
-  /// @brief Textual output of a pre.
   friend
   std::ostream&
   operator<<(std::ostream& os, const pre& p)

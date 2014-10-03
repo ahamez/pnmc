@@ -14,10 +14,6 @@ struct set
 {
   const unsigned int value;
 
-  set(unsigned int v)
-    : value(v)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>&)
   const
@@ -25,7 +21,6 @@ struct set
     return sdd::values::flat_set<unsigned int>({value});
   }
 
-  /// @brief Equality.
   friend
   bool
   operator==(const set& lhs, const set& rhs)
@@ -34,7 +29,6 @@ struct set
     return lhs.value == rhs.value;
   }
 
-  /// @brief Textual output.
   friend
   std::ostream&
   operator<<(std::ostream& os, const set& s)

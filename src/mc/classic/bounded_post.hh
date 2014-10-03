@@ -15,13 +15,9 @@ namespace pnmc { namespace mc { namespace classic {
 template <typename C>
 struct bounded_post
 {
-  const unsigned int valuation_;
-  const unsigned int bound_;
-  const std::string& place_;
-
-  bounded_post(unsigned int valuation, unsigned int bound, const std::string& place)
-    : valuation_(valuation), bound_(bound), place_(place)
-  {}
+  const unsigned int valuation;
+  const unsigned int bound;
+  const std::string& place;
 
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
@@ -31,32 +27,31 @@ struct bounded_post
     builder.reserve(val.size());
     for (const auto& v : val)
     {
-      if (v >= bound_)
+      if (v >= bound)
       {
-        throw bound_error(place_);
+        throw bound_error(place);
       }
-      builder.insert(builder.end(), v + valuation_);
+      builder.insert(builder.end(), v + valuation);
     }
     return std::move(builder);
   }
+
+  friend
+  bool
+  operator==(const bounded_post& lhs, const bounded_post& rhs)
+  noexcept
+  {
+    return lhs.valuation == rhs.valuation and lhs.bound == rhs.bound;
+  }
+
+  friend
+  std::ostream&
+  operator<<(std::ostream& os, const bounded_post& p)
+  {
+    return os << "bounded_post(" << p.valuation << "," << p.bound <<")";
+  }
+
 };
-
-/// @brief Equality of two bounded_post.
-template <typename C>
-bool
-operator==(const bounded_post<C>& lhs, const bounded_post<C>& rhs)
-noexcept
-{
-  return lhs.valuation_ == rhs.valuation_ and lhs.bound_ == rhs.bound_;
-}
-
-/// @brief Textual output of a bounded_post.
-template <typename C>
-std::ostream&
-operator<<(std::ostream& os, const bounded_post<C>& p)
-{
-  return os << "bounded_post(" << p.valuation_ << "," << p.bound_ <<")";
-}
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -75,7 +70,7 @@ struct hash<pnmc::mc::classic::bounded_post<C>>
   const noexcept
   {
     using namespace sdd::hash;
-    return seed(98678683) (val(p.valuation_)) (val(p.bound_));
+    return seed(98678683) (val(p.valuation)) (val(p.bound));
   }
 };
 

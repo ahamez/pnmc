@@ -14,10 +14,6 @@ struct filter_lt
 {
   const unsigned int value;
 
-  filter_lt(unsigned int v)
-    : value(v)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const
@@ -38,7 +34,6 @@ struct filter_lt
     return true;
   }
 
-  /// @brief Equality.
   friend
   bool
   operator==(const filter_lt& lhs, const filter_lt& rhs)
@@ -47,7 +42,6 @@ struct filter_lt
     return lhs.value == rhs.value;
   }
 
-  /// @brief Textual output.
   friend
   std::ostream&
   operator<<(std::ostream& os, const filter_lt& e)

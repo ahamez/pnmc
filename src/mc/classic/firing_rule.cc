@@ -55,7 +55,7 @@ mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_
   }
   else
   {
-    return function(o, id, Fun(std::forward<Args>(args)...));;
+    return function(o, id, Fun{std::forward<Args>(args)...});;
   }
 }
 
@@ -87,13 +87,7 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
                   , std::back_inserter(arcs_tmp)
                   , [](const std::pair<const std::string, pn::arc>& p){return &p;});
     std::sort( arcs_tmp.begin(), arcs_tmp.end()
-             , [&]( const std::pair<const std::string, pn::arc>* lhs
-                  , const std::pair<const std::string, pn::arc>* rhs)
-                  {
-//                    return o.node(lhs->first) < o.node(rhs->first);
-                    return o.node(rhs->first) < o.node(lhs->first);
-                  }
-             );
+             , [&](auto&& lhs, auto&& rhs){return o.node(rhs->first) < o.node(lhs->first);});
 
     // compose from left to right
     auto h_t = sdd::id<sdd_conf>();
@@ -103,9 +97,10 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
     {
       // Is the maximal marking limited?
       const auto f = conf.marking_bound == 0
-                   ? function(o, arc->first, post(arc->second.weight))
-                   : function(o, arc->first, bounded_post<sdd_conf>( arc->second.weight
-                                                                  , conf.marking_bound, arc->first));
+                   ? function(o, arc->first, post{arc->second.weight})
+                   : function( o, arc->first
+                             , bounded_post<sdd_conf>{ arc->second.weight
+                                                     , conf.marking_bound, arc->first});
       h_t = composition(h_t, f);
     }
 
@@ -121,24 +116,17 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
       {
         // Target the same variable as the last pre or post to be fired to avoid evaluations.
         const auto var = transition.pre.cbegin()->first;
-        const auto f = function(o, var, live(transition.index, transitions_bitset));
+        const auto f = function(o, var, live{transition.index, transitions_bitset});
         h_t = composition(h_t, f);
       }
     }
 
     // Sort pre arcs using the variable order.
     arcs_tmp.clear();
-    std::transform( transition.pre.cbegin(), transition.pre.cend()
-                  , std::back_inserter(arcs_tmp)
-                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
+    std::transform( transition.pre.cbegin(), transition.pre.cend(), std::back_inserter(arcs_tmp)
+                  , [](auto&& p){return &p;});
     std::sort( arcs_tmp.begin(), arcs_tmp.end()
-             , [&]( const std::pair<const std::string, pn::arc>* lhs
-                  , const std::pair<const std::string, pn::arc>* rhs)
-                  {
-//                    return o.node(lhs->first) < o.node(rhs->first);
-                    return o.node(rhs->first) < o.node(lhs->first);
-                  }
-             );
+             , [&](auto&& lhs, auto&& rhs){return o.node(rhs->first) < o.node(lhs->first);});
 
     // Pre actions.
     for (const auto& arc : arcs_tmp)
@@ -197,15 +185,10 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
 
     // Sort pre arcs using the variable order.
     arcs_tmp.clear();
-    std::transform( t.pre.cbegin(), t.pre.cend()
-                  , std::back_inserter(arcs_tmp)
-                  , [](const std::pair<const std::string, pn::arc>& p){return &p;});
+    std::transform( t.pre.cbegin(), t.pre.cend(), std::back_inserter(arcs_tmp)
+                  , [](auto&& p){return &p;});
     std::sort( arcs_tmp.begin(), arcs_tmp.end()
-             , [&]( const std::pair<const std::string, pn::arc>* lhs
-                  , const std::pair<const std::string, pn::arc>* rhs)
-                  {
-                    return o.node(rhs->first) < o.node(lhs->first);
-                  }
+             , [&](auto&& lhs, auto&& rhs){return o.node(rhs->first) < o.node(lhs->first);}
              );
 
     // All pre arcs.
@@ -215,13 +198,13 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
         switch (arc->second.kind)
         {
           case pn::arc::type::normal:
-            return function(o, arc->first, pre(arc->second.weight));
+            return function(o, arc->first, pre{arc->second.weight});
 
           case pn::arc::type::inhibitor:
-            return function(o, arc->first, inhibitor(arc->second.weight));
+            return function(o, arc->first, inhibitor{arc->second.weight});
 
           case pn::arc::type::read:
-            return function(o, arc->first, filter_ge(arc->second.weight));
+            return function(o, arc->first, filter_ge{arc->second.weight});
 
           default:
             throw std::runtime_error("Unsupported arc type.");
@@ -335,7 +318,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
       // newly enabled neither persistent, as t will consume tokens of some pre places of u.
       if (conf.one_safe and shared_pre_post.empty() and not u_has_inhibitor and not t_has_read)
       {
-        h_t = composition(function(o, u.id, set(pn::sharp)), h_t);
+        h_t = composition(function(o, u.id, set{pn::sharp}), h_t);
         continue; // to next u
       }
 
@@ -353,10 +336,10 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
             {
               case pn::arc::type::normal:
               case pn::arc::type::read:
-                return function(o, u_arc.first, filter_ge(u_arc.second.weight));
+                return function(o, u_arc.first, filter_ge{u_arc.second.weight});
 
               case pn::arc::type::inhibitor:
-                return function(o, u_arc.first, filter_lt(u_arc.second.weight));
+                return function(o, u_arc.first, filter_lt{u_arc.second.weight});
 
               default:
                 throw std::runtime_error("Unsupported arc type.");
@@ -377,11 +360,11 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
               case pn::arc::type::normal:
               case pn::arc::type::read:
                 return function( o, u_arc.first
-                               , enabled(u_arc.second.weight, t_arc.second.weight));
+                               , enabled{u_arc.second.weight, t_arc.second.weight});
 
               case pn::arc::type::inhibitor:
                 return function( o, u_arc.first
-                               , enabled_inhibitor(u_arc.second.weight, t_arc.second.weight));
+                               , enabled_inhibitor{u_arc.second.weight, t_arc.second.weight});
 
               default:
                 throw std::runtime_error("Unsupported arc type.");
@@ -461,14 +444,14 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
                   // that u was already enabled before Pre(t).
                   case pn::arc::type::normal:
                   case pn::arc::type::read:
-                    return function(o, u_arc.first, filter_ge(u_arc.second.weight));
+                    return function(o, u_arc.first, filter_ge{u_arc.second.weight});
 
                   case pn::arc::type::inhibitor:
                   {
                     const auto t_pre_search = t.pre.find(u_arc.first);
                     if (t_pre_search == t.pre.cend()) // not a common pre place of t and u
                     {
-                      return function(o, u_arc.first, filter_lt(u_arc.second.weight));
+                      return function(o, u_arc.first, filter_lt{u_arc.second.weight});
                     }
                     else
                     {
@@ -476,12 +459,12 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
                       if (t_arc.second.kind == pn::arc::type::inhibitor)
                       {
                         // If t_arc is also an inhibitor, we don't have to "put back" tokens.
-                        return function(o, u_arc.first, filter_lt(u_arc.second.weight));
+                        return function(o, u_arc.first, filter_lt{u_arc.second.weight});
                       }
                       else
                       {
-                        return function( o, u_arc.first, enabled_inhibitor( u_arc.second.weight
-                                                                          , t_arc.second.weight));
+                        return function( o, u_arc.first, enabled_inhibitor{ u_arc.second.weight
+                                                                          , t_arc.second.weight});
                       }
                     }
                   }
@@ -497,17 +480,17 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
 
           return sdd::if_then_else( u_is_persistent
                                   , sdd::id<sdd_conf>()
-                                  , function(o, u.id, set(0)));
+                                  , function(o, u.id, set{0}));
         }
         else // not u_persistence_possible
         {
-          return function(o, u.id, set(0));
+          return function(o, u.id, set{0});
         }
       }(); // enabled_branch
 
       const auto ite_u = sdd::if_then_else( u_is_enabled
                                           , enabled_branch
-                                          , function(o, u.id, set(pn::sharp)));
+                                          , function(o, u.id, set{pn::sharp}));
 
       h_t = composition(ite_u, h_t);
 
@@ -553,8 +536,8 @@ post_and_advance_time:
       if (t.timed())
       {
         const auto f = t.high == pn::inf
-                     ? function(o, t.id, advance_capped(t.low, t.high))
-                     : function(o, t.id, advance(t.high));
+                     ? function(o, t.id, advance_capped{t.low, t.high})
+                     : function(o, t.id, advance{t.high});
         res = composition(f, res);
       }
     }

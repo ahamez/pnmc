@@ -17,10 +17,6 @@ struct live
   const std::size_t index;
   boost::dynamic_bitset<>& bitset;
 
-  live(std::size_t i, boost::dynamic_bitset<>& b)
-    : index(i), bitset(b)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const noexcept
@@ -28,23 +24,22 @@ struct live
     bitset[index] = true;
     return val;
   }
+
+  friend
+  bool
+  operator==(const live& lhs, const live& rhs)
+  noexcept
+  {
+    return lhs.index == rhs.index;
+  }
+
+  friend
+  std::ostream&
+  operator<<(std::ostream& os, const live& l)
+  {
+    return os << "live(" << l.index << ")";
+  }
 };
-
-/// @brief Equality of two post.
-inline
-bool
-operator==(const live& lhs, const live& rhs)
-noexcept
-{
-  return lhs.index == rhs.index;
-}
-
-/// @brief Textual output of a post.
-std::ostream&
-operator<<(std::ostream& os, const live& l)
-{
-  return os << "live(" << l.index << ")";
-}
 
 /*------------------------------------------------------------------------------------------------*/
 

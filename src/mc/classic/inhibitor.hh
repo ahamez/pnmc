@@ -15,10 +15,6 @@ struct inhibitor
 {
   const unsigned int valuation;
 
-  inhibitor(unsigned int val)
-    : valuation(val)
-  {}
-
   sdd::values::flat_set<unsigned int>
   operator()(const sdd::values::flat_set<unsigned int>& val)
   const
