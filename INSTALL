@@ -3,8 +3,8 @@ PNMC INSTALLATION
 # Requirements
 
   * C++11 compiler
-    - clang >= 3.3
-    - gcc >= 4.9
+    - clang >= 3.4
+    - gcc >= 4.9.1
     - Other compilers might work, as long as they implement the C++11 standard
 
   * Libraries
