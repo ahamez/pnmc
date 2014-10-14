@@ -296,7 +296,7 @@ input_arcs(parse_cxt& cxt, Fun&& add_arc)
     const auto maybe_target = target(cxt);
     if (not maybe_target) {break;} // no more arcs
 
-    pn::arc::type arc_ty = pn::arc::type::normal;
+    auto arc_ty = pn::arc::type::normal;
     auto valuation = 1u;
 
     if (accept(cxt, token_t::mult))
@@ -315,7 +315,7 @@ input_arcs(parse_cxt& cxt, Fun&& add_arc)
       else                             {arc_ty = pn::arc::type::stopwatch;}
       valuation = number(cxt);
     }
-    add_arc(*maybe_target, pn::arc{valuation, arc_ty});
+    add_arc(*maybe_target, valuation, arc_ty);
   }
 }
 
@@ -337,7 +337,7 @@ output_arcs(parse_cxt& cxt, Fun&& add_arc)
     {
       valuation = number(cxt);
     }
-    add_arc(*maybe_target, pn::arc{valuation, pn::arc::type::normal});
+    add_arc(*maybe_target, valuation, pn::arc::type::normal);
   }
 }
 
@@ -397,10 +397,16 @@ transition(parse_cxt& cxt, pn::net& n)
     n.add_time_interval(tid, low, high);
   }
 
-  input_arcs(cxt, [&](auto&& pre, auto&& arc){n.add_pre_place(tid, pre, arc);});
+  input_arcs(cxt, [&](const auto& pre, unsigned int weight, pn::arc::type ty)
+                     {
+                       n.add_pre_place(tid, pre, weight, ty);
+                     });
   if (accept(cxt, token_t::arrow))
   {
-    output_arcs(cxt, [&](auto&& post, auto&& arc){n.add_post_place(tid, post, arc);});
+    output_arcs(cxt, [&](const auto& post, unsigned int weight, pn::arc::type ty)
+                        {
+                          n.add_post_place(tid, post, weight, ty);
+                        });
   }
 }
 

@@ -49,49 +49,101 @@ net::add_transition(const std::string& tid)
 /*------------------------------------------------------------------------------------------------*/
 
 void
-net::add_post_place(const std::string& tid, const std::string& post, const arc& a)
+net::add_post_place( const std::string& tid, const std::string& post
+                   , unsigned int weight, arc::type ty)
 {
-  const auto it = transitions_set.get<id_index>().find(tid);
-  const auto arc_search = it->post.find(post);
-  if (arc_search != it->post.cend() and arc_search->second.kind != a.kind)
+  if (ty != arc::type::normal)
   {
-    throw std::runtime_error
-      ("Arcs of different types between a place and a transition are not supported.");
+    throw std::runtime_error("An output arc of a transition must be normal.");
   }
 
-  transitions_set.modify( it
-                        , [&](transition& t){t.post.insert({post , a});});
-  if (places_by_id().find(post) == places_by_id().end())
+  const auto it = transitions_set.get<id_index>().find(tid);
+  if (it == end(transitions_set.get<id_index>()))
+  {
+    throw std::runtime_error("Adding a post place to a non-existing transition.");
+  }
+
+  if (it->post.find(arc{post}) != end(it->post))
+  {
+    // Add weights of arcs with the same direction between the same place and transition.
+    transitions_set.modify(it, [&](transition& t)
+                                  {
+                                    const auto old = t.post.find(arc{post});
+                                    const auto old_weight = old->weight;
+                                    t.post.erase(old);
+                                    t.post.emplace_hint(end(t.post), post, weight + old_weight, ty);
+                                  });
+  }
+  else
+  {
+    transitions_set.modify( it
+                          , [&](transition& t)
+                               {
+                                 t.post.emplace_hint(end(t.post), post , weight, ty);
+                               });
+
+  }
+
+  if (places_by_id().find(post) == end(places_by_id()))
   {
     add_place(post, 0);
   }
-  const auto place_cit = places_by_id().find(post);
-  places_set.get<id_index>().modify( place_cit
-                                   , [&](place& p){p.pre.insert({tid, a});});
+  places_set.get<id_index>().modify( places_by_id().find(post)
+                                   , [&](place& p)
+                                        {
+                                          p.pre.emplace_hint(end(p.pre), tid, weight, ty);
+                                        });
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 void
-net::add_pre_place(const std::string& tid, const std::string& pre, const arc& a)
+net::add_pre_place( const std::string& tid, const std::string& pre
+                  , unsigned int weight, arc::type ty)
 {
   const auto it = transitions_set.get<id_index>().find(tid);
-  const auto arc_search = it->pre.find(pre);
-  if (arc_search != it->pre.cend() and arc_search->second.kind != a.kind)
+  if (it == end(transitions_set.get<id_index>()))
   {
-    throw std::runtime_error
-      ("Arcs of different types between a place and a transition are not supported.");
+    throw std::runtime_error("Adding a pre place to a non-existing transition.");
   }
-  transitions_set.modify( it
-                        , [&](transition& t){t.pre.insert({pre, a});});
-  if (places_by_id().find(pre) == places_by_id().end())
+
+  const auto arc_search = it->pre.find(arc{pre});
+  if (arc_search != end(it->pre))
+  {
+    if (arc_search->kind != ty)
+    {
+      throw std::runtime_error
+        ("Arcs of different types between a place and a transition are not supported yet.");
+    }
+
+    // Add weights of arcs with the same direction between the same place and transition.
+    transitions_set.modify(it, [&](transition& t)
+                                  {
+                                    const auto old = t.pre.find(arc{pre});
+                                    const auto old_weight = old->weight;
+                                    t.pre.erase(old);
+                                    t.pre.emplace_hint(end(t.pre), pre, weight + old_weight, ty);
+                                  });
+  }
+  else
+  {
+    transitions_set.modify( it
+                          , [&](transition& t)
+                               {
+                                 t.pre.emplace_hint(end(t.pre), pre , weight, ty);
+                               });
+
+  }
+
+  if (places_by_id().find(pre) == end(places_by_id()))
   {
     add_place(pre, 0);
   }
-  /// @todo Only one lookup.
-  const auto place_cit = places_by_id().find(pre);
-  places_set.get<id_index>().modify( place_cit
-                                   , [&](place& p){p.post.insert({tid , a});});
+  places_set.get<id_index>().modify( places_by_id().find(pre)
+                                   , [&](place& p)
+                                        {
+                                          p.post.emplace_hint(end(p.post), tid, weight, ty);
+                                        });
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -164,18 +216,18 @@ const
 
   for (const auto& arc : t.pre)
   {
-    const auto place_cit = places_by_id().find(arc.first);
+    const auto place_cit = places_by_id().find(arc.target);
     if (place_cit == places_by_id().cend())
     {
-      throw std::runtime_error("Place " + arc.first + " doesn't exist");
+      throw std::runtime_error("Place " + arc.target + " doesn't exist");
     }
     const auto& place = *place_cit;
-    switch (arc.second.kind)
+    switch (arc.kind)
     {
       case pn::arc::type::normal:
       case pn::arc::type::read:
       {
-        if (place.marking < arc.second.weight)
+        if (place.marking < arc.weight)
         {
           return false;
         }
@@ -184,7 +236,7 @@ const
 
       case pn::arc::type::inhibitor:
       {
-        if (place.marking >= arc.second.weight)
+        if (place.marking >= arc.weight)
         {
           return false;
         }

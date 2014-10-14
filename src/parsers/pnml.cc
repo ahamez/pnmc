@@ -102,12 +102,12 @@ pnml(std::istream& in)
       if (net_ptr->places_by_id().find(src) != net_ptr->places_by_id().end())
       {
         // src is a place.
-        net_ptr->add_pre_place(dst, src, {valuation, pn::arc::type::normal});
+        net_ptr->add_pre_place(dst, src, valuation, pn::arc::type::normal);
       }
       else
       {
         // src is a transitions.
-        net_ptr->add_post_place(src, dst, {valuation, pn::arc::type::normal});
+        net_ptr->add_post_place(src, dst, valuation, pn::arc::type::normal);
       }
     }
     node = node->next_sibling();

@@ -186,7 +186,7 @@ dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn
     // We are only interested in pre actions.
     for (const auto& arc : transition.pre)
     {
-      or_operands.insert(sdd::function(o, arc.first, dead{arc.second.weight}));
+      or_operands.insert(sdd::function(o, arc.target, dead{arc.weight}));
     }
 
     and_operands.insert(sdd::sum(o, or_operands.cbegin(), or_operands.cend()));

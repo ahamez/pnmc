@@ -97,13 +97,15 @@ public:
   ///
   /// If the place doesn't exist, it is created with a marking set to 0.
   void
-  add_post_place(const std::string& tid, const std::string& post, const arc&);
+  add_post_place( const std::string& tid, const std::string& post, unsigned int weight
+                , arc::type ty = arc::type::normal);
 
   /// @brief Add a pre place to a transition.
   ///
   /// If the place doesn't exist, it is created with a marking set to 0.
   void
-  add_pre_place(const std::string& tid, const std::string& pre, const arc&);
+  add_pre_place( const std::string& tid, const std::string& pre, unsigned int weight
+               , arc::type ty = arc::type::normal);
 
   /// @brief Return all places by insertion order.
   const places_type::index<insertion_index>::type&

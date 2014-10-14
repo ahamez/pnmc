@@ -183,12 +183,12 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     {
       for (const auto& arc : transition.pre)
       {
-        identifiers.emplace_back(arc.first);
+        identifiers.emplace_back(arc.target);
       }
 
       for (const auto& arc : transition.post)
       {
-        identifiers.emplace_back(arc.first);
+        identifiers.emplace_back(arc.target);
       }
 
       if (transition.timed())
