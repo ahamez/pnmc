@@ -61,18 +61,138 @@ mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_
 
 /*------------------------------------------------------------------------------------------------*/
 
+using arc_ref = std::reference_wrapper<const pn::arc>;
+
+struct elt
+{
+  std::deque<arc_ref> pre;
+  std::deque<arc_ref> post;
+};
+
+homomorphism
+factorize(const sdd::order<sdd_conf>& o, const std::vector<elt>& operations, int depth = 0)
+{
+//  const auto tab = std::string(depth*4, ' ');
+//  for (auto&& x : operations)
+//  {
+//    std::cout << tab;
+//    for (const pn::arc& y : x.post)
+//    {
+//      std::cout  << y.target << ' ';
+//    }
+//    std::cout << '|';
+//    for (const pn::arc& y : x.pre)
+//    {
+//      std::cout << ' ' << y.target;
+//    }
+//    std::cout << '\n';
+//  }
+//  std::cout << std::endl;
+
+  struct arc_hash
+  {
+    auto
+    operator()(const pn::arc& a)
+    const noexcept
+    {
+      using namespace sdd::hash;
+      return seed(a.target) (val(a.weight)) (val(static_cast<unsigned int>(a.kind)));
+    }
+  };
+
+  struct arc_eq
+  {
+    auto
+    operator()(const pn::arc& lhs, const pn::arc& rhs)
+    const noexcept
+    {
+      return lhs.kind == rhs.kind and lhs.weight == rhs.weight and lhs.target == rhs.target;
+    }
+  };
+
+  std::unordered_map<pn::arc, std::deque<elt>, arc_hash, arc_eq> common_posts;
+  std::set<homomorphism> operands;
+
+  // Find common targets.
+  for (const auto& e : operations)
+  {
+    if (not e.post.empty())
+    {
+      const auto front = e.post.front().get();
+      const auto search = common_posts.find(front);
+      if (search == end(common_posts))
+      {
+        common_posts.emplace_hint(search, front, std::deque<elt> {e});
+      }
+      else
+      {
+        search->second.emplace_back(e);
+      }
+    }
+    else
+    {
+      auto h = sdd::id<sdd_conf>();
+      for (const pn::arc& a : e.pre)
+      {
+        h = composition(h, function(o, a.target, pre{a.weight}));
+      }
+      operands.insert(h);
+    }
+  }
+
+  for (const auto& common_to_arcs : common_posts)
+  {
+    if (common_to_arcs.second.size() > 1) // we can factorize
+    {
+      const auto common = common_to_arcs.first;
+//      std::cout << tab << "-> " << common.target << " : " << common_to_arcs.second.size() << '\n';
+      std::vector<elt> sub_operations;
+      sub_operations.reserve(common_to_arcs.second.size());
+      for (auto e : common_to_arcs.second)
+      {
+        e.post.pop_front(); // remove common target
+        sub_operations.emplace_back(std::move(e));
+      }
+      operands.insert(composition( function(o, common.target, post{common.weight})
+                                 , factorize(o, sub_operations, depth + 1)));
+    }
+    else
+    {
+      assert(common_to_arcs.second.size() == 1);
+      const auto& e = common_to_arcs.second.front();
+      auto h = sdd::id<sdd_conf>();
+      for (const pn::arc& a : e.post)
+      {
+        h = composition(h, function(o, a.target, post{a.weight}));
+      }
+      for (const pn::arc& a : e.pre)
+      {
+        h = composition(h, function(o, a.target, pre{a.weight}));
+      }
+      operands.insert(h);
+    }
+  }
+
+  return sum(o, begin(operands), end(operands));
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 /// @brief Compute the transition relation corresponding to a petri net.
 homomorphism
-untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
-       , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
+untimed( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn::net& net
+       , boost::dynamic_bitset<>&, const bool&)
 {
   // Each transition will produce an operand.
   std::set<homomorphism> operands;
   operands.insert(sdd::id<sdd_conf>());
 
   // Temporary storage to sort post and pre arcs.
-  std::vector<std::reference_wrapper<const pn::arc>> arcs_tmp;
+  std::vector<arc_ref> arcs_tmp;
   arcs_tmp.reserve(128);
+
+  std::vector<elt> operations;
+  operations.reserve(net.transitions().size());
 
   for (const pn::transition& transition : net.transitions())
   {
@@ -81,7 +201,10 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
       continue; // A transition with no pre or post places, no need to keep it.
     }
 
-   // Sort post arcs using the variable order.
+    std::deque<arc_ref> pre;
+    std::deque<arc_ref> post;
+
+    // Sort post arcs using the variable order.
     arcs_tmp.clear();
     std::copy(begin(transition.post), end(transition.post), std::back_inserter(arcs_tmp));
     std::sort( arcs_tmp.begin(), arcs_tmp.end()
@@ -90,38 +213,13 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
                     return o.node(rhs.target) < o.node(lhs.target);
                   });
 
-    // compose from left to right
-    auto h_t = sdd::id<sdd_conf>();
-
     // Post actions.
     for (const auto& arc : arcs_tmp)
     {
-      // Is the maximal marking limited?
-      const auto f = conf.marking_bound == 0
-                   ? function(o, arc.get().target, post{arc.get().weight})
-                   : function( o, arc.get().target
-                             , bounded_post<sdd_conf>{ arc.get().weight
-                                                     , conf.marking_bound, arc.get().target});
-      h_t = composition(h_t, f);
+      post.emplace_front(arc);
     }
 
-    // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
-    if (conf.compute_dead_transitions)
-    {
-      if (transition.pre.empty())
-      {
-        // t is always enabled, it's useless to test if it's live.
-        transitions_bitset[transition.index] = true;
-      }
-      else
-      {
-        // Target the same variable as the last pre or post to be fired to avoid evaluations.
-        const auto var = transition.pre.cbegin()->target;
-        const auto f = function(o, var, live{transition.index, transitions_bitset});
-        h_t = composition(h_t, f);
-      }
-    }
-
+    // Sort pre arcs using the variable order.
     // Sort pre arcs using the variable order.
     arcs_tmp.clear();
     std::copy(begin(transition.pre), end(transition.pre), std::back_inserter(arcs_tmp));
@@ -134,29 +232,17 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
     // Pre actions.
     for (const pn::arc& arc : arcs_tmp)
     {
-      const auto f = [&]{
-        switch (arc.kind)
-        {
-          case pn::arc::type::normal:
-            return mk_fun<pre>(conf, stop, o, arc.target, arc.weight);
-
-          case pn::arc::type::inhibitor:
-            return mk_fun<inhibitor>(conf, stop, o, arc.target, arc.weight);
-
-          case pn::arc::type::read:
-            return mk_fun<filter_ge>(conf, stop, o, arc.target, arc.weight);
-
-          default:
-            throw std::runtime_error("Unsupported arc type.");
-        }
-      }();
-      h_t = composition(h_t, f);
+      if (arc.kind != pn::arc::type::normal)
+      {
+        throw std::runtime_error("TODO");
+      }
+      pre.emplace_front(arc);
     }
 
-    operands.insert(h_t);
+    operations.emplace_back(elt {std::move(pre), std::move(post)});
   }
 
-  return fixpoint(sum(o, operands.cbegin(), operands.cend()));
+  return fixpoint(sum(o, {factorize(o, operations), sdd::id<sdd_conf>()}));
 }
 
 /*------------------------------------------------------------------------------------------------*/
