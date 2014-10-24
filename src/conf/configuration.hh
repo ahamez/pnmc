@@ -102,6 +102,7 @@ struct configuration
   boost::optional<boost::filesystem::path> hypergraph_dot_file;
   boost::optional<boost::filesystem::path> export_hom_to_dot_file;
   boost::optional<boost::filesystem::path> export_sat_hom_to_dot_file;
+  boost::optional<boost::filesystem::path> export_hom_to_json_file;
   boost::optional<boost::filesystem::path> export_tina_file;
   boost::optional<std::string> load_order_file;
 

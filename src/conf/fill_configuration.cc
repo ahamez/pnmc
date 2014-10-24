@@ -115,6 +115,7 @@ const auto results_json_str = "results-json";
 const auto show_time_str = "show-time";
 const auto hypergraph_dot_str = "hypergraph-force-dot";
 const auto fast_exit_str = "fast-exit";
+const auto hom_json_export_str = "hom-json";
 const auto hom_dot_export_str = "hom-dot";
 const auto hom_sat_dot_export_str = "sat-hom-dot";
 const auto export_tina_str = "export-tina";
@@ -188,6 +189,8 @@ fill_configuration(int argc, char** argv)
                                 , "Export the SDD state space to a DOT file")
     (hypergraph_dot_str         , po::value<std::string>()
                                 , "Export FORCE's hypergraph to a DOT file")
+    (hom_json_export_str        , po::value<std::string>()
+                                , "Export homomorphism to a JSON file")
     (hom_dot_export_str         , po::value<std::string>()
                                 , "Export homomorphism to a DOT file")
     (hom_sat_dot_export_str     , po::value<std::string>()
@@ -383,6 +386,10 @@ fill_configuration(int argc, char** argv)
   if (vm.count(hypergraph_dot_str))
   {
     conf.hypergraph_dot_file = util::output_file(vm[hypergraph_dot_str].as<std::string>());
+  }
+  if (vm.count(hom_json_export_str))
+  {
+    conf.export_hom_to_json_file = util::output_file(vm[hom_json_export_str].as<std::string>());
   }
   if (vm.count(hom_dot_export_str))
   {

@@ -270,7 +270,7 @@ const
   if (conf.order_only)
   {
     dump_json(conf, stats, manager, sdd::zero<sdd_conf>(), net);
-    dump_hom_dot(conf, h_classic, h);
+    dump_hom(conf, h_classic, h);
     return;
   }
 
@@ -286,7 +286,7 @@ const
               << std::endl;
     stats.interrupted = true;
     dump_json(conf, stats, manager, m, net);
-    dump_hom_dot(conf, h_classic, h);
+    dump_hom(conf, h_classic, h);
     return;
   }
   catch (const interrupted&)
@@ -295,7 +295,7 @@ const
               << "s." << std::endl;
     stats.interrupted = true;
     dump_json(conf, stats, manager, m, net);
-    dump_hom_dot(conf, h_classic, h);
+    dump_hom(conf, h_classic, h);
     return;
   }
 
@@ -412,7 +412,7 @@ const
   dump_sdd_dot(conf, m, o);
   dump_json(conf, stats, manager, m, net);
   dump_results(conf, res);
-  dump_hom_dot(conf, h_classic, h);
+  dump_hom(conf, h_classic, h);
 
   if (conf.fast_exit)
   {

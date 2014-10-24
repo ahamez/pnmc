@@ -3,6 +3,7 @@
 #include <sdd/tools/dot/force_hypergraph.hh>
 #include <sdd/tools/dot/homomorphism.hh>
 #include <sdd/tools/dot/sdd.hh>
+#include <sdd/tools/js.hh>
 #include <sdd/tools/sdd_statistics.hh>
 #include <sdd/tools/serialization.hh>
 
@@ -117,9 +118,21 @@ dump_hypergraph_dot( const conf::configuration& conf
 /*------------------------------------------------------------------------------------------------*/
 
 void
-dump_hom_dot( const conf::configuration& conf, const sdd::homomorphism<sdd::conf1>& classic
-            , const sdd::homomorphism<sdd::conf1>& sat)
+dump_hom( const conf::configuration& conf, const sdd::homomorphism<sdd::conf1>& classic
+        , const sdd::homomorphism<sdd::conf1>& sat)
 {
+  if (conf.export_hom_to_json_file)
+  {
+    boost::filesystem::ofstream file(*conf.export_hom_to_json_file);
+    if (file.is_open())
+    {
+      file << sdd::tools::js(classic) << std::endl;
+    }
+    else
+    {
+      std::cerr << "Can't export homomorphism to " << *conf.export_hom_to_json_file << std::endl;
+    }
+  }
   if (conf.export_hom_to_dot_file)
   {
     boost::filesystem::ofstream file(*conf.export_hom_to_dot_file);
