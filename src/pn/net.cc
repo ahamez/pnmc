@@ -63,15 +63,13 @@ net::add_post_place( const std::string& tid, const std::string& post
     throw std::runtime_error("Adding a post place to a non-existing transition.");
   }
 
-  if (it->post.find(arc{post}) != end(it->post))
+  if (it->post.find(post) != end(it->post))
   {
     // Add weights of arcs with the same direction between the same place and transition.
     transitions_set.modify(it, [&](transition& t)
                                   {
-                                    const auto old = t.post.find(arc{post});
-                                    const auto old_weight = old->weight;
-                                    t.post.erase(old);
-                                    t.post.emplace_hint(end(t.post), post, weight + old_weight, ty);
+                                    auto search = t.post.find(post);
+                                    search->second.weight += weight;
                                   });
   }
   else
@@ -79,7 +77,7 @@ net::add_post_place( const std::string& tid, const std::string& post
     transitions_set.modify( it
                           , [&](transition& t)
                                {
-                                 t.post.emplace_hint(end(t.post), post , weight, ty);
+                                 t.post.emplace_hint(end(t.post), post , pn::arc{weight, ty});
                                });
 
   }
@@ -91,7 +89,7 @@ net::add_post_place( const std::string& tid, const std::string& post
   places_set.get<id_index>().modify( places_by_id().find(post)
                                    , [&](place& p)
                                         {
-                                          p.pre.emplace_hint(end(p.pre), tid, weight, ty);
+                                          p.pre.emplace_hint(end(p.pre), tid, pn::arc{weight, ty});
                                         });
 }
 
@@ -107,10 +105,10 @@ net::add_pre_place( const std::string& tid, const std::string& pre
     throw std::runtime_error("Adding a pre place to a non-existing transition.");
   }
 
-  const auto arc_search = it->pre.find(arc{pre});
+  const auto arc_search = it->pre.find(pre);
   if (arc_search != end(it->pre))
   {
-    if (arc_search->kind != ty)
+    if (arc_search->second.kind != ty)
     {
       throw std::runtime_error
         ("Arcs of different types between a place and a transition are not supported yet.");
@@ -119,10 +117,8 @@ net::add_pre_place( const std::string& tid, const std::string& pre
     // Add weights of arcs with the same direction between the same place and transition.
     transitions_set.modify(it, [&](transition& t)
                                   {
-                                    const auto old = t.pre.find(arc{pre});
-                                    const auto old_weight = old->weight;
-                                    t.pre.erase(old);
-                                    t.pre.emplace_hint(end(t.pre), pre, weight + old_weight, ty);
+                                    auto search = t.pre.find(pre);
+                                    search->second.weight += weight;
                                   });
   }
   else
@@ -130,7 +126,7 @@ net::add_pre_place( const std::string& tid, const std::string& pre
     transitions_set.modify( it
                           , [&](transition& t)
                                {
-                                 t.pre.emplace_hint(end(t.pre), pre , weight, ty);
+                                 t.pre.emplace_hint(end(t.pre), pre , pn::arc{weight, ty});
                                });
 
   }
@@ -142,7 +138,7 @@ net::add_pre_place( const std::string& tid, const std::string& pre
   places_set.get<id_index>().modify( places_by_id().find(pre)
                                    , [&](place& p)
                                         {
-                                          p.post.emplace_hint(end(p.post), tid, weight, ty);
+                                          p.post.emplace_hint(end(p.post), tid, pn::arc{weight, ty});
                                         });
 }
 
@@ -216,18 +212,18 @@ const
 
   for (const auto& arc : t.pre)
   {
-    const auto place_cit = places_by_id().find(arc.target);
+    const auto place_cit = places_by_id().find(arc.first);
     if (place_cit == places_by_id().cend())
     {
-      throw std::runtime_error("Place " + arc.target + " doesn't exist");
+      throw std::runtime_error("Place " + arc.first + " doesn't exist");
     }
     const auto& place = *place_cit;
-    switch (arc.kind)
+    switch (arc.second.kind)
     {
       case pn::arc::type::normal:
       case pn::arc::type::read:
       {
-        if (place.marking < arc.weight)
+        if (place.marking < arc.second.weight)
         {
           return false;
         }
@@ -236,7 +232,7 @@ const
 
       case pn::arc::type::inhibitor:
       {
-        if (place.marking >= arc.weight)
+        if (place.marking >= arc.second.weight)
         {
           return false;
         }

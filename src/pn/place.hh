@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iosfwd>
-#include <set>
+#include <map>
 #include <string>
 
 #include "pn/arc.hh"
@@ -12,7 +12,7 @@ namespace pnmc { namespace pn {
 
 struct place
 {
-  using arcs_type = std::set<arc>;
+  using arcs_type = std::map<std::string, arc>;
 
   /// @brief This place's id.
   const std::string id;

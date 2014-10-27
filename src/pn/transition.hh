@@ -2,7 +2,7 @@
 
 #include <iosfwd>
 #include <limits>
-#include <set>
+#include <map>
 #include <string>
 
 #include "pn/arc.hh"
@@ -20,7 +20,7 @@ constexpr unsigned int sharp = inf - 1;
 /// @brief A transition in a Petri Net.
 struct transition
 {
-  using arcs_type = std::set<arc>;
+  using arcs_type = std::map<std::string, arc>;
 
   /// @brief This transition's id.
   const std::string id;

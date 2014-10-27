@@ -29,12 +29,12 @@ tina(std::ostream& out, const net& net)
     out << "tr " << format(transition.id);
     for (const auto& arc : transition.pre)
     {
-      out << " " << format(arc.target);
+      out << " " << format(arc.first);
     }
     out << " ->";
     for (const auto& arc : transition.post)
     {
-      out << " " << format(arc.target);
+      out << " " << format(arc.first);
     }
     out << std::endl;
   }
