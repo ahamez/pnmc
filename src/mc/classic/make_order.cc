@@ -1,4 +1,4 @@
-#include <algorithm> // copy, random_shuffle, transform
+#include <algorithm> // copy, shuffle, transform
 #include <cassert>
 #include <deque>
 #include <chrono>
@@ -89,19 +89,23 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       sdd::order<sdd_conf> o = sdd::tools::load_order<sdd_conf>(file);
 
       // Check if loaded order corresponds to the Petri net.
-      std::set<std::string> order_identifiers;
+      boost::container::flat_set<std::string> order_identifiers;
       o.flat(std::inserter(order_identifiers, order_identifiers.end()));
 
-      std::set<std::string> pn_identifiers;
+      boost::container::flat_set<std::string> pn_identifiers;
       std::transform( net.places_by_id().cbegin(), net.places_by_id().cend()
                     , std::inserter(pn_identifiers, pn_identifiers.end())
                     , [](const pn::place& p){return p.id;});
 
       if (net.timed())
       {
-        std::transform( net.transitions().cbegin(), net.transitions().cend()
-                      , std::inserter(pn_identifiers, pn_identifiers.end())
-                      , [](const pn::transition& t){return t.id;});
+        for (const auto& t : net.transitions())
+        {
+          if (t.timed())
+          {
+            pn_identifiers.insert(t.id);
+          }
+        }
       }
 
       std::vector<std::string> diff;
