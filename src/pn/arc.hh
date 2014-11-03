@@ -8,17 +8,13 @@ namespace pnmc { namespace pn {
 struct arc
 {
   /// @brief The possible types of an arc.
-  enum class type {normal, read, inhibitor, stopwatch, stopwatch_inhibitor};
+  enum class type {normal, read, inhibitor, stopwatch, stopwatch_inhibitor, reset};
 
   /// @brief The valuation of this arc.
   unsigned int weight;
 
   /// @brief The type of this arc.
   type kind;
-
-//  arc(unsigned int w, type t)
-//    : weight(w), kind(t)
-//  {}
 };
 
 /*------------------------------------------------------------------------------------------------*/
