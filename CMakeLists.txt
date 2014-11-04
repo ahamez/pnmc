@@ -50,7 +50,6 @@ find_package(ZLIB)
 
 add_definitions("-Wall")
 add_definitions("-std=c++1y")
-add_definitions("-ftemplate-depth=256")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_definitions("-stdlib=libc++")
@@ -61,6 +60,7 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif ()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fvisibility=hidden -fvisibility-inlines-hidden")
 
 ################################################################################
 
