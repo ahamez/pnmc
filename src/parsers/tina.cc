@@ -301,7 +301,14 @@ input_arcs(parse_cxt& cxt, Fun&& add_arc)
 
     if (accept(cxt, token_t::mult))
     {
-      valuation = number(cxt);
+      if (accept(cxt, token_t::mult))
+      {
+        arc_ty = pn::arc::type::reset;
+      }
+      else
+      {
+        valuation = number(cxt);
+      }
     }
     else if (accept(cxt, token_t::question))
     {

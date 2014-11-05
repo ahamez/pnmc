@@ -134,9 +134,24 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
                     return o.node(rhs.first) < o.node(lhs.first);
                   });
 
+    // Reset arcs.
+    for (const target_arc_type& arc : arcs)
+    {
+      if (arc.second.kind == pn::arc::type::reset)
+      {
+        const auto f = function(o, arc.first, set{0});
+        h_t = composition(h_t, f);
+      }
+    }
+
     // Pre actions.
     for (const target_arc_type& arc : arcs)
     {
+      if (arc.second.kind == pn::arc::type::reset)
+      {
+        continue;
+      }
+
       const auto f = [&]{
         switch (arc.second.kind)
         {
@@ -203,6 +218,11 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
     // All pre arcs.
     for (const target_arc_type& arc : arcs)
     {
+      if (arc.second.kind == pn::arc::type::reset)
+      {
+        continue;
+      }
+
       const homomorphism p = [&]{
         switch (arc.second.kind)
         {
@@ -220,6 +240,16 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
         }
       }();
       h_t = composition(p, h_t);
+    }
+
+    // Reset arcs.
+    for (const target_arc_type& arc : arcs)
+    {
+      if (arc.second.kind == pn::arc::type::reset)
+      {
+        const auto f = function(o, arc.first, set{0});
+        h_t = composition(f, h_t);
+      }
     }
 
     // Add a "canary" to detect live transitions. It will be triggered if all pre are fired.
