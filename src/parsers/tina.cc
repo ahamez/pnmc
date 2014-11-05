@@ -318,9 +318,14 @@ input_arcs(parse_cxt& cxt, Fun&& add_arc)
     }
     else if (accept(cxt, token_t::exclamation))
     {
-      if (accept(cxt, token_t::minus)) {arc_ty = pn::arc::type::stopwatch_inhibitor;}
-      else                             {arc_ty = pn::arc::type::stopwatch;}
-      valuation = number(cxt);
+      if (accept(cxt, token_t::minus))
+      {
+        throw parse_error("Unsupported stopwatch inhibitor arc");
+      }
+      else
+      {
+        throw parse_error("Unsupported stopwatch arc");
+      }
     }
     add_arc(*maybe_target, valuation, arc_ty);
   }
