@@ -4,9 +4,9 @@
 #include <ostream>
 
 #include "conf/configuration.hh"
-#include "mc/classic/exceptions.hh"
+#include "mc/shared/exceptions.hh"
 
-namespace pnmc { namespace mc { namespace classic {
+namespace pnmc { namespace mc { namespace shared {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -61,17 +61,17 @@ struct interruptible
 
 /*------------------------------------------------------------------------------------------------*/
 
-}}} // namespace pnmc::mc::classic
+}}} // namespace pnmc::mc::shared
 
 namespace std {
 
 /*------------------------------------------------------------------------------------------------*/
 
 template <typename C, typename Fun>
-struct hash<pnmc::mc::classic::interruptible<C, Fun>>
+struct hash<pnmc::mc::shared::interruptible<C, Fun>>
 {
   std::size_t
-  operator()(const pnmc::mc::classic::interruptible<C, Fun>& t)
+  operator()(const pnmc::mc::shared::interruptible<C, Fun>& t)
   const noexcept
   {
     return std::hash<Fun>()(t.fun_);

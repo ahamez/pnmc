@@ -14,19 +14,17 @@
 #include "mc/classic/filter_lt.hh"
 #include "mc/classic/firing_rule.hh"
 #include "mc/classic/inhibitor.hh"
-#include "mc/classic/interruptible.hh"
-#include "mc/classic/live.hh"
 #include "mc/classic/post.hh"
 #include "mc/classic/pre.hh"
 #include "mc/classic/pre_clock.hh"
 #include "mc/classic/set.hh"
+#include "mc/shared/interruptible.hh"
+#include "mc/shared/live.hh"
 #include "util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
-
-namespace chrono = std::chrono;
 
 using sdd_conf = sdd::conf1 ;
 using SDD = sdd::SDD<sdd_conf>;
@@ -36,29 +34,6 @@ using sdd::fixpoint;
 using sdd::intersection;
 using sdd::sum;
 using sdd::function;
-
-/*------------------------------------------------------------------------------------------------*/
-
-namespace /* anonymous */ {
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Create an interruptible function if required by the configuration, a normal function
-/// otherwise.
-template <typename Fun, typename... Args>
-homomorphism
-mk_fun( const conf::configuration& conf, const bool& stop, const sdd::order<sdd_conf>& o
-      , const sdd_conf::Identifier& id, Args&&... args)
-{
-  if (conf.max_time > chrono::duration<double>(0))
-  {
-    return function(o, id, interruptible<sdd_conf, Fun>(stop, std::forward<Args>(args)...));
-  }
-  else
-  {
-    return function(o, id, Fun{std::forward<Args>(args)...});;
-  }
-}
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -102,9 +77,8 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
       // Is the maximal marking limited?
       const auto f = conf.marking_bound == 0
                    ? function(o, arc.first, post{arc.second.weight})
-                   : function( o, arc.first
-                             , bounded_post<sdd_conf>{ arc.second.weight
-                                                     , conf.marking_bound, arc.first});
+                   : function(o, arc.first, bounded_post{ arc.second.weight, conf.marking_bound
+                                                        , arc.first});
       h_t = composition(h_t, f);
     }
 
@@ -120,7 +94,7 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
       {
         // Target the same variable as the last pre or post to be fired to avoid evaluations.
         const auto var = transition.pre.cbegin()->first;
-        const auto f = function(o, var, live{transition.index, transitions_bitset});
+        const auto f = function(o, var, shared::live{transition.index, transitions_bitset});
         h_t = composition(h_t, f);
       }
     }
@@ -145,27 +119,52 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
     }
 
     // Pre actions.
-    for (const target_arc_type& arc : arcs)
+    for (auto cit = begin(arcs); cit != end(arcs); ++cit)
     {
+      const target_arc_type& arc = *cit;
       if (arc.second.kind == pn::arc::type::reset)
       {
         continue;
       }
 
-      const auto f = [&]{
-        switch (arc.second.kind)
+      const auto weight = arc.second.weight;
+      const auto& id = arc.first;
+      const auto f = [&]
+      {
+        // Make last pre arc interruptible if required by the configuration.
+        if (std::next(cit) == end(arcs) and conf.max_time > std::chrono::duration<double>(0))
         {
-          case pn::arc::type::normal:
-            return mk_fun<pre>(conf, stop, o, arc.first, arc.second.weight);
+          switch (arc.second.kind)
+          {
+            case pn::arc::type::normal:
+              return function(o, id, shared::interruptible<sdd_conf, pre>(stop, weight));
 
-          case pn::arc::type::inhibitor:
-            return mk_fun<inhibitor>(conf, stop, o, arc.first, arc.second.weight);
+            case pn::arc::type::inhibitor:
+              return function(o, id, shared::interruptible<sdd_conf, inhibitor>(stop, weight));
 
-          case pn::arc::type::read:
-            return mk_fun<filter_ge>(conf, stop, o, arc.first, arc.second.weight);
+            case pn::arc::type::read:
+              return function(o, id, shared::interruptible<sdd_conf, filter_ge>(stop, weight));
 
-          default:
-            throw std::runtime_error("Unsupported arc type.");
+            default:
+              __builtin_unreachable();
+          }
+        }
+        else
+        {
+          switch (arc.second.kind)
+          {
+            case pn::arc::type::normal:
+              return function(o, id, pre{weight});
+
+            case pn::arc::type::inhibitor:
+              return function(o, id, inhibitor{weight});
+
+            case pn::arc::type::read:
+              return function(o, id, filter_ge{weight});
+
+            default:
+              __builtin_unreachable();
+          }
         }
       }();
       h_t = composition(h_t, f);
@@ -203,7 +202,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
     // An untimed transition doesn't have a clock.
     if (t.timed())
     {
-      h_t = mk_fun<pre_clock>(conf, stop, o, t.id, t.low);
+      h_t = function(o, t.id, pre_clock{t.low});
     }
 
     // Sort pre arcs using the variable order.
@@ -215,31 +214,56 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
                     return o.node(rhs.first) < o.node(lhs.first);
                   });
 
-    // All pre arcs.
-    for (const target_arc_type& arc : arcs)
+    // Pre actions.
+    for (auto cit = begin(arcs); cit != end(arcs); ++cit)
     {
+      const target_arc_type& arc = *cit;
       if (arc.second.kind == pn::arc::type::reset)
       {
         continue;
       }
 
-      const homomorphism p = [&]{
-        switch (arc.second.kind)
+      const auto weight = arc.second.weight;
+      const auto& id = arc.first;
+      const auto f = [&]
+      {
+        // Make last pre arc interruptible if required by the configuration.
+        if (std::next(cit) == end(arcs) and conf.max_time > std::chrono::duration<double>(0))
         {
-          case pn::arc::type::normal:
-            return function(o, arc.first, pre{arc.second.weight});
+          switch (arc.second.kind)
+          {
+            case pn::arc::type::normal:
+              return function(o, id, shared::interruptible<sdd_conf, pre>(stop, weight));
 
-          case pn::arc::type::inhibitor:
-            return function(o, arc.first, inhibitor{arc.second.weight});
+            case pn::arc::type::inhibitor:
+              return function(o, id, shared::interruptible<sdd_conf, inhibitor>(stop, weight));
 
-          case pn::arc::type::read:
-            return function(o, arc.first, filter_ge{arc.second.weight});
+            case pn::arc::type::read:
+              return function(o, id, shared::interruptible<sdd_conf, filter_ge>(stop, weight));
 
-          default:
-            throw std::runtime_error("Unsupported arc type.");
+            default:
+              __builtin_unreachable();
+          }
+        }
+        else
+        {
+          switch (arc.second.kind)
+          {
+            case pn::arc::type::normal:
+              return function(o, id, pre{weight});
+
+            case pn::arc::type::inhibitor:
+              return function(o, id, inhibitor{weight});
+
+            case pn::arc::type::read:
+              return function(o, id, filter_ge{weight});
+
+            default:
+              __builtin_unreachable();
+          }
         }
       }();
-      h_t = composition(p, h_t);
+      h_t = composition(f, h_t);
     }
 
     // Reset arcs.
@@ -265,7 +289,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
       {
         // Target the same variable as the last pre to be fired to avoid useless evaluations.
         const auto var = t.pre.crbegin()->first;
-        const auto f = mk_fun<live>(conf, stop, o, var, t.index, transitions_bitset);
+        const auto f = function(o, var, shared::live{t.index, transitions_bitset});
         h_t = composition(f, h_t);
       }
     }
@@ -509,7 +533,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
                   }
 
                   default:
-                    throw std::runtime_error("Unsupported arc type.");
+                    __builtin_unreachable();
                 }
               }();
               persistence = composition(f, persistence);
@@ -552,9 +576,9 @@ post_and_advance_time:
     {
       // Is the maximal marking limited?
       const auto p = conf.marking_bound == 0
-                   ? mk_fun<post>(conf, stop, o, arc.first, arc.second.weight)
-                   : mk_fun<bounded_post<sdd_conf>>( conf, stop, o, arc.first, arc.second.weight
-                                                   , conf.marking_bound, arc.first);
+                   ? function(o, arc.first, post{arc.second.weight})
+                   : function(o, arc.first, bounded_post{ arc.second.weight, conf.marking_bound
+                                                        , arc.first});
       post_t = composition(p, post_t);
     }
     h_t = composition(post_t, h_t);
@@ -585,15 +609,11 @@ post_and_advance_time:
 
 /*------------------------------------------------------------------------------------------------*/
 
-} // namespace anonymous
-
-/*------------------------------------------------------------------------------------------------*/
-
 /// @brief Compute the transition relation corresponding to a petri net.
 homomorphism
 firing_rule( const conf::configuration& conf, const sdd::order<sdd_conf>& o
            , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-           , statistics& stats, const bool& stop)
+           , shared::statistics& stats, const bool& stop)
 {
   util::timer timer;
   const auto h = net.timed()

@@ -7,7 +7,7 @@
 #include <sdd/order/order.hh>
 
 #include "conf/configuration.hh"
-#include "mc/classic/statistics.hh"
+#include "mc/shared/statistics.hh"
 #include "pn/net.hh"
 
 namespace pnmc { namespace mc { namespace classic {
@@ -17,7 +17,7 @@ namespace pnmc { namespace mc { namespace classic {
 sdd::homomorphism<sdd::conf1>
 firing_rule( const conf::configuration& conf, const sdd::order<sdd::conf1>& o
            , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-           , statistics& stats, const bool& stop);
+           , shared::statistics& stats, const bool& stop);
 
 /*------------------------------------------------------------------------------------------------*/
 

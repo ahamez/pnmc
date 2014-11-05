@@ -13,8 +13,8 @@
 #include <sdd/order/strategies/identifiers_per_hierarchy.hh>
 #include <sdd/tools/order.hh>
 
-#include "mc/classic/dump.hh"
 #include "mc/classic/make_order.hh"
+#include "mc/shared/dump.hh"
 #include "util/paths.hh"
 #include "util/timer.hh"
 
@@ -63,7 +63,7 @@ struct mk_order_visitor
 /*------------------------------------------------------------------------------------------------*/
 
 sdd::order<sdd_conf>
-make_order(const conf::configuration& conf, statistics& stats, const pn::net& net)
+make_order(const conf::configuration& conf, shared::statistics& stats, const pn::net& net)
 {
   for (const auto& place : net.places())
   {
@@ -212,7 +212,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     stats.force_spans = force.spans();
 
     // Dump the hypergraph to a DOT file if required by the configuration.
-    dump_hypergraph_dot(conf, graph);
+    shared::dump_hypergraph_dot(conf, graph);
   }
   // Use model's hierarchy, if any.
   else if (not conf.order_flat and net.modules)

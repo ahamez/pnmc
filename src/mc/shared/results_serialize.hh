@@ -3,9 +3,9 @@
 #include <cereal/archives/json.hpp>
 
 #include "conf/configuration.hh"
-#include "mc/classic/results.hh"
+#include "mc/shared/results.hh"
 
-namespace pnmc { namespace mc { namespace classic {
+namespace pnmc { namespace mc { namespace shared {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -23,4 +23,4 @@ save(Archive& archive, const results& r)
 
 /*------------------------------------------------------------------------------------------------*/
 
-}}} // namespace pnmc::mc::classic
+}}} // namespace pnmc::mc::shared

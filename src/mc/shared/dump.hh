@@ -1,4 +1,4 @@
-#include <fstream>
+#pragma once
 
 #include <sdd/tools/dot/force_hypergraph.hh>
 #include <sdd/tools/dot/homomorphism.hh>
@@ -11,20 +11,24 @@
 
 #include <cereal/archives/json.hpp>
 
-#include "mc/classic/dump.hh"
-#include "mc/classic/results_serialize.hh"
-#include "mc/classic/statistics_serialize.hh"
+#include "conf/configuration.hh"
+#include "mc/shared/results.hh"
+#include "mc/shared/results_serialize.hh"
+#include "mc/shared/statistics.hh"
+#include "mc/shared/statistics_serialize.hh"
+#include "pn/net.hh"
 #include "pn/statistics.hh"
 #include "pn/statistics_serialize.hh"
 #include "util/paths.hh"
 
-namespace pnmc { namespace mc { namespace classic {
+namespace pnmc { namespace mc { namespace shared {
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Export SDD to the DOT format when required by the configuration.
+template <typename SDD, typename Order>
 void
-dump_sdd_dot( const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s
-            , const sdd::order<sdd::conf1>& o)
+dump_sdd_dot(const conf::configuration& conf, const SDD& s, const Order& o)
 {
   if (conf.export_final_sdd_dot_file)
   {
@@ -42,10 +46,11 @@ dump_sdd_dot( const conf::configuration& conf, const sdd::SDD<sdd::conf1>& s
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Export statistics to a JSON file when required by the configuration.
+template <typename Manager, typename SDD>
 void
-dump_json( const conf::configuration& conf, const statistics& stats
-         , const sdd::manager<sdd::conf1>& manager, const sdd::SDD<sdd::conf1>& s
-         , const pn::net& net)
+dump_json( const conf::configuration& conf, const statistics& stats, const Manager& manager
+         , const SDD& s, const pn::net& net)
 {
   if (conf.json_file)
   {
@@ -57,11 +62,10 @@ dump_json( const conf::configuration& conf, const statistics& stats
       {
         archive(cereal::make_nvp("file", conf.file_name));
       }
-      archive( cereal::make_nvp("pnmc", stats)
-             , cereal::make_nvp("libsdd", manager));
+      archive(cereal::make_nvp("pnmc", stats), cereal::make_nvp("libsdd", manager));
       if (conf.final_sdd_statistics)
       {
-        archive(cereal::make_nvp("final sdd", sdd::tools::sdd_statistics<sdd::conf1>(s)));
+        archive(cereal::make_nvp("final sdd", sdd::tools::statistics(s)));
       }
       if (conf.pn_statistics)
       {
@@ -77,29 +81,16 @@ dump_json( const conf::configuration& conf, const statistics& stats
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Export results to a JSON file when required by the configuration.
 void
-dump_results(const conf::configuration& conf, const results& res)
-{
-  if (conf.results_json_file)
-  {
-    boost::filesystem::ofstream file(*conf.results_json_file);
-    if (file.is_open())
-    {
-      cereal::JSONOutputArchive archive(file);
-      archive(cereal::make_nvp("pnmc", res));
-    }
-    else
-    {
-      std::cerr << "Can't export results to " << *conf.results_json_file << std::endl;
-    }
-  }
-}
+dump_results(const conf::configuration&, const results&);
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Export the FORCE's hypergraph to the DOT format when required by the configuration.
+template <typename Hypergraph>
 void
-dump_hypergraph_dot( const conf::configuration& conf
-                   , const sdd::force::hypergraph<sdd::conf1>& graph)
+dump_hypergraph_dot(const conf::configuration& conf, const Hypergraph& graph)
 {
   if (conf.hypergraph_dot_file)
   {
@@ -117,9 +108,10 @@ dump_hypergraph_dot( const conf::configuration& conf
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Export homomorphisms to the DOT format when required by the configuration.
+template <typename Homomorphism>
 void
-dump_hom( const conf::configuration& conf, const sdd::homomorphism<sdd::conf1>& classic
-        , const sdd::homomorphism<sdd::conf1>& sat)
+dump_hom(const conf::configuration& conf, const Homomorphism& classic, const Homomorphism& sat)
 {
   if (conf.export_hom_to_json_file)
   {
@@ -161,30 +153,4 @@ dump_hom( const conf::configuration& conf, const sdd::homomorphism<sdd::conf1>& 
 
 /*------------------------------------------------------------------------------------------------*/
 
-}}} // namespace pnmc::mc::classic
-
-namespace sdd { namespace values {
-
-/*------------------------------------------------------------------------------------------------*/
-
-template <>
-struct display_value<unsigned int>
-{
-  void
-  operator()(std::ostream& os, unsigned int v)
-  const
-  {
-    if (v == pnmc::pn::sharp)
-    {
-      os << "#";
-    }
-    else
-    {
-      os << v;
-    }
-  }
-};
-
-/*------------------------------------------------------------------------------------------------*/
-
-}} // namespace sdd::values
+}}} // namespace pnmc::mc::shared

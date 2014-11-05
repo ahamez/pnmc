@@ -4,9 +4,9 @@
 #include <cereal/types/deque.hpp>
 
 #include "conf/configuration.hh"
-#include "mc/classic/statistics.hh"
+#include "mc/shared/statistics.hh"
 
-namespace pnmc { namespace mc { namespace classic {
+namespace pnmc { namespace mc { namespace shared {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -55,4 +55,4 @@ save(Archive& archive, const statistics& s)
 
 /*------------------------------------------------------------------------------------------------*/
 
-}}} // namespace pnmc::mc::classic
+}}} // namespace pnmc::mc::shared

@@ -3,7 +3,7 @@
 #include <exception>
 #include <string>
 
-namespace pnmc { namespace mc { namespace classic {
+namespace pnmc { namespace mc { namespace shared {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -25,4 +25,4 @@ struct interrupted final
 
 /*------------------------------------------------------------------------------------------------*/
 
-}}} // namespace pnmc::mc::classic
+}}} // namespace pnmc::mc::shared

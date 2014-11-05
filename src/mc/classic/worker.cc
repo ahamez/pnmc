@@ -11,18 +11,17 @@
 
 #include "mc/classic/count_tokens.hh"
 #include "mc/classic/dead.hh"
-#include "mc/classic/dump.hh"
-#include "mc/classic/exceptions.hh"
 #include "mc/classic/firing_rule.hh"
 #include "mc/classic/make_order.hh"
-#include "mc/classic/results.hh"
-#include "mc/classic/statistics.hh"
+#include "mc/classic/sharp_output.hh"
+#include "mc/shared/dump.hh"
+#include "mc/shared/results.hh"
+#include "mc/shared/statistics.hh"
 #include "mc/classic/worker.hh"
+#include "mc/shared/exceptions.hh"
 #include "util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
-
-namespace chrono = std::chrono;
 
 using sdd_conf = sdd::conf1 ;
 using SDD = sdd::SDD<sdd_conf>;
@@ -70,7 +69,7 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 
 homomorphism
 rewrite( const conf::configuration&, const sdd::order<sdd_conf>& o
-       , const homomorphism& h, statistics& stats)
+       , const homomorphism& h, shared::statistics& stats)
 {
   util::timer timer;
   const auto res = sdd::rewrite(o, h);
@@ -86,11 +85,11 @@ struct threads
   std::thread clock;
   std::thread sdd_sampling;
 
-  threads( const conf::configuration& conf, statistics& stats, bool& stop
+  threads( const conf::configuration& conf, shared::statistics& stats, bool& stop
          , const sdd::manager<sdd_conf>& manager, util::timer& beginnning)
     : finished(false), clock(), sdd_sampling()
   {
-    if (conf.max_time > chrono::duration<double>(0))
+    if (conf.max_time > std::chrono::duration<double>(0))
     {
       clock = std::thread([&]
               {
@@ -144,7 +143,8 @@ struct threads
 
 SDD
 state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD m
-           , homomorphism h, statistics& stats, bool& stop, const sdd::manager<sdd_conf>& manager)
+           , homomorphism h, shared::statistics& stats, bool& stop
+           , const sdd::manager<sdd_conf>& manager)
 {
   SDD res;
 
@@ -173,7 +173,7 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
 
 SDD
 dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn::net& net
-           , const SDD& state_space, statistics& stats)
+           , const SDD& state_space, shared::statistics& stats)
 {
   std::set<homomorphism> and_operands;
   std::set<homomorphism> or_operands;
@@ -233,8 +233,8 @@ const
   auto manager_ptr = std::make_unique<sdd::manager<sdd_conf>>(sdd::init(sconf));
   auto& manager = *manager_ptr;
 
-  statistics stats(conf);
-  results res(conf);
+  shared::statistics stats(conf);
+  shared::results res(conf);
 
   // Used in limited time mode.
   bool stop = false;
@@ -270,7 +270,7 @@ const
   if (conf.order_only)
   {
     dump_json(conf, stats, manager, sdd::zero<sdd_conf>(), net);
-    dump_hom(conf, h_classic, h);
+    shared::dump_hom(conf, h_classic, h);
     return;
   }
 
@@ -280,22 +280,22 @@ const
   {
     m = state_space(conf, o, m0, h, stats, stop, manager);
   }
-  catch (const bound_error& e)
+  catch (const shared::bound_error& e)
   {
     std::cout << "Marking limit (" << conf.marking_bound << ") reached for place " << e.place << "."
               << std::endl;
     stats.interrupted = true;
     dump_json(conf, stats, manager, m, net);
-    dump_hom(conf, h_classic, h);
+    shared::dump_hom(conf, h_classic, h);
     return;
   }
-  catch (const interrupted&)
+  catch (const shared::interrupted&)
   {
     std::cout << "State space computation interrupted after " << stats.state_space_duration.count()
               << "s." << std::endl;
     stats.interrupted = true;
     dump_json(conf, stats, manager, m, net);
-    dump_hom(conf, h_classic, h);
+    shared::dump_hom(conf, h_classic, h);
     return;
   }
 
@@ -409,10 +409,10 @@ const
 
   stats.total_duration = total_timer.duration();
 
-  dump_sdd_dot(conf, m, o);
-  dump_json(conf, stats, manager, m, net);
-  dump_results(conf, res);
-  dump_hom(conf, h_classic, h);
+  shared::dump_sdd_dot(conf, m, o);
+  shared::dump_json(conf, stats, manager, m, net);
+  shared::dump_results(conf, res);
+  shared::dump_hom(conf, h_classic, h);
 
   if (conf.fast_exit)
   {

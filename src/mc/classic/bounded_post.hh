@@ -6,13 +6,12 @@
 #include <sdd/values/flat_set.hh>
 #include <sdd/values_manager.hh>
 
-#include "mc/classic/exceptions.hh"
+#include "mc/shared/exceptions.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-template <typename C>
 struct bounded_post
 {
   const unsigned int valuation;
@@ -29,7 +28,7 @@ struct bounded_post
     {
       if (v >= bound)
       {
-        throw bound_error(place);
+        throw shared::bound_error(place);
       }
       builder.insert(builder.end(), v + valuation);
     }
@@ -62,11 +61,11 @@ namespace std
 
 /*------------------------------------------------------------------------------------------------*/
 
-template <typename C>
-struct hash<pnmc::mc::classic::bounded_post<C>>
+template <>
+struct hash<pnmc::mc::classic::bounded_post>
 {
   std::size_t
-  operator()(const pnmc::mc::classic::bounded_post<C>& p)
+  operator()(const pnmc::mc::classic::bounded_post& p)
   const noexcept
   {
     using namespace sdd::hash;

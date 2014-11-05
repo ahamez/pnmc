@@ -5,10 +5,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "sdd/values/flat_set.hh"
-#include "sdd/values_manager.hh"
-
-namespace pnmc { namespace mc { namespace classic {
+namespace pnmc { namespace mc { namespace shared {
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -17,8 +14,9 @@ struct live
   const std::size_t index;
   boost::dynamic_bitset<>& bitset;
 
-  sdd::values::flat_set<unsigned int>
-  operator()(const sdd::values::flat_set<unsigned int>& val)
+  template <typename T>
+  T
+  operator()(const T& val)
   const noexcept
   {
     bitset[index] = true;
@@ -43,7 +41,7 @@ struct live
 
 /*------------------------------------------------------------------------------------------------*/
 
-}}} // namespace pnmc::mc::classic
+}}} // namespace pnmc::mc::shared
 
 namespace std
 {
@@ -51,10 +49,10 @@ namespace std
 /*------------------------------------------------------------------------------------------------*/
 
 template <>
-struct hash<pnmc::mc::classic::live>
+struct hash<pnmc::mc::shared::live>
 {
   std::size_t
-  operator()(const pnmc::mc::classic::live& l)
+  operator()(const pnmc::mc::shared::live& l)
   const noexcept
   {
     using namespace sdd::hash;

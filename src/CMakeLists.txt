@@ -2,10 +2,10 @@ set(SOURCES
     main.cc
     conf/fill_configuration.cc
     mc/classic/count_tokens.cc
-    mc/classic/dump.cc
     mc/classic/firing_rule.cc
     mc/classic/make_order.cc
     mc/classic/worker.cc
+    mc/shared/dump.cc
     mc/mc.cc
     parsers/bpn.cc
     parsers/helpers.cc

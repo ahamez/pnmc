@@ -97,7 +97,7 @@ struct count_tokens_visitor
 /*------------------------------------------------------------------------------------------------*/
 
 void
-count_tokens(results& res, const sdd::SDD<sdd::conf1>& states, const pn::net& net)
+count_tokens(shared::results& res, const sdd::SDD<sdd::conf1>& states, const pn::net& net)
 {
   std::tie(res.max_token_markings, res.max_token_places) = visit(count_tokens_visitor(), states);
 
