@@ -124,24 +124,45 @@ xml(std::istream& in)
   auto net_ptr = std::make_shared<pn::net>();
 
   xml_node<>* node = doc.first_node();
-  net_ptr->name = node->first_attribute("name")->value();
+  ;
+  if (const auto name_node = node->first_attribute("name"))
+  {
+    net_ptr->name = name_node->value();
+  }
+  else
+  {
+    net_ptr->name = "petri net";
+  }
 
   pn::module_node mn(net_ptr->name);
 
   // Places.
-  auto place = node->first_node("places")->first_node();
-  while (place)
+  const auto places_node = node->first_node("places");
+  if (places_node)
   {
-    mn.add_module(xml_parse_place(net_ptr, place));
-    place = place->next_sibling();
+    auto place = places_node->first_node();
+    while (place)
+    {
+      mn.add_module(xml_parse_place(net_ptr, place));
+      place = place->next_sibling();
+    }
   }
 
   // Transitions.
-  auto transition = node->first_node("transitions")->first_node();
-  while (transition)
+  const auto transitions_node = node->first_node("transitions");
+  if (transitions_node)
   {
-    xml_parse_transition(net_ptr, transition);
-    transition = transition->next_sibling();
+    auto transition = transitions_node->first_node();
+    while (transition)
+    {
+      xml_parse_transition(net_ptr, transition);
+      transition = transition->next_sibling();
+    }
+  }
+
+  if (not places_node and not transitions_node)
+  {
+    throw parse_error("XML parser: invalid file");
   }
 
   const bool only_places = std::all_of( mn.nested.begin(), mn.nested.end()
