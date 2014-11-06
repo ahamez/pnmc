@@ -3,8 +3,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "parsers/bpn.hh"
 #include "parsers/helpers.hh"
+#include "parsers/nupn.hh"
 #include "parsers/parse_error.hh"
 
 namespace pnmc { namespace parsers {
@@ -181,7 +181,7 @@ struct prefix
 /*------------------------------------------------------------------------------------------------*/
 
 std::shared_ptr<pn::net>
-bpn(std::istream& in)
+nupn(std::istream& in)
 {
   auto net_ptr = std::make_shared<pn::net>();
   auto& net = *net_ptr;

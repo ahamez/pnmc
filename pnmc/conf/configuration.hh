@@ -7,13 +7,10 @@
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 
+#include "conf/pn_format.hh"
+
 namespace pnmc { namespace conf {
   
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief The accepted input formats.
-enum class input_format {bpn, pnml, tina, xml};
-
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief The configuration of pnmc at runtime.
@@ -23,7 +20,7 @@ struct configuration
   std::string file_name;
 
   /// @brief The model's format to process.
-  input_format file_type;
+  pn_format file_type;
 
   /// @brief Read from standard input rather than from a file.
   bool read_stdin;

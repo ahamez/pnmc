@@ -17,7 +17,7 @@
 #pragma clang diagnostic pop
 #endif
 
-#include "parsers/bpn.hh"
+#include "parsers/nupn.hh"
 #include "parsers/parse.hh"
 #include "parsers/pnml.hh"
 #include "parsers/tina.hh"
@@ -86,10 +86,10 @@ parse(const conf::configuration& conf)
 
   switch (conf.file_type)
   {
-    case (conf::input_format::bpn)  : return parsers::bpn(*in);
-    case (conf::input_format::pnml) : return parsers::pnml(*in);
-    case (conf::input_format::tina) : return parsers::tina(*in);
-    case (conf::input_format::xml)  : break;
+    case (conf::pn_format::nupn) : return parsers::nupn(*in);
+    case (conf::pn_format::pnml) : return parsers::pnml(*in);
+    case (conf::pn_format::tina) : return parsers::tina(*in);
+    case (conf::pn_format::xml)  : break;
   }
   return parsers::xml(*in);
 }

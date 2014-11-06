@@ -9,8 +9,9 @@ set(SOURCES
     mc/classic/worker.cc
     mc/shared/dump.cc
     mc/mc.cc
-    ${PROJECT_SOURCE_DIR}/shared/parsers/bpn.cc
+    ${PROJECT_SOURCE_DIR}/shared/conf/options.cc
     ${PROJECT_SOURCE_DIR}/shared/parsers/helpers.cc
+    ${PROJECT_SOURCE_DIR}/shared/parsers/nupn.cc
     ${PROJECT_SOURCE_DIR}/shared/parsers/parse_error.cc
     ${PROJECT_SOURCE_DIR}/shared/parsers/parse.cc
     ${PROJECT_SOURCE_DIR}/shared/parsers/pnml.cc

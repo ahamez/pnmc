@@ -12,6 +12,7 @@
 
 #include "conf/configuration.hh"
 #include "conf/fill_configuration.hh"
+#include "conf/options.hh"
 #include "util/paths.hh"
 
 namespace pnmc { namespace conf {
@@ -22,47 +23,6 @@ namespace po = boost::program_options;
 
 const std::string version
   = "Petri Net Model Checker (built " + std::string(__DATE__) + " " + std::string(__TIME__)  + ")";
-
-/*------------------------------------------------------------------------------------------------*/
-
-// Input format options.
-const auto bpn_str  = "bpn";
-const auto pnml_str = "pnml";
-const auto tina_str = "tina";
-const auto xml_str  = "xml";
-const auto decompress_str = "decompress";
-
-input_format
-file_type(const po::variables_map& vm)
-{
-  const bool bpn  = vm.count(bpn_str);
-  const bool pnml = vm.count(pnml_str);
-  const bool tina = vm.count(tina_str);
-
-  if (not (bpn or pnml or tina))
-  {
-    return input_format::xml;
-  }
-  else if (not (bpn xor pnml xor tina))
-  {
-    throw po::error("Can specify only one input format.");
-  }
-  else
-  {
-    if (bpn)
-    {
-      return input_format::bpn;
-    }
-    else if (pnml)
-    {
-      return input_format::pnml;
-    }
-    else // tina
-    {
-      return input_format::tina;
-    }
-  }
-}
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -132,16 +92,7 @@ fill_configuration(int argc, char** argv)
     (help_exp_str , "Show experimental/dev features help")
     (version_str  , "Show version")
     (conf_str     , po::value<std::string>()
-                  , "Configure PNMC with a file")
-  ;
-
-  po::options_description file_options("Input file format options");
-  file_options.add_options()
-    (bpn_str        , "Parse BPN format")
-    (pnml_str       , "Parse PNML format")
-    (tina_str       , "Parse TINA format")
-    (xml_str        , "Parse pnmc's XML format (default)")
-    (decompress_str , "Decompress file to read")
+                  , "Configure pnmc with a file")
   ;
 
   po::options_description order_options("Order options");
@@ -155,7 +106,7 @@ fill_configuration(int argc, char** argv)
   stats_options.add_options()
     (show_time_str              , "Show a breakdown of all steps' times")
     (json_str                   , po::value<std::string>()
-                                , "Export PNMC's statistics to a JSON file")
+                                , "Export pnmc's statistics to a JSON file")
   ;
 
   po::options_description petri_options("Petri net options");
@@ -171,7 +122,7 @@ fill_configuration(int argc, char** argv)
     (mc_dead_states_str        , "Compute dead states")
     (mc_count_tokens_str       , "Compute maximal markings")
     (results_json_str          , po::value<std::string>()
-                               , "Export PNMC's results to a JSON file")
+                               , "Export pnmc's results to a JSON file")
   ;
 
   po::options_description hidden_exp_options("Hidden dev/experimental options");
@@ -231,7 +182,7 @@ fill_configuration(int argc, char** argv)
   po::options_description cmdline_options;
   cmdline_options
   	.add(general_options)
-    .add(file_options)
+    .add(file_options())
     .add(order_options)
     .add(petri_options)
     .add(mc_options)
@@ -277,7 +228,7 @@ fill_configuration(int argc, char** argv)
     std::cout << version << std::endl;
     std::cout << "Usage: " << argv[0] << " [options] file " << std::endl << std::endl;
     std::cout << general_options << std::endl;
-    std::cout << file_options << std::endl;
+    std::cout << file_options() << std::endl;
     std::cout << order_options << std::endl;
     std::cout << petri_options << std::endl;
     std::cout << mc_options << std::endl;
@@ -320,9 +271,9 @@ fill_configuration(int argc, char** argv)
 
   // Input options
   conf.file_name = vm["input-file"].as<std::string>();
-  conf.file_type = file_type(vm);
+  conf.file_type = pn_format_from_options(vm);
   conf.read_stdin = conf.file_name == "-";
-  conf.decompress = vm.count(decompress_str);
+  conf.decompress = decompress(vm);
 
   // Order options
   conf.order_show = vm.count(order_show_str);
