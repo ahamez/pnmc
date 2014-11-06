@@ -65,11 +65,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fvisibility=hidden -fvi
 ################################################################################
 
 include_directories("${Boost_INCLUDE_DIRS}")
-include_directories("${PROJECT_SOURCE_DIR}/src")
+include_directories("${PROJECT_SOURCE_DIR}/shared")
 include_directories("${LIBSDD_INCLUDE_DIR}")
 
 ################################################################################
 
-add_subdirectory(src)
+add_subdirectory(pnmc)
 
 ################################################################################

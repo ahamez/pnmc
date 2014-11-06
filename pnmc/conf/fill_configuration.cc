@@ -118,7 +118,6 @@ const auto fast_exit_str = "fast-exit";
 const auto hom_json_export_str = "hom-json";
 const auto hom_dot_export_str = "hom-dot";
 const auto hom_sat_dot_export_str = "sat-hom-dot";
-const auto export_tina_str = "export-tina";
 const auto sample_nb_sdd_str = "sample-nb-sdd";
 const auto pn_stats_str = "pn-stats";
 
@@ -196,8 +195,6 @@ fill_configuration(int argc, char** argv)
     (hom_sat_dot_export_str     , po::value<std::string>()
                                 , "Export saturated homomorphism to a DOT file")
     (hom_show_relation_str      , "Show the transition relation")
-    (export_tina_str            , po::value<std::string>()
-                                , "Export Petri net to a TINA file")
     (order_load_str             , po::value<std::string>()
                                 , "Load order from a JSON file")
     (sample_nb_sdd_str          , "Sample the number of SDD regularly")
@@ -399,10 +396,6 @@ fill_configuration(int argc, char** argv)
   {
     conf.export_sat_hom_to_dot_file
       = util::output_file(vm[hom_sat_dot_export_str].as<std::string>());
-  }
-  if (vm.count(export_tina_str))
-  {
-    conf.export_tina_file = util::output_file(vm[export_tina_str].as<std::string>());
   }
   if (vm.count(order_load_str))
   {

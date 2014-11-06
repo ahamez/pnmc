@@ -9,8 +9,6 @@
 #include "mc/mc.hh"
 #include "parsers/parse.hh"
 #include "parsers/parse_error.hh"
-#include "pn/tina.hh"
-#include "util/export_to_tina.hh"
 #include "util/paths.hh"
 
 /*------------------------------------------------------------------------------------------------*/
@@ -32,7 +30,6 @@ main(int argc, char** argv)
 
     const auto& conf = *conf_opt;
     const auto net_ptr = parsers::parse(conf);
-    util::export_to_tina(conf, *net_ptr);
     mc::mc worker(conf);
     worker(*net_ptr);
     return EX_OK;
