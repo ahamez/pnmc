@@ -15,7 +15,7 @@ struct id_to_tina
   std::ostream&
   operator<<(std::ostream& os, const id_to_tina& manip)
   {
-    const auto aname = std::all_of( cbegin(manip.id), cend(manip.id)
+    const auto aname = std::all_of( begin(manip.id), end(manip.id)
                                   , [](auto c){return std::isalnum(c) or c == '_' or c == '\'';});
     if (aname)
     {
@@ -97,12 +97,12 @@ operator<<(std::ostream& os, const net_to_tina& manip)
 
     for (const auto& a : t.pre)
     {
-      os << " " << a;
+      os << ' ' << a;
     }
     os << " ->";
     for (const auto& a : t.post)
     {
-      os << " " << a;
+      os << ' ' << a;
     }
     os << '\n';
   }
@@ -112,7 +112,7 @@ operator<<(std::ostream& os, const net_to_tina& manip)
     os << "pl " << tina(p.id)<< " (" << p.marking << ")\n";
   }
 
-  return os << "net " << tina(manip.net.name) << "\n";
+  return os << "net " << tina(manip.net.name) << '\n';
 }
 
 /*------------------------------------------------------------------------------------------------*/
