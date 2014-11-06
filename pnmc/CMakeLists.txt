@@ -9,7 +9,6 @@ set(SOURCES
     mc/classic/worker.cc
     mc/shared/dump.cc
     mc/mc.cc
-    util/paths.cc
     ${PROJECT_SOURCE_DIR}/shared/parsers/bpn.cc
     ${PROJECT_SOURCE_DIR}/shared/parsers/helpers.cc
     ${PROJECT_SOURCE_DIR}/shared/parsers/parse_error.cc
@@ -21,6 +20,7 @@ set(SOURCES
     ${PROJECT_SOURCE_DIR}/shared/pn/net.cc
     ${PROJECT_SOURCE_DIR}/shared/pn/place.cc
     ${PROJECT_SOURCE_DIR}/shared/pn/transition.cc
+    ${PROJECT_SOURCE_DIR}/shared/util/paths.cc
     )
 
 add_executable(pnmc ${SOURCES})
