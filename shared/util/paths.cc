@@ -60,4 +60,17 @@ file(const std::string& p)
 
 /*------------------------------------------------------------------------------------------------*/
 
+boost::filesystem::path
+in_file(const std::string& p)
+{
+  const auto f = file(p);
+  if (not boost::filesystem::is_regular_file(f))
+  {
+    throw std::runtime_error(f.string() + ": not a regular file");
+  }
+  return f;
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 }} // namespace pnmc::util

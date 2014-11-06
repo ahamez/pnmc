@@ -85,10 +85,15 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
     boost::filesystem::ifstream file(*conf.order_file);
     if (file.is_open())
     {
-      sdd::order<sdd_conf> o = sdd::tools::load_order<sdd_conf>(file);
+      const auto ob = sdd::tools::load_order<sdd_conf>(file);
+      if (not ob)
+      {
+        throw std::runtime_error("Empty JSON order file " + conf.order_file->string());
+      }
+      sdd::order<sdd_conf> o{*ob};
 
       // Check if loaded order corresponds to the Petri net.
-      boost::container::flat_set<std::string> order_identifiers;
+      std::set<std::string> order_identifiers;
       o.flat(std::inserter(order_identifiers, order_identifiers.end()));
 
       boost::container::flat_set<std::string> pn_identifiers;

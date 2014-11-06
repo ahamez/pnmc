@@ -346,7 +346,7 @@ fill_configuration(int argc, const char** argv)
   }
   if (vm.count(order_load_str))
   {
-    conf.order_file = util::file(vm[order_load_str].as<std::string>());
+    conf.order_file = util::in_file(vm[order_load_str].as<std::string>());
   }
   return conf;
 }

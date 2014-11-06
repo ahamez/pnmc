@@ -39,11 +39,6 @@ parse(const configuration& conf)
   {
     const auto& file = *conf.file;
 
-    if (not boost::filesystem::is_regular_file(file))
-    {
-      throw std::runtime_error(file.string() + ": not a regular file");
-    }
-
     if (conf.decompress)
     {
       file_stream.open(file, std::ios_base::in | std::ios_base::binary);

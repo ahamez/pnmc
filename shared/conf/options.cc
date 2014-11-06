@@ -67,7 +67,7 @@ configure_parser(const boost::program_options::variables_map& vm)
   parsers::configuration conf;
   if (vm["input-file"].as<std::string>() != "-")
   {
-    conf.file = util::file(vm["input-file"].as<std::string>());
+    conf.file = util::in_file(vm["input-file"].as<std::string>());
   }
   conf.file_type = pn_format_from_options(vm);
   conf.decompress = vm.count(decompress_str);
