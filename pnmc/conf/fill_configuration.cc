@@ -313,15 +313,15 @@ fill_configuration(int argc, const char** argv)
   conf.pn_statistics = vm.count(pn_stats_str);
   if (vm.count(final_sdd_dot_export_str))
   {
-    conf.export_final_sdd_dot_file = vm[final_sdd_dot_export_str].as<std::string>();
+    conf.final_sdd_dot_file = vm[final_sdd_dot_export_str].as<std::string>();
   }
   if (vm.count(json_str))
   {
-    conf.json_file = util::output_file(vm[json_str].as<std::string>());
+    conf.json_file = util::file(vm[json_str].as<std::string>());
   }
   if (vm.count(results_json_str))
   {
-    conf.results_json_file = util::output_file(vm[results_json_str].as<std::string>());
+    conf.results_json_file = util::file(vm[results_json_str].as<std::string>());
   }
   if (conf.order_ordering_force)
   {
@@ -330,24 +330,23 @@ fill_configuration(int argc, const char** argv)
   conf.max_time = std::chrono::duration<double>(vm[limit_time_str].as<unsigned int>());
   if (vm.count(hypergraph_dot_str))
   {
-    conf.hypergraph_dot_file = util::output_file(vm[hypergraph_dot_str].as<std::string>());
+    conf.hypergraph_dot_file = util::file(vm[hypergraph_dot_str].as<std::string>());
   }
   if (vm.count(hom_json_export_str))
   {
-    conf.export_hom_to_json_file = util::output_file(vm[hom_json_export_str].as<std::string>());
+    conf.hom_json_file = util::file(vm[hom_json_export_str].as<std::string>());
   }
   if (vm.count(hom_dot_export_str))
   {
-    conf.export_hom_to_dot_file = util::output_file(vm[hom_dot_export_str].as<std::string>());
+    conf.hom_dot_file = util::file(vm[hom_dot_export_str].as<std::string>());
   }
   if (vm.count(hom_sat_dot_export_str))
   {
-    conf.export_sat_hom_to_dot_file
-      = util::output_file(vm[hom_sat_dot_export_str].as<std::string>());
+    conf.sat_hom_dot_file = util::file(vm[hom_sat_dot_export_str].as<std::string>());
   }
   if (vm.count(order_load_str))
   {
-    conf.load_order_file = vm[order_load_str].as<std::string>();
+    conf.order_file = util::file(vm[order_load_str].as<std::string>());
   }
   return conf;
 }

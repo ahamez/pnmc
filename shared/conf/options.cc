@@ -1,5 +1,6 @@
 #include "shared/conf/options.hh"
 #include "shared/conf/pn_format.hh"
+#include "shared/util/paths.hh"
 
 namespace pnmc { namespace conf {
 
@@ -64,9 +65,11 @@ parsers::configuration
 configure_parser(const boost::program_options::variables_map& vm)
 {
   parsers::configuration conf;
-  conf.file_name = vm["input-file"].as<std::string>();
+  if (vm["input-file"].as<std::string>() != "-")
+  {
+    conf.file = util::file(vm["input-file"].as<std::string>());
+  }
   conf.file_type = pn_format_from_options(vm);
-  conf.read_stdin = conf.file_name == "-";
   conf.decompress = vm.count(decompress_str);
   return conf;
 }

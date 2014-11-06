@@ -2,6 +2,9 @@
 
 #include <string>
 
+#include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
+
 #include "shared/conf/pn_format.hh"
 
 namespace pnmc { namespace parsers {
@@ -10,9 +13,8 @@ namespace pnmc { namespace parsers {
 
 struct configuration
 {
-  bool read_stdin;
+  boost::optional<boost::filesystem::path> file;
   bool decompress;
-  std::string file_name;
   conf::pn_format file_type;
 };
 

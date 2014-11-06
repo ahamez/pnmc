@@ -80,10 +80,9 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
 
   // Load a pre-computed order from a JSON file and check if it matches the Petri net.
   // We don't try to apply any heuristic on this order.
-  if (conf.load_order_file)
+  if (conf.order_file)
   {
-    auto path = util::canonize_path(*conf.load_order_file);
-    boost::filesystem::ifstream file(path);
+    boost::filesystem::ifstream file(*conf.order_file);
     if (file.is_open())
     {
       sdd::order<sdd_conf> o = sdd::tools::load_order<sdd_conf>(file);
@@ -118,7 +117,8 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
       if (not diff.empty())
       {
         std::stringstream ss;
-        ss << "The following identifiers from " << *conf.load_order_file << " don't exist in PN: ";
+        ss << "The following identifiers from " << conf.order_file->string()
+           << " don't exist in PN: ";
         std::copy( diff.cbegin(), std::prev(diff.cend())
                  , std::ostream_iterator<std::string>(ss, ", "));
         ss << diff.back();
@@ -132,7 +132,8 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
       if (not diff.empty())
       {
         std::stringstream ss;
-        ss << "The following identifiers from PN don't exist in " << *conf.load_order_file << ": ";
+        ss << "The following identifiers from PN don't exist in " << conf.order_file->string()
+           << ": ";
         std::copy( diff.cbegin(), std::prev(diff.cend())
                   , std::ostream_iterator<std::string>(ss, ", "));
         ss << diff.back();
@@ -143,7 +144,7 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
     }
     else
     {
-      throw std::runtime_error("Can't open JSON order file " + *conf.load_order_file);
+      throw std::runtime_error("Can't open JSON order file " + conf.order_file->string());
     }
   }
 

@@ -73,7 +73,7 @@ struct configuration
   /// @brief Export costly SDD statistics.
   bool final_sdd_statistics;
 
-  /// @brief Compute
+  /// @brief Compute some statistics on the Petri net.
   bool pn_statistics;
 
   std::size_t sdd_ut_size;
@@ -83,14 +83,14 @@ struct configuration
   std::size_t hom_ut_size;
   std::size_t hom_cache_size;
 
-  boost::optional<boost::filesystem::path> export_final_sdd_dot_file;
+  boost::optional<boost::filesystem::path> final_sdd_dot_file;
   boost::optional<boost::filesystem::path> json_file;
   boost::optional<boost::filesystem::path> results_json_file;
   boost::optional<boost::filesystem::path> hypergraph_dot_file;
-  boost::optional<boost::filesystem::path> export_hom_to_dot_file;
-  boost::optional<boost::filesystem::path> export_sat_hom_to_dot_file;
-  boost::optional<boost::filesystem::path> export_hom_to_json_file;
-  boost::optional<std::string> load_order_file;
+  boost::optional<boost::filesystem::path> hom_dot_file;
+  boost::optional<boost::filesystem::path> sat_hom_dot_file;
+  boost::optional<boost::filesystem::path> hom_json_file;
+  boost::optional<boost::filesystem::path> order_file;
 
   /// @brief Stop state space generation after this much time.
   std::chrono::duration<double> max_time;

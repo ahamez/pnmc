@@ -35,29 +35,29 @@ parse(const configuration& conf)
   boost::filesystem::ifstream file_stream;
   boost::iostreams::filtering_istream decompressor;
 
-  if (not conf.read_stdin)
+  if (conf.file) // don't read stdin
   {
-    auto path = util::canonize_path(conf.file_name);
+    const auto& file = *conf.file;
 
-    if (not boost::filesystem::is_regular_file(path))
+    if (not boost::filesystem::is_regular_file(file))
     {
-      throw std::runtime_error(conf.file_name + ": not a regular file");
+      throw std::runtime_error(file.string() + ": not a regular file");
     }
 
     if (conf.decompress)
     {
-      file_stream.open(path, std::ios_base::in | std::ios_base::binary);
+      file_stream.open(file, std::ios_base::in | std::ios_base::binary);
     }
     else
     {
-      file_stream.open(path);
+      file_stream.open(file);
     }
   }
 
   if (conf.decompress)
   {
     decompressor.push(boost::iostreams::gzip_decompressor());
-    if (conf.read_stdin)
+    if (not conf.file) // read stdin
     {
       decompressor.push(std::cin);
     }
@@ -69,7 +69,7 @@ parse(const configuration& conf)
   }
   else
   {
-    if (conf.read_stdin)
+    if (not conf.file) // read stdin
     {
       in = &std::cin;
     }

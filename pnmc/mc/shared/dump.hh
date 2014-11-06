@@ -30,16 +30,16 @@ template <typename SDD, typename Order>
 void
 dump_sdd_dot(const conf::configuration& conf, const SDD& s, const Order& o)
 {
-  if (conf.export_final_sdd_dot_file)
+  if (conf.final_sdd_dot_file)
   {
-    boost::filesystem::ofstream file(*conf.export_final_sdd_dot_file);
+    boost::filesystem::ofstream file(*conf.final_sdd_dot_file);
     if (file.is_open())
     {
       file << sdd::tools::dot(s, o) << std::endl;
     }
     else
     {
-      std::cerr << "Can't export state space to " << *conf.export_final_sdd_dot_file << std::endl;
+      std::cerr << "Can't export state space to " << *conf.final_sdd_dot_file << std::endl;
     }
   }
 }
@@ -58,9 +58,13 @@ dump_json( const conf::configuration& conf, const statistics& stats, const Manag
     if (file.is_open())
     {
       cereal::JSONOutputArchive archive(file);
-      if (not conf.input.read_stdin)
+      if (not conf.input.file)
       {
-        archive(cereal::make_nvp("file", conf.input.file_name));
+        archive(cereal::make_nvp("file", "stdin"));
+      }
+      else
+      {
+        archive(cereal::make_nvp("file", conf.input.file->string()));
       }
       archive(cereal::make_nvp("pnmc", stats), cereal::make_nvp("libsdd", manager));
       if (conf.final_sdd_statistics)
@@ -113,40 +117,40 @@ template <typename Homomorphism>
 void
 dump_hom(const conf::configuration& conf, const Homomorphism& classic, const Homomorphism& sat)
 {
-  if (conf.export_hom_to_json_file)
+  if (conf.hom_json_file)
   {
-    boost::filesystem::ofstream file(*conf.export_hom_to_json_file);
+    boost::filesystem::ofstream file(*conf.hom_json_file);
     if (file.is_open())
     {
       file << sdd::tools::js(classic) << std::endl;
     }
     else
     {
-      std::cerr << "Can't export homomorphism to " << *conf.export_hom_to_json_file << std::endl;
+      std::cerr << "Can't export homomorphism to " << *conf.hom_json_file << std::endl;
     }
   }
-  if (conf.export_hom_to_dot_file)
+  if (conf.hom_dot_file)
   {
-    boost::filesystem::ofstream file(*conf.export_hom_to_dot_file);
+    boost::filesystem::ofstream file(*conf.hom_dot_file);
     if (file.is_open())
     {
       file << sdd::tools::dot(classic) << std::endl;
     }
     else
     {
-      std::cerr << "Can't export homomorphism to " << *conf.export_hom_to_dot_file << std::endl;
+      std::cerr << "Can't export homomorphism to " << *conf.hom_dot_file << std::endl;
     }
   }
-  if (conf.export_sat_hom_to_dot_file)
+  if (conf.sat_hom_dot_file)
   {
-    boost::filesystem::ofstream file(*conf.export_sat_hom_to_dot_file);
+    boost::filesystem::ofstream file(*conf.sat_hom_dot_file);
     if (file.is_open())
     {
       file << sdd::tools::dot(sat) << std::endl;
     }
     else
     {
-      std::cerr << "Can't export homomorphism to " << *conf.export_sat_hom_to_dot_file << std::endl;
+      std::cerr << "Can't export homomorphism to " << *conf.sat_hom_dot_file << std::endl;
     }
   }
 }

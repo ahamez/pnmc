@@ -46,7 +46,7 @@ canonize_path(const std::string& path)
 /*------------------------------------------------------------------------------------------------*/
 
 boost::filesystem::path
-output_file(const std::string& p)
+file(const std::string& p)
 {
   boost::filesystem::path path(p);
   const auto parent_dir_str = trim(path.parent_path().string());
