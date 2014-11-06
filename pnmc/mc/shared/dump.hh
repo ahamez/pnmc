@@ -58,9 +58,9 @@ dump_json( const conf::configuration& conf, const statistics& stats, const Manag
     if (file.is_open())
     {
       cereal::JSONOutputArchive archive(file);
-      if (not conf.read_stdin)
+      if (not conf.input.read_stdin)
       {
-        archive(cereal::make_nvp("file", conf.file_name));
+        archive(cereal::make_nvp("file", conf.input.file_name));
       }
       archive(cereal::make_nvp("pnmc", stats), cereal::make_nvp("libsdd", manager));
       if (conf.final_sdd_statistics)

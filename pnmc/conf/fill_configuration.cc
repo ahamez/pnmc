@@ -182,7 +182,7 @@ fill_configuration(int argc, char** argv)
   po::options_description cmdline_options;
   cmdline_options
   	.add(general_options)
-    .add(file_options())
+    .add(input_options())
     .add(order_options)
     .add(petri_options)
     .add(mc_options)
@@ -228,7 +228,7 @@ fill_configuration(int argc, char** argv)
     std::cout << version << std::endl;
     std::cout << "Usage: " << argv[0] << " [options] file " << std::endl << std::endl;
     std::cout << general_options << std::endl;
-    std::cout << file_options() << std::endl;
+    std::cout << input_options() << std::endl;
     std::cout << order_options << std::endl;
     std::cout << petri_options << std::endl;
     std::cout << mc_options << std::endl;
@@ -270,10 +270,7 @@ fill_configuration(int argc, char** argv)
   }
 
   // Input options
-  conf.file_name = vm["input-file"].as<std::string>();
-  conf.file_type = pn_format_from_options(vm);
-  conf.read_stdin = conf.file_name == "-";
-  conf.decompress = decompress(vm);
+  conf.input = configure_parser(vm);
 
   // Order options
   conf.order_show = vm.count(order_show_str);

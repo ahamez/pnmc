@@ -1,17 +1,20 @@
 #pragma once
 
-#include <iosfwd>
-#include <memory>
+#include <string>
 
-#include "parsers/configuration.hh"
-#include "pn/net.hh"
+#include "conf/pn_format.hh"
 
 namespace pnmc { namespace parsers {
-  
+
 /*------------------------------------------------------------------------------------------------*/
 
-std::shared_ptr<pn::net>
-parse(const configuration&);
+struct configuration
+{
+  bool read_stdin;
+  bool decompress;
+  std::string file_name;
+  conf::pn_format file_type;
+};
 
 /*------------------------------------------------------------------------------------------------*/
 

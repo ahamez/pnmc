@@ -7,24 +7,19 @@
 #include <boost/program_options.hpp>
 #pragma GCC diagnostic pop
 
-#include "conf/pn_format.hh"
+#include "parsers/configuration.hh"
 
 namespace pnmc { namespace conf {
 
 /*------------------------------------------------------------------------------------------------*/
 
 boost::program_options::options_description
-file_options();
+input_options();
 
 /*------------------------------------------------------------------------------------------------*/
 
-pn_format
-pn_format_from_options(const boost::program_options::variables_map&);
-
-/*------------------------------------------------------------------------------------------------*/
-
-bool
-decompress(const boost::program_options::variables_map&);
+parsers::configuration
+configure_parser(const boost::program_options::variables_map&);
 
 /*------------------------------------------------------------------------------------------------*/
 

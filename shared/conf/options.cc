@@ -1,4 +1,5 @@
 #include "conf/options.hh"
+#include "conf/pn_format.hh"
 
 namespace pnmc { namespace conf {
 
@@ -13,22 +14,21 @@ static const auto decompress_str = "decompress";
 /*------------------------------------------------------------------------------------------------*/
 
 boost::program_options::options_description
-file_options()
+input_options()
 {
   boost::program_options::options_description options("Input file format options");
   options.add_options()
-    (nupn_str       , "Read input file as ")
+    (nupn_str       , "Parse NUPN format")
     (pnml_str       , "Parse PNML format")
     (tina_str       , "Parse TINA format")
     (xml_str        , "Parse pnmc's XML format (default)")
-    (decompress_str , "Decompress file to read")
-    ;
-
+    (decompress_str , "Decompress file to read");
   return options;
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
+static
 pn_format
 pn_format_from_options(const boost::program_options::variables_map& vm)
 {
@@ -44,29 +44,31 @@ pn_format_from_options(const boost::program_options::variables_map& vm)
   {
     throw boost::program_options::error("Can specify only one input format.");
   }
+  else if (nupn)
+  {
+    return pn_format::nupn;
+  }
+  else if (pnml)
+  {
+    return pn_format::pnml;
+  }
   else
   {
-    if (nupn)
-    {
-      return pn_format::nupn;
-    }
-    else if (pnml)
-    {
-      return pn_format::pnml;
-    }
-    else // tina
-    {
-      return pn_format::tina;
-    }
+    return pn_format::tina;
   }
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
-bool
-decompress(const boost::program_options::variables_map& vm)
+parsers::configuration
+configure_parser(const boost::program_options::variables_map& vm)
 {
-  return vm.count(decompress_str);
+  parsers::configuration conf;
+  conf.file_name = vm["input-file"].as<std::string>();
+  conf.file_type = pn_format_from_options(vm);
+  conf.read_stdin = conf.file_name == "-";
+  conf.decompress = vm.count(decompress_str);
+  return conf;
 }
 
 /*------------------------------------------------------------------------------------------------*/

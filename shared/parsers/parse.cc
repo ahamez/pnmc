@@ -29,7 +29,7 @@ namespace pnmc { namespace parsers {
 /*------------------------------------------------------------------------------------------------*/
 
 std::shared_ptr<pn::net>
-parse(const conf::configuration& conf)
+parse(const configuration& conf)
 {
   std::istream* in;
   boost::filesystem::ifstream file_stream;
