@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "util/paths.hh"
+#include "shared/util/paths.hh"
 
 namespace pnmc { namespace util {
 

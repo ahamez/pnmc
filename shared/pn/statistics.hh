@@ -3,7 +3,7 @@
 #include <utility> // pair
 #include <vector>
 
-#include "pn/net.hh"
+#include "shared/pn/net.hh"
 
 namespace pnmc { namespace pn {
 

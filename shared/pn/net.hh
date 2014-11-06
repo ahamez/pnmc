@@ -11,10 +11,10 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #pragma GCC diagnostic pop
 
-#include "pn/arc.hh"
-#include "pn/module.hh"
-#include "pn/place.hh"
-#include "pn/transition.hh"
+#include "shared/pn/arc.hh"
+#include "shared/pn/module.hh"
+#include "shared/pn/place.hh"
+#include "shared/pn/transition.hh"
 
 namespace pnmc { namespace pn {
 

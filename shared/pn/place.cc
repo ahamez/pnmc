@@ -1,6 +1,6 @@
 #include <ostream>
 
-#include "pn/place.hh"
+#include "shared/pn/place.hh"
 
 namespace pnmc { namespace pn {
 

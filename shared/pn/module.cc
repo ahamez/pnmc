@@ -1,4 +1,4 @@
-#include "pn/module.hh"
+#include "shared/pn/module.hh"
 
 namespace pnmc { namespace pn {
 

@@ -10,8 +10,8 @@
 
 #include <boost/optional.hpp>
 
-#include "parsers/parse_error.hh"
-#include "parsers/tina.hh"
+#include "shared/parsers/parse_error.hh"
+#include "shared/parsers/tina.hh"
 
 namespace pnmc { namespace parsers {
 

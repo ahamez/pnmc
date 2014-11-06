@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "parsers/helpers.hh"
+#include "shared/parsers/helpers.hh"
 
 namespace pnmc { namespace parsers {
 

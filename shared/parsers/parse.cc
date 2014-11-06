@@ -17,12 +17,12 @@
 #pragma clang diagnostic pop
 #endif
 
-#include "parsers/nupn.hh"
-#include "parsers/parse.hh"
-#include "parsers/pnml.hh"
-#include "parsers/tina.hh"
-#include "parsers/xml.hh"
-#include "util/paths.hh"
+#include "shared/parsers/nupn.hh"
+#include "shared/parsers/parse.hh"
+#include "shared/parsers/pnml.hh"
+#include "shared/parsers/tina.hh"
+#include "shared/parsers/xml.hh"
+#include "shared/util/paths.hh"
 
 namespace pnmc { namespace parsers {
   

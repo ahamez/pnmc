@@ -12,8 +12,8 @@
 
 #include "conf/configuration.hh"
 #include "conf/fill_configuration.hh"
-#include "conf/options.hh"
-#include "util/paths.hh"
+#include "shared/conf/options.hh"
+#include "shared/util/paths.hh"
 
 namespace pnmc { namespace conf {
 

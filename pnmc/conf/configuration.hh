@@ -1,14 +1,12 @@
 #pragma once
 
 #include <chrono>
-#include <iosfwd>
 #include <string>
 
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 
-#include "conf/pn_format.hh"
-#include "parsers/configuration.hh"
+#include "shared/parsers/configuration.hh"
 
 namespace pnmc { namespace conf {
   

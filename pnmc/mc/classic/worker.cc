@@ -19,7 +19,7 @@
 #include "mc/shared/statistics.hh"
 #include "mc/classic/worker.hh"
 #include "mc/shared/exceptions.hh"
-#include "util/timer.hh"
+#include "shared/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

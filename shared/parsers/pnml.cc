@@ -1,9 +1,9 @@
 #include <istream>
 #include <string>
 
-#include "parsers/parse_error.hh"
-#include "parsers/pnml.hh"
-#include "parsers/rapidxml/rapidxml.hpp"
+#include "shared/parsers/parse_error.hh"
+#include "shared/parsers/pnml.hh"
+#include "shared/parsers/rapidxml/rapidxml.hpp"
 
 namespace pnmc { namespace parsers {
 

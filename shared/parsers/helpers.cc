@@ -1,5 +1,5 @@
-#include "parsers/helpers.hh"
-#include "parsers/parse_error.hh"
+#include "shared/parsers/helpers.hh"
+#include "shared/parsers/parse_error.hh"
 
 namespace pnmc { namespace parsers {
 

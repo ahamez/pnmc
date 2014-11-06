@@ -4,7 +4,7 @@
 #include <sdd/conf/default_configurations.hh>
 
 #include "mc/shared/results.hh"
-#include "pn/net.hh"
+#include "shared/pn/net.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

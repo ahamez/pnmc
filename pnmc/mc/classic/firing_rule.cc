@@ -20,7 +20,7 @@
 #include "mc/classic/set.hh"
 #include "mc/shared/interruptible.hh"
 #include "mc/shared/live.hh"
-#include "util/timer.hh"
+#include "shared/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

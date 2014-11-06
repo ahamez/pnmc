@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-#include "pn/arc.hh"
+#include "shared/pn/arc.hh"
 
 namespace pnmc { namespace pn {
 

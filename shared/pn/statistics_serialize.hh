@@ -3,7 +3,7 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/types/vector.hpp>
 
-#include "pn/statistics.hh"
+#include "shared/pn/statistics.hh"
 
 namespace pnmc { namespace pn {
 

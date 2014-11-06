@@ -7,7 +7,7 @@
 #include <boost/program_options.hpp>
 #pragma GCC diagnostic pop
 
-#include "parsers/configuration.hh"
+#include "shared/parsers/configuration.hh"
 
 namespace pnmc { namespace conf {
 

@@ -2,7 +2,7 @@
 
 #include "conf/configuration.hh"
 #include "mc/mc_impl.hh"
-#include "pn/net.hh"
+#include "shared/pn/net.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

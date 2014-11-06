@@ -1,6 +1,6 @@
 #include <ostream>
 
-#include "pn/transition.hh"
+#include "shared/pn/transition.hh"
 
 namespace pnmc { namespace pn {
 

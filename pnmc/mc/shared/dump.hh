@@ -16,10 +16,10 @@
 #include "mc/shared/results_serialize.hh"
 #include "mc/shared/statistics.hh"
 #include "mc/shared/statistics_serialize.hh"
-#include "pn/net.hh"
-#include "pn/statistics.hh"
-#include "pn/statistics_serialize.hh"
-#include "util/paths.hh"
+#include "shared/pn/net.hh"
+#include "shared/pn/statistics.hh"
+#include "shared/pn/statistics_serialize.hh"
+#include "shared/util/paths.hh"
 
 namespace pnmc { namespace mc { namespace shared {
 

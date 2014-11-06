@@ -1,5 +1,5 @@
-#include "conf/options.hh"
-#include "conf/pn_format.hh"
+#include "shared/conf/options.hh"
+#include "shared/conf/pn_format.hh"
 
 namespace pnmc { namespace conf {
 

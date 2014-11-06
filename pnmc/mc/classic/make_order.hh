@@ -5,7 +5,7 @@
 
 #include "conf/configuration.hh"
 #include "mc/shared/statistics.hh"
-#include "pn/net.hh"
+#include "shared/pn/net.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

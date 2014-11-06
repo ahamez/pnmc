@@ -15,8 +15,8 @@
 
 #include "mc/classic/make_order.hh"
 #include "mc/shared/dump.hh"
-#include "util/paths.hh"
-#include "util/timer.hh"
+#include "shared/util/paths.hh"
+#include "shared/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

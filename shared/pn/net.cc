@@ -1,6 +1,6 @@
 #include <algorithm> // any_of
 
-#include "pn/net.hh"
+#include "shared/pn/net.hh"
 
 namespace pnmc { namespace pn {
 

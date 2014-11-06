@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "conf/pn_format.hh"
+#include "shared/conf/pn_format.hh"
 
 namespace pnmc { namespace parsers {
 

@@ -3,8 +3,8 @@
 #include <iosfwd>
 #include <memory>
 
-#include "parsers/configuration.hh"
-#include "pn/net.hh"
+#include "shared/parsers/configuration.hh"
+#include "shared/pn/net.hh"
 
 namespace pnmc { namespace parsers {
   
