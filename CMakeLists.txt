@@ -70,6 +70,9 @@ include_directories("${LIBSDD_INCLUDE_DIR}")
 
 ################################################################################
 
+add_subdirectory(shared)
+link_directories(${pnmc_BINARY_DIR}/shared)
 add_subdirectory(pnmc)
+add_subdirectory(translator)
 
 ################################################################################

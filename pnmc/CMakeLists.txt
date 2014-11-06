@@ -9,21 +9,8 @@ set(SOURCES
     mc/classic/worker.cc
     mc/shared/dump.cc
     mc/mc.cc
-    ${PROJECT_SOURCE_DIR}/shared/conf/options.cc
-    ${PROJECT_SOURCE_DIR}/shared/parsers/helpers.cc
-    ${PROJECT_SOURCE_DIR}/shared/parsers/nupn.cc
-    ${PROJECT_SOURCE_DIR}/shared/parsers/parse_error.cc
-    ${PROJECT_SOURCE_DIR}/shared/parsers/parse.cc
-    ${PROJECT_SOURCE_DIR}/shared/parsers/pnml.cc
-    ${PROJECT_SOURCE_DIR}/shared/parsers/tina.cc
-    ${PROJECT_SOURCE_DIR}/shared/parsers/xml.cc
-    ${PROJECT_SOURCE_DIR}/shared/pn/module.cc
-    ${PROJECT_SOURCE_DIR}/shared/pn/net.cc
-    ${PROJECT_SOURCE_DIR}/shared/pn/place.cc
-    ${PROJECT_SOURCE_DIR}/shared/pn/transition.cc
-    ${PROJECT_SOURCE_DIR}/shared/util/paths.cc
     )
 
 add_executable(pnmc ${SOURCES})
-target_link_libraries(pnmc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
+target_link_libraries(pnmc ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES} shared)
 install(TARGETS pnmc DESTINATION bin)
