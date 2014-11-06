@@ -82,7 +82,7 @@ const auto sample_nb_sdd_str = "sample-nb-sdd";
 const auto pn_stats_str = "pn-stats";
 
 boost::optional<configuration>
-fill_configuration(int argc, char** argv)
+fill_configuration(int argc, const char** argv)
 {
   configuration conf;
 

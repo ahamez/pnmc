@@ -14,24 +14,20 @@
 /*------------------------------------------------------------------------------------------------*/
 
 int
-main(int argc, char** argv)
+main(int argc, const char** argv)
 {
   using namespace pnmc;
 
   try
   {
-    boost::optional<conf::configuration> conf_opt;
-    conf_opt = conf::fill_configuration(argc, argv);
-
-    if (not conf_opt) // --help or --version
+    const auto conf_opt = conf::fill_configuration(argc, argv);
+    if (conf_opt)
     {
-      return EX_OK;
+      const auto& conf = *conf_opt;
+      const auto net_ptr = parsers::parse(conf.input);
+      mc::mc worker(conf);
+      worker(*net_ptr);
     }
-
-    const auto& conf = *conf_opt;
-    const auto net_ptr = parsers::parse(conf);
-    mc::mc worker(conf);
-    worker(*net_ptr);
     return EX_OK;
   }
   catch (const boost::program_options::error& e)

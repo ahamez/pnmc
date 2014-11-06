@@ -9,7 +9,7 @@ namespace pnmc { namespace conf {
 /*------------------------------------------------------------------------------------------------*/
 
 boost::optional<configuration>
-fill_configuration(int, char**);
+fill_configuration(int, const char**);
 
 /*------------------------------------------------------------------------------------------------*/
 
