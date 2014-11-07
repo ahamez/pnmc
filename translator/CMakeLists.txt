@@ -7,4 +7,4 @@ set(SOURCES
     )
 
 add_executable(translator ${SOURCES})
-target_link_libraries(translator ${Boost_LIBRARIES} ${ZLIB_LIBRARIES} shared)
+target_link_libraries(translator shared ${Boost_LIBRARIES} ${ZLIB_LIBRARIES})
