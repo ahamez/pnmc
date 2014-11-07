@@ -4,7 +4,9 @@
 #include <ostream>
 
 #include <sdd/util/hash.hh>
-#include "sdd/values/flat_set.hh"
+
+#include "mc/classic/sdd.hh"
+#include "shared/pn/types.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -12,13 +14,13 @@ namespace pnmc { namespace mc { namespace classic {
 
 struct set
 {
-  const unsigned int value;
+  const pn::clock_type value;
 
-  sdd::values::flat_set<unsigned int>
-  operator()(const sdd::values::flat_set<unsigned int>&)
+  flat_set
+  operator()(const flat_set&)
   const
   {
-    return sdd::values::flat_set<unsigned int>({value});
+    return {value};
   }
 
   friend

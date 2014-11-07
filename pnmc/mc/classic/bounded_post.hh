@@ -6,7 +6,9 @@
 #include <sdd/values/flat_set.hh>
 #include <sdd/values_manager.hh>
 
+#include "mc/classic/sdd.hh"
 #include "mc/shared/exceptions.hh"
+#include "shared/pn/types.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -14,15 +16,15 @@ namespace pnmc { namespace mc { namespace classic {
 
 struct bounded_post
 {
-  const unsigned int valuation;
-  const unsigned int bound;
+  const pn::valuation_type valuation;
+  const pn::valuation_type bound;
   const std::string& place;
 
-  sdd::values::flat_set<unsigned int>
-  operator()(const sdd::values::flat_set<unsigned int>& val)
+  flat_set
+  operator()(const flat_set& val)
   const
   {
-    sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    flat_set_builder builder;
     builder.reserve(val.size());
     for (const auto& v : val)
     {

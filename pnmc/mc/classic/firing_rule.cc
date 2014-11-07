@@ -17,6 +17,7 @@
 #include "mc/classic/post.hh"
 #include "mc/classic/pre.hh"
 #include "mc/classic/pre_clock.hh"
+#include "mc/classic/sdd.hh"
 #include "mc/classic/set.hh"
 #include "mc/shared/interruptible.hh"
 #include "mc/shared/live.hh"
@@ -27,20 +28,9 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-using sdd_conf = sdd::conf1 ;
-using SDD = sdd::SDD<sdd_conf>;
-using homomorphism = sdd::homomorphism<sdd_conf>;
-using sdd::composition;
-using sdd::fixpoint;
-using sdd::intersection;
-using sdd::sum;
-using sdd::function;
-
-/*------------------------------------------------------------------------------------------------*/
-
 /// @brief Compute the transition relation corresponding to a petri net.
 homomorphism
-untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
+untimed( const conf::configuration& conf, const order& o, const pn::net& net
        , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
   // Each transition will produce an operand.
@@ -181,7 +171,7 @@ untimed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const p
 
 /// @brief Compute the transition relation corresponding to a petri net.
 homomorphism
-timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn::net& net
+timed( const conf::configuration& conf, const order& o, const pn::net& net
      , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
   // Each transition will produce an operand.
@@ -542,9 +532,7 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
             return persistence;
           }();
 
-          return sdd::if_then_else( u_is_persistent
-                                  , sdd::id<sdd_conf>()
-                                  , function(o, u.id, set{0}));
+          return if_then_else(u_is_persistent, sdd::id<sdd_conf>(), function(o, u.id, set{0}));
         }
         else // not u_persistence_possible
         {
@@ -552,9 +540,8 @@ timed( const conf::configuration& conf, const sdd::order<sdd_conf>& o, const pn:
         }
       }(); // enabled_branch
 
-      const auto ite_u = sdd::if_then_else( u_is_enabled
-                                          , enabled_branch
-                                          , function(o, u.id, set{pn::sharp}));
+      const auto ite_u
+        = if_then_else(u_is_enabled, enabled_branch, function(o, u.id, set{pn::sharp}));
 
       h_t = composition(ite_u, h_t);
 
@@ -612,7 +599,7 @@ post_and_advance_time:
 
 /// @brief Compute the transition relation corresponding to a petri net.
 homomorphism
-firing_rule( const conf::configuration& conf, const sdd::order<sdd_conf>& o
+firing_rule( const conf::configuration& conf, const order& o
            , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
            , shared::statistics& stats, const bool& stop)
 {

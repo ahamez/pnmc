@@ -6,8 +6,10 @@
 #include <sdd/util/hash.hh>
 #include <sdd/values/flat_set.hh>
 
+#include "mc/classic/sdd.hh"
 #include "shared/pn/constants.hh"
 #include "shared/pn/transition.hh"
+#include "shared/pn/types.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -15,13 +17,13 @@ namespace pnmc { namespace mc { namespace classic {
 
 struct advance
 {
-  const unsigned int upper_clock;
+  const pn::clock_type upper_clock;
 
-  sdd::values::flat_set<unsigned int>
-  operator()(const sdd::values::flat_set<unsigned int>& val)
+  flat_set
+  operator()(const flat_set& val)
   const
   {
-    sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    flat_set_builder builder;
     builder.reserve(val.size());
     for (const auto v : val)
     {

@@ -3,11 +3,10 @@
 #include <functional> // hash
 #include <ostream>
 
-
 #include <sdd/util/hash.hh>
-#include <sdd/values/flat_set.hh>
 
-#include "conf/configuration.hh"
+#include "mc/classic/sdd.hh"
+#include "shared/pn/types.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -15,13 +14,13 @@ namespace pnmc { namespace mc { namespace classic {
 
 struct pre
 {
-  const unsigned int valuation;
+  const pn::valuation_type valuation;
 
-  sdd::values::flat_set<unsigned int>
-  operator()(const sdd::values::flat_set<unsigned int>& val)
+  flat_set
+  operator()(const flat_set& val)
   const
   {
-    sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    flat_set_builder builder;
     builder.reserve(val.size());
 
     // Find the first entry in val that is greater or equal than valuation.

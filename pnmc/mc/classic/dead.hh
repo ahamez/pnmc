@@ -4,7 +4,9 @@
 #include <ostream>
 
 #include <sdd/util/hash.hh>
-#include "sdd/values/flat_set.hh"
+
+#include "mc/classic/sdd.hh"
+#include "shared/pn/types.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -12,13 +14,13 @@ namespace pnmc { namespace mc { namespace classic {
 
 struct dead
 {
-  const unsigned int valuation;
+  const pn::valuation_type valuation;
 
-  sdd::values::flat_set<unsigned int>
-  operator()(const sdd::values::flat_set<unsigned int>& val)
+  flat_set
+  operator()(const flat_set& val)
   const
   {
-    sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    flat_set_builder builder;
     builder.reserve(val.size());
     for (const auto v : val)
     {

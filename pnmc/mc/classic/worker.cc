@@ -6,13 +6,13 @@
 #include <set>
 #include <thread>
 
-#include <sdd/sdd.hh>
 #include <sdd/tools/size.hh>
 
 #include "mc/classic/count_tokens.hh"
 #include "mc/classic/dead.hh"
 #include "mc/classic/firing_rule.hh"
 #include "mc/classic/make_order.hh"
+#include "mc/classic/sdd.hh"
 #include "mc/classic/sharp_output.hh"
 #include "mc/shared/dump.hh"
 #include "mc/shared/results.hh"
@@ -22,10 +22,6 @@
 #include "shared/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
-
-using sdd_conf = sdd::conf1 ;
-using SDD = sdd::SDD<sdd_conf>;
-using homomorphism = sdd::homomorphism<sdd_conf>;
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -41,35 +37,35 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
     }
   }
 
-  return SDD(order, [&](const std::string& id)
-             -> sdd::values::flat_set<unsigned int>
-             {
-               const auto cit = net.places_by_id().find(id);
-               if (cit != net.places_by_id().end())
-               {
-                 return {cit->marking};
-               }
-               else
-               {
-                 const auto t_cit = timed.find(id);
-                 assert(t_cit != timed.end());
-                 if (net.enabled(t_cit->second.get().id))
-                 {
-                   return {0};
-                 }
-                 else
-                 {
-                   return {pn::sharp};
-                 }
-               }
-             });
+  return SDD( order
+            , [&](const std::string& id) -> flat_set
+              {
+                const auto cit = net.places_by_id().find(id);
+                if (cit != net.places_by_id().end())
+                {
+                  return {cit->marking};
+                }
+                else
+                {
+                  const auto t_cit = timed.find(id);
+                  assert(t_cit != timed.end());
+                  if (net.enabled(t_cit->second.get().id))
+                  {
+                    return {0};
+                  }
+                  else
+                  {
+                    return {pn::sharp};
+                  }
+                }
+              });
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 homomorphism
-rewrite( const conf::configuration&, const sdd::order<sdd_conf>& o
-       , const homomorphism& h, shared::statistics& stats)
+rewrite( const conf::configuration&, const order& o, const homomorphism& h
+       , shared::statistics& stats)
 {
   util::timer timer;
   const auto res = sdd::rewrite(o, h);
@@ -142,7 +138,7 @@ struct threads
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
-state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD m
+state_space( const conf::configuration& conf, const order& o, SDD m
            , homomorphism h, shared::statistics& stats, bool& stop
            , const sdd::manager<sdd_conf>& manager)
 {
@@ -172,7 +168,7 @@ state_space( const conf::configuration& conf, const sdd::order<sdd_conf>& o, SDD
 /*------------------------------------------------------------------------------------------------*/
 
 SDD
-dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn::net& net
+dead_states( const conf::configuration&, const order& o, const pn::net& net
            , const SDD& state_space, shared::statistics& stats)
 {
   std::set<homomorphism> and_operands;
@@ -186,13 +182,13 @@ dead_states( const conf::configuration&, const sdd::order<sdd_conf>& o, const pn
     // We are only interested in pre actions.
     for (const auto& arc : transition.pre)
     {
-      or_operands.insert(sdd::function(o, arc.first, dead{arc.second.weight}));
+      or_operands.insert(function(o, arc.first, dead{arc.second.weight}));
     }
 
-    and_operands.insert(sdd::sum(o, or_operands.cbegin(), or_operands.cend()));
+    and_operands.insert(sum(o, or_operands.cbegin(), or_operands.cend()));
     or_operands.clear();
   }
-  const auto tmp = sdd::intersection(o, and_operands.cbegin(), and_operands.cend());
+  const auto tmp = intersection(o, and_operands.cbegin(), and_operands.cend());
   stats.dead_states_relation_duration = timer.duration();
 
   // Rewrite the relation

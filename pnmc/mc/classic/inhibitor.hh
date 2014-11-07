@@ -4,7 +4,8 @@
 #include <functional> // hash
 #include <ostream>
 
-#include "conf/configuration.hh"
+#include "mc/classic/sdd.hh"
+#include "shared/pn/types.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -13,13 +14,13 @@ namespace pnmc { namespace mc { namespace classic {
 /// @brief An inhibitor arc.
 struct inhibitor
 {
-  const unsigned int valuation;
+  const pn::valuation_type valuation;
 
-  sdd::values::flat_set<unsigned int>
-  operator()(const sdd::values::flat_set<unsigned int>& val)
+  flat_set
+  operator()(const flat_set& val)
   const
   {
-    sdd::values::values_traits<sdd::values::flat_set<unsigned int>>::builder builder;
+    flat_set_builder builder;
     builder.reserve(val.size());
     // Only keep values that are less than the requested valuation.
     std::copy(val.cbegin(), val.lower_bound(valuation), std::inserter(builder, builder.end()));

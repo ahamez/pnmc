@@ -8,7 +8,6 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-#include <sdd/order/order.hh>
 #include <sdd/order/strategies/force.hh>
 #include <sdd/order/strategies/identifiers_per_hierarchy.hh>
 #include <sdd/tools/order.hh>
@@ -20,14 +19,11 @@
 
 namespace pnmc { namespace mc { namespace classic {
 
-using sdd_conf = sdd::conf1;
-
 /*------------------------------------------------------------------------------------------------*/
 
 struct mk_order_visitor
-  : public boost::static_visitor<sdd::order_builder<sdd_conf>>
+  : public boost::static_visitor<order_builder>
 {
-  using order_builder = sdd::order_builder<sdd_conf>;
   using result_type = order_builder;
 
   // Place: base case of the recursion, there's no more possible nested hierarchies.
@@ -62,7 +58,7 @@ struct mk_order_visitor
 
 /*------------------------------------------------------------------------------------------------*/
 
-sdd::order<sdd_conf>
+order
 make_order(const conf::configuration& conf, shared::statistics& stats, const pn::net& net)
 {
   for (const auto& place : net.places())
@@ -90,7 +86,7 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
       {
         throw std::runtime_error("Empty JSON order file " + conf.order_file->string());
       }
-      sdd::order<sdd_conf> o{*ob};
+      order o{*ob};
 
       // Check if loaded order corresponds to the Petri net.
       std::set<std::string> order_identifiers;
@@ -154,7 +150,7 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
   }
 
   // FORCE heuristic.
-  sdd::order_builder<sdd_conf> ob;
+  order_builder ob;
   if (conf.order_ordering_force)
   {
     util::timer timer;
@@ -314,7 +310,7 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
   {
     ob = sdd::identifiers_per_hierarchy<sdd_conf>(conf.order_id_per_hierarchy)(ob);
   }
-  return sdd::order<sdd_conf>(ob);
+  return order{ob};
 }
 
 /*------------------------------------------------------------------------------------------------*/
