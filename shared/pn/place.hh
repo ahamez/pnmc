@@ -5,6 +5,7 @@
 #include <string>
 
 #include "shared/pn/arc.hh"
+#include "shared/pn/types.hh"
 
 namespace pnmc { namespace pn {
 
@@ -27,7 +28,7 @@ struct place
   arcs_type post;
 
   /// @brief Constructor.
-  place(const std::string& id, unsigned int m);
+  place(const std::string& id, valuation_type m);
 
   /// @brief Tell if this place is connected to one or more transitions.
   bool connected() const noexcept;

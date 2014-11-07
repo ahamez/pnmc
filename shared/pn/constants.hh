@@ -1,24 +1,19 @@
 #pragma once
 
+#include <limits>
+
 #include "shared/pn/types.hh"
 
 namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief An arc in a Petri Net.
-struct arc
-{
-  /// @brief The possible types of an arc.
-  enum class type {inhibitor, normal, read, reset, stopwatch, stopwatch_inhibitor};
+/// @brief Time infinity.
+constexpr auto infinity = std::numeric_limits<valuation_type>::max();
 
-  /// @brief The valuation of this arc.
-  valuation_type weight;
-
-  /// @brief The type of this arc.
-  type kind;
-};
+/// @brief Time sharp.
+constexpr auto sharp = infinity - 1;
 
 /*------------------------------------------------------------------------------------------------*/
-
+  
 }} // namespace pnmc::pn

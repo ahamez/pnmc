@@ -13,7 +13,7 @@ net::net()
 /*------------------------------------------------------------------------------------------------*/
 
 const place&
-net::add_place(const std::string& pid, unsigned int marking)
+net::add_place(const std::string& pid, valuation_type marking)
 {
   const auto cit = places_by_id().find(pid);
   if (cit == places_by_id().cend())
@@ -50,7 +50,7 @@ net::add_transition(const std::string& tid)
 
 void
 net::add_post_place( const std::string& tid, const std::string& post
-                   , unsigned int weight, arc::type ty)
+                   , valuation_type weight, arc::type ty)
 {
   if (ty != arc::type::normal)
   {
@@ -97,7 +97,7 @@ net::add_post_place( const std::string& tid, const std::string& post
 
 void
 net::add_pre_place( const std::string& tid, const std::string& pre
-                  , unsigned int weight, arc::type ty)
+                  , valuation_type weight, arc::type ty)
 {
   const auto it = transitions_set.get<id_index>().find(tid);
   if (it == end(transitions_set.get<id_index>()))
@@ -181,7 +181,7 @@ const
 /*------------------------------------------------------------------------------------------------*/
 
 void
-net::add_time_interval(const std::string& tid, unsigned int low, unsigned int high)
+net::add_time_interval(const std::string& tid, clock_type low, clock_type high)
 {
   const auto it = transitions_set.get<id_index>().find(tid);
   transitions_set.modify(it, [&](transition& t){t.low = low; t.high = high;});

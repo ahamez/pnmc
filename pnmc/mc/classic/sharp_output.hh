@@ -3,6 +3,7 @@
 #include <iosfwd>
 
 #include "sdd/values/flat_set.hh"
+#include "shared/pn/constants.hh"
 
 namespace sdd { namespace values {
 

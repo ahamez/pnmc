@@ -1,19 +1,13 @@
 #pragma once
 
 #include <iosfwd>
-#include <limits>
 #include <map>
 #include <string>
 
 #include "shared/pn/arc.hh"
+#include "shared/pn/types.hh"
 
 namespace pnmc { namespace pn {
-
-/// @brief Time infinity.
-constexpr unsigned int inf = std::numeric_limits<unsigned int>::max();
-
-/// @brief Time sharp.
-constexpr unsigned int sharp = inf - 1;
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -37,11 +31,11 @@ struct transition
   /// @brief Post-places
   arcs_type post;
 
-  /// @brief Lower time interval.
-  unsigned int low;
+  /// @brief Lower (closed) time interval.
+  clock_type low;
 
-  /// @brief Upper time interval.
-  unsigned int high;
+  /// @brief Upper (closed) time interval.
+  clock_type high;
 
   /// @brief Constructor.
   transition(const std::string& id, std::size_t index);

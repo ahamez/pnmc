@@ -6,7 +6,7 @@ namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
-place::place(const std::string& i, unsigned int m)
+place::place(const std::string& i, valuation_type m)
   : id(i), marking(m), pre(), post()
 {}
 

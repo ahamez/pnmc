@@ -15,6 +15,7 @@
 #include "shared/pn/module.hh"
 #include "shared/pn/place.hh"
 #include "shared/pn/transition.hh"
+#include "shared/pn/types.hh"
 
 namespace pnmc { namespace pn {
 
@@ -85,7 +86,7 @@ public:
   ///
   /// If the place already exist, its marking is updated.
   const place&
-  add_place(const std::string& id, unsigned int marking);
+  add_place(const std::string& id, valuation_type marking);
 
   /// @brief Add a transition.
   ///
@@ -97,14 +98,14 @@ public:
   ///
   /// If the place doesn't exist, it is created with a marking set to 0.
   void
-  add_post_place( const std::string& tid, const std::string& post, unsigned int weight
+  add_post_place( const std::string& tid, const std::string& post, valuation_type weight
                 , arc::type ty = arc::type::normal);
 
   /// @brief Add a pre place to a transition.
   ///
   /// If the place doesn't exist, it is created with a marking set to 0.
   void
-  add_pre_place( const std::string& tid, const std::string& pre, unsigned int weight
+  add_pre_place( const std::string& tid, const std::string& pre, valuation_type weight
                , arc::type ty = arc::type::normal);
 
   /// @brief Return all places by insertion order.
@@ -125,7 +126,7 @@ public:
 
   /// @brief Add a time interval to a transition.
   void
-  add_time_interval(const std::string& tid, unsigned int low, unsigned int high);
+  add_time_interval(const std::string& tid, clock_type low, clock_type high);
 
   /// @brief Tell if some transitions are timed.
   bool

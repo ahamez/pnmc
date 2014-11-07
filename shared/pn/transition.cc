@@ -1,5 +1,6 @@
 #include <ostream>
 
+#include "shared/pn/constants.hh"
 #include "shared/pn/transition.hh"
 
 namespace pnmc { namespace pn {
@@ -7,7 +8,7 @@ namespace pnmc { namespace pn {
 /*------------------------------------------------------------------------------------------------*/
 
 transition::transition(const std::string& i, std::size_t idx)
-  : id(i), index(idx), pre(), post(), low(0), high(inf)
+  : id(i), index(idx), pre(), post(), low(0), high(infinity)
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -16,7 +17,7 @@ bool
 transition::timed()
 const
 {
-  return this->low != 0 or this->high != inf;
+  return this->low != 0 or this->high != infinity;
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -36,10 +37,10 @@ std::ostream&
 operator<<(std::ostream& os, const transition& t)
 {
   os << "tr " << t.id;
-  if (t.low != 0 or t.high != inf)
+  if (t.low != 0 or t.high != infinity)
   {
     os << " |" << t.low << ",";
-    if (t.high != inf)
+    if (t.high != infinity)
     {
       os << t.high;
     }

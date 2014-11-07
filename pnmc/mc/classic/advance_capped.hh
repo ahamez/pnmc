@@ -6,6 +6,7 @@
 #include <sdd/util/hash.hh>
 #include <sdd/values/flat_set.hh>
 
+#include "shared/pn/constants.hh"
 #include "shared/pn/transition.hh"
 
 namespace pnmc { namespace mc { namespace classic {

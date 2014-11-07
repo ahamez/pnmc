@@ -20,6 +20,7 @@
 #include "mc/classic/set.hh"
 #include "mc/shared/interruptible.hh"
 #include "mc/shared/live.hh"
+#include "shared/pn/constants.hh"
 #include "shared/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
@@ -594,7 +595,7 @@ post_and_advance_time:
     {
       if (t.timed())
       {
-        const auto f = t.high == pn::inf
+        const auto f = t.high == pn::infinity
                      ? function(o, t.id, advance_capped{t.low, t.high})
                      : function(o, t.id, advance{t.high});
         res = composition(f, res);
