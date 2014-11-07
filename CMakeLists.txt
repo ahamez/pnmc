@@ -66,6 +66,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fvisibility=hidden -fvi
 
 include_directories("${Boost_INCLUDE_DIRS}")
 include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_SOURCE_DIR}/external/cereal/include")
 include_directories("${LIBSDD_INCLUDE_DIR}")
 
 ################################################################################
