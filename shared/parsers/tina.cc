@@ -466,7 +466,7 @@ tina(std::istream& in)
     else if (accept(cxt, token_t::place))      {place(cxt, *net_ptr);}
     else                                       {error(cxt);}
   };
-
+  net_ptr->format = conf::pn_format::tina;
   return net_ptr;
 }
 

@@ -113,7 +113,7 @@ pnml(std::istream& in)
     }
     node = node->next_sibling();
   }
-
+  net_ptr->format = conf::pn_format::pnml;
   return net_ptr;
 }
 

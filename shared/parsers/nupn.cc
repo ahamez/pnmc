@@ -315,7 +315,7 @@ nupn(std::istream& in)
     }
   }
   net.modules = modules["U" + root_module].first;
-
+  net.format = conf::pn_format::nupn;
   return net_ptr;
 }
 

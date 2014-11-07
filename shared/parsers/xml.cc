@@ -174,7 +174,7 @@ xml(std::istream& in)
   {
     net_ptr->modules = make_module(mn);
   }
-
+  net_ptr->format = conf::pn_format::xml;
   return net_ptr;
 }
 

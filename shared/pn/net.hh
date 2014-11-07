@@ -11,6 +11,7 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #pragma GCC diagnostic pop
 
+#include "shared/conf/pn_format.hh"
 #include "shared/pn/arc.hh"
 #include "shared/pn/module.hh"
 #include "shared/pn/place.hh"
@@ -78,6 +79,9 @@ public:
 
   /// @brief The hierarchical description, if any.
   module modules;
+
+  /// @brief The original format of this net.
+  conf::pn_format format;
 
   /// @brief Default constructor.
   net();
