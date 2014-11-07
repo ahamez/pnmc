@@ -6,6 +6,7 @@ set(SOURCES
     mc/classic/count_tokens.cc
     mc/classic/firing_rule.cc
     mc/classic/make_order.cc
+    mc/classic/threads.cc
     mc/classic/worker.cc
     mc/shared/dump.cc
     mc/mc.cc

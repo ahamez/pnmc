@@ -4,7 +4,6 @@
 #include <iostream>
 #include <memory>
 #include <set>
-#include <thread>
 
 #include <sdd/tools/size.hh>
 
@@ -14,10 +13,11 @@
 #include "mc/classic/make_order.hh"
 #include "mc/classic/sdd.hh"
 #include "mc/classic/sharp_output.hh"
+#include "mc/classic/threads.hh"
+#include "mc/classic/worker.hh"
 #include "mc/shared/dump.hh"
 #include "mc/shared/results.hh"
 #include "mc/shared/statistics.hh"
-#include "mc/classic/worker.hh"
 #include "mc/shared/exceptions.hh"
 #include "shared/util/timer.hh"
 
@@ -72,68 +72,6 @@ rewrite( const conf::configuration&, const order& o, const homomorphism& h
   stats.rewrite_duration = timer.duration();
   return res;
 }
-
-/*------------------------------------------------------------------------------------------------*/
-
-struct threads
-{
-  bool finished;
-  std::thread clock;
-  std::thread sdd_sampling;
-
-  threads( const conf::configuration& conf, shared::statistics& stats, bool& stop
-         , const sdd::manager<sdd_conf>& manager, util::timer& beginnning)
-    : finished(false), clock(), sdd_sampling()
-  {
-    if (conf.max_time > std::chrono::duration<double>(0))
-    {
-      clock = std::thread([&]
-              {
-                while (not finished)
-                {
-                  std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                  if (beginnning.duration() >= conf.max_time)
-                  {
-                    stop = true;
-                    break;
-                  }
-                }
-              });
-    }
-
-    if (conf.sample_nb_sdd)
-    {
-      sdd_sampling = std::thread([&]
-                     {
-                       const auto sample_time = std::chrono::milliseconds(500);
-                       auto last = std::chrono::system_clock::now();
-                       while (not finished)
-                       {
-                         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                         auto now = std::chrono::system_clock::now();
-                         if ((now - last) >= sample_time)
-                         {
-                           stats.sdd_ut_size.emplace_back(manager.sdd_stats().size);
-                           last = now;
-                         }
-                       }
-                     });
-    }
-  }
-
-  ~threads()
-  {
-    finished = true;
-    if (clock.joinable())
-    {
-      clock.join();
-    }
-    if (sdd_sampling.joinable())
-    {
-      sdd_sampling.join();
-    }
-  }
-};
 
 /*------------------------------------------------------------------------------------------------*/
 
