@@ -14,7 +14,7 @@ mc::mc(const conf::configuration& conf)
 std::unique_ptr<mc_impl>
 mc::mk_impl(const conf::configuration& conf)
 {
-  return std::unique_ptr<mc_impl>(new classic::worker(conf));
+  return std::unique_ptr<mc_impl>(new classic::worker{conf});
 }
 
 /*------------------------------------------------------------------------------------------------*/

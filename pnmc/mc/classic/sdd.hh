@@ -9,6 +9,8 @@ namespace pnmc { namespace mc { namespace classic {
 using sdd_conf = sdd::conf1;
 
 using SDD = sdd::SDD<sdd_conf>;
+static auto zero = []{return sdd::zero<sdd_conf>();};
+static auto one  = []{return sdd::one<sdd_conf>();};
 
 using flat_set         = sdd_conf::Values;
 using flat_set_builder = sdd::values::values_traits<flat_set>::builder;

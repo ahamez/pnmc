@@ -49,7 +49,8 @@ save(Archive& archive, const statistics& s)
   {
     archive( cereal::make_nvp("dead states relation time", s.dead_states_relation_duration.count())
            , cereal::make_nvp("dead states rewrite time", s.dead_states_rewrite_duration.count())
-           , cereal::make_nvp("dead states time", s.dead_states_duration.count()));
+           , cereal::make_nvp("dead states time", s.dead_states_duration.count())
+           , cereal::make_nvp("trace time", s.trace_duration.count()));
   }
 }
 

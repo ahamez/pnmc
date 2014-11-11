@@ -25,7 +25,7 @@ main(int argc, const char** argv)
     {
       const auto& conf = *conf_opt;
       const auto net_ptr = parsers::parse(conf.input);
-      mc::mc worker(conf);
+      mc::mc worker{conf};
       worker(*net_ptr);
     }
     return EX_OK;

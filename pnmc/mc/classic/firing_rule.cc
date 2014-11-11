@@ -29,7 +29,7 @@ namespace pnmc { namespace mc { namespace classic {
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief Compute the transition relation corresponding to a petri net.
-homomorphism
+std::set<homomorphism>
 untimed( const conf::configuration& conf, const order& o, const pn::net& net
        , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
@@ -164,13 +164,13 @@ untimed( const conf::configuration& conf, const order& o, const pn::net& net
     operands.insert(h_t);
   }
 
-  return fixpoint(sum(o, operands.cbegin(), operands.cend()));
+  return operands;
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief Compute the transition relation corresponding to a petri net.
-homomorphism
+std::set<homomorphism>
 timed( const conf::configuration& conf, const order& o, const pn::net& net
      , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
@@ -592,23 +592,23 @@ post_and_advance_time:
   }();
   operands.insert(advance_time);
 
-  return fixpoint(sum(o, operands.cbegin(), operands.cend()));
+  return operands;
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief Compute the transition relation corresponding to a petri net.
-homomorphism
+std::set<homomorphism>
 firing_rule( const conf::configuration& conf, const order& o
            , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
            , shared::statistics& stats, const bool& stop)
 {
   util::timer timer;
-  const auto h = net.timed()
-               ? timed(conf, o, net, transitions_bitset, stop)
-               : untimed(conf, o, net, transitions_bitset, stop);
+  const auto operands = net.timed()
+                      ? timed(conf, o, net, transitions_bitset, stop)
+                      : untimed(conf, o, net, transitions_bitset, stop);
   stats.relation_duration = timer.duration();
-  return h;
+  return operands;
 }
 
 /*------------------------------------------------------------------------------------------------*/
