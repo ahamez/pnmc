@@ -1,12 +1,17 @@
 #pragma once
 
-namespace pnmc { namespace conf {
+#include <iosfwd>
+#include <memory>
+
+#include "shared/pn/net.hh"
+
+namespace pnmc { namespace parsers {
+  
+/*------------------------------------------------------------------------------------------------*/
+
+std::shared_ptr<pn::net>
+net(std::istream&);
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief The accepted input formats.
-enum class pn_format {nupn, pnml, ndr, net, xml};
-
-/*------------------------------------------------------------------------------------------------*/
-
-}} // namespace pnmc::conf
+}} // pnmc::parsers

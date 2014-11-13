@@ -1,28 +1,45 @@
+#include <map>
+#include <string>
+#include <utility>
+
+#include <boost/algorithm/string/join.hpp>
+#include <boost/range/adaptor/map.hpp>
+
 #include "shared/conf/options.hh"
 #include "shared/conf/pn_format.hh"
 #include "shared/util/paths.hh"
 
 namespace pnmc { namespace conf {
 
+namespace po = boost::program_options;
+
 /*------------------------------------------------------------------------------------------------*/
 
-static const auto nupn_str = "nupn";
-static const auto pnml_str = "pnml";
-static const auto tina_str = "tina";
-static const auto xml_str  = "xml";
+static const auto pn_input_str   = "pn-format";
 static const auto decompress_str = "decompress";
+static const auto format_map = std::map<std::string, pn_format>
+  { std::make_pair("ndr" , pn_format::ndr)
+  , std::make_pair("net" , pn_format::net)
+  , std::make_pair("nupn", pn_format::nupn)
+  , std::make_pair("pnml", pn_format::pnml)
+  , std::make_pair("xml" , pn_format::xml)};
+
+static const auto possible_format_values = [&]
+{
+  using namespace boost::adaptors;
+  using namespace std::string_literals;
+  return "Petri net format ["s + boost::algorithm::join(format_map | map_keys, "|") + "]"s;
+}();
 
 /*------------------------------------------------------------------------------------------------*/
 
-boost::program_options::options_description
+po::options_description
 input_options()
 {
-  boost::program_options::options_description options("Input file format options");
+  po::options_description options("Input file format options");
   options.add_options()
-    (nupn_str       , "Parse NUPN format")
-    (pnml_str       , "Parse PNML format")
-    (tina_str       , "Parse TINA format")
-    (xml_str        , "Parse pnmc's XML format (default)")
+    (pn_input_str   , po::value<std::string>()->default_value("xml")
+                    , possible_format_values.c_str())
     (decompress_str , "Decompress file to read");
   return options;
 }
@@ -31,31 +48,17 @@ input_options()
 
 static
 pn_format
-pn_format_from_options(const boost::program_options::variables_map& vm)
+pn_format_from_options(const po::variables_map& vm)
 {
-  const bool nupn = vm.count(nupn_str);
-  const bool pnml = vm.count(pnml_str);
-  const bool tina = vm.count(tina_str);
-
-  if (not (nupn or pnml or tina))
+  const auto s = vm[pn_input_str].as<std::string>();
+  const auto search = format_map.find(s);
+  if (search != end(format_map))
   {
-    return pn_format::xml;
-  }
-  else if (not (nupn xor pnml xor tina))
-  {
-    throw boost::program_options::error("Can specify only one input format.");
-  }
-  else if (nupn)
-  {
-    return pn_format::nupn;
-  }
-  else if (pnml)
-  {
-    return pn_format::pnml;
+    return search->second;
   }
   else
   {
-    return pn_format::tina;
+    throw po::error("Invalid input format " + s);
   }
 }
 

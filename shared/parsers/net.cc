@@ -5,13 +5,13 @@
 #include <iostream>
 #include <limits>
 #include <regex>
-#include <string>
 #include <type_traits>
 
 #include <boost/optional.hpp>
 
 #include "shared/parsers/parse_error.hh"
-#include "shared/parsers/tina.hh"
+#include "shared/parsers/net.hh"
+#include "shared/parsers/token.hh"
 
 namespace pnmc { namespace parsers {
 
@@ -25,37 +25,15 @@ static constexpr auto keywords_gap = 1000u;
 
 // @brief Start at 1 because the relative position in the enum is used to compute the type of the 
 // token and because submatches of regular expressions start at 1 (0 is the whole match).
-enum class token_t { skip = 1u, newline, number, qname, name, colon, comma
-                   , lbracket, rbracket, arrow, lparen, rparen, question, exclamation, minus, mult
-                   , comment
-                   , net = keywords_gap, transition, place};
+enum class tk { skip = 1u, newline, number, qname, name, colon, comma
+              , lbracket, rbracket, arrow, lparen, rparen, question, exclamation, minus, mult
+              , comment
+              , net = keywords_gap, transition, place};
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief Gets the position of tk in the enum class token_t.
-std::size_t
-pos(token_t tk)
-{
-  return static_cast<std::underlying_type_t<token_t>>(tk);
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-/// @brief Describes a token (its type and its string value).
-struct token
-{
-  token_t ty;
-  std::string val;
-  std::size_t line;
-  std::size_t column;
-
-  std::string
-  str()
-  const
-  {
-    return "'" + val + "' at " + std::to_string(line) + ":" + std::to_string(column);
-  }
-};
+using token = token_holder<tk>;
+using parse_cxt = parse_context<tk>;
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -67,7 +45,7 @@ tokens(InputIterator&& begin, InputIterator&& end)
   static constexpr std::array<const char*, 3> keywords = {{"net", "tr", "pl"}};
   // Order must match enum token_t
   static const std::regex regex
-  ( 
+  {
     "([ \\t]+)|"                  // skip spaces and tabs
     "(\\n)|"                      // newline (to keep track of line numbers)
     "(\\d+[KM]?)|"                // numbers can have a suffix
@@ -85,7 +63,7 @@ tokens(InputIterator&& begin, InputIterator&& end)
     "(-)|"                        // minus
     "(\\*)|"                      // multiplication
     "(^#[^\\n]*)"                 // comments start at the beginning of a line
-  );
+  };
 
   // To report error location, if any.
   auto line = 1ul;
@@ -109,12 +87,12 @@ tokens(InputIterator&& begin, InputIterator&& end)
     column += match.length();
     begin += match.length();
 
-    if (match[pos(token_t::skip)].matched)
+    if (match[pos(tk::skip)].matched)
     {
       continue;
     }
 
-    if (match[pos(token_t::newline)].matched)
+    if (match[pos(tk::newline)].matched)
     {
       last_match_is_newline = true;
       column = 1;
@@ -122,7 +100,7 @@ tokens(InputIterator&& begin, InputIterator&& end)
       continue;
     }
 
-    if (match[pos(token_t::comment)].matched)
+    if (match[pos(tk::comment)].matched)
     {
       if (not last_match_is_newline)
       {
@@ -135,7 +113,7 @@ tokens(InputIterator&& begin, InputIterator&& end)
     // Get the type of token by looking for the first successful submatch.
     const auto ty = [&match]
     {
-      auto t = pos(token_t::number);
+      auto t = pos(tk::number);
       for (; t < match.size(); ++t)
       {
         if (match[t].matched) {break;}
@@ -145,18 +123,18 @@ tokens(InputIterator&& begin, InputIterator&& end)
     assert(ty < match.size());
 
     // Check if name is a keyword.
-    if (ty == pos(token_t::name))
+    if (ty == pos(tk::name))
     {
       const auto search = std::find(keywords.cbegin(), keywords.cend(), match[ty].str());
       if (search != keywords.cend())
       {
         const auto kw_ty = std::distance(keywords.cbegin(), search) + keywords_gap;
-        tokens.emplace_back(token {token_t(kw_ty), "", line, column});
+        tokens.emplace_back(token {tk(kw_ty), "", line, column});
         continue;
       }
     }
     // Process qualified names manually (to handle despecialization).
-    else if (ty == pos(token_t::qname))
+    else if (ty == pos(tk::qname))
     {
       std::string qname;
       qname.reserve(32);
@@ -177,11 +155,11 @@ tokens(InputIterator&& begin, InputIterator&& end)
         ++begin;
         ++column;
       }
-      tokens.emplace_back(token {token_t::qname, qname, line, column});
+      tokens.emplace_back(token {tk::qname, qname, line, column});
       continue;
     }
     // All other tokens.
-    tokens.emplace_back(token {token_t(ty), match[ty].str(), line, column});
+    tokens.emplace_back(token {tk(ty), match[ty].str(), line, column});
   }
 
   return tokens;
@@ -189,55 +167,16 @@ tokens(InputIterator&& begin, InputIterator&& end)
 
 /*------------------------------------------------------------------------------------------------*/
 
-struct parse_cxt
-{
-  std::deque<token>::const_iterator curr;
-  std::deque<token>::const_iterator end;
-  auto eof()      const noexcept {return curr == end;}
-  auto val()      const noexcept {return (curr - 1)->val;}
-  auto previous() const noexcept {return *(curr - 1);}
-  auto current()  const noexcept {return *curr;}
-  void advance()  noexcept       {++curr;}
-};
-
-/*------------------------------------------------------------------------------------------------*/
-
-bool
-accept(parse_cxt& cxt, token_t ty)
-noexcept
-{
-  return cxt.curr->ty == ty ? cxt.advance(), true : false;
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-void
-error(parse_cxt& cxt)
-{
-  throw parse_error("Unexpected " + cxt.current().str());
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-bool
-expect(parse_cxt& cxt, token_t ty)
-{
-  if   (accept(cxt, ty)) {return true;}
-  else                   {error(cxt); __builtin_unreachable();}
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
 boost::optional<std::string>
 accept_name(parse_cxt& cxt)
 {
-  if (accept(cxt, token_t::number)) // identifiers may start with a number
+  if (accept(cxt, tk::number)) // identifiers may start with a number
   {
     const auto name = cxt.val();
-    accept(cxt, token_t::name);
+    accept(cxt, tk::name);
     return name + cxt.val();
   }
-  else if (accept(cxt, token_t::name))
+  else if (accept(cxt, tk::name))
   {
     return cxt.val();
   }
@@ -255,7 +194,7 @@ id(parse_cxt& cxt)
   }
   else
   {
-    expect(cxt, token_t::qname);
+    expect(cxt, tk::qname);
     return cxt.val();
   }
 }
@@ -265,7 +204,7 @@ id(parse_cxt& cxt)
 unsigned int
 number(parse_cxt& cxt)
 {
-  expect(cxt, token_t::number);
+  expect(cxt, tk::number);
   const auto res = std::stoi(cxt.val());
   switch (cxt.val().back())
   {
@@ -281,7 +220,7 @@ boost::optional<std::string>
 target(parse_cxt& cxt)
 {
   if      (const auto maybe_name = accept_name(cxt)) {return *maybe_name;}
-  else if (accept(cxt, token_t::qname))              {return cxt.val();}
+  else if (accept(cxt, tk::qname))              {return cxt.val();}
   else                                               {return {};}
 }
 
@@ -299,9 +238,9 @@ input_arcs(parse_cxt& cxt, Fun&& add_arc)
     auto arc_ty = pn::arc::type::normal;
     auto valuation = 1u;
 
-    if (accept(cxt, token_t::mult))
+    if (accept(cxt, tk::mult))
     {
-      if (accept(cxt, token_t::mult))
+      if (accept(cxt, tk::mult))
       {
         arc_ty = pn::arc::type::reset;
       }
@@ -310,22 +249,15 @@ input_arcs(parse_cxt& cxt, Fun&& add_arc)
         valuation = number(cxt);
       }
     }
-    else if (accept(cxt, token_t::question))
+    else if (accept(cxt, tk::question))
     {
-      if (accept(cxt, token_t::minus)) {arc_ty = pn::arc::type::inhibitor;}
+      if (accept(cxt, tk::minus)) {arc_ty = pn::arc::type::inhibitor;}
       else                             {arc_ty = pn::arc::type::read;}
       valuation = number(cxt);
     }
-    else if (accept(cxt, token_t::exclamation))
+    else if (accept(cxt, tk::exclamation))
     {
-      if (accept(cxt, token_t::minus))
-      {
-        throw parse_error("Unsupported stopwatch inhibitor arc");
-      }
-      else
-      {
-        throw parse_error("Unsupported stopwatch arc");
-      }
+      throw parse_error("Unsupported stopwatch inhibitor arc");
     }
     add_arc(*maybe_target, valuation, arc_ty);
   }
@@ -345,7 +277,7 @@ output_arcs(parse_cxt& cxt, Fun&& add_arc)
       break; // no more arcs
     }
     auto valuation = 1u;
-    if (accept(cxt, token_t::mult))
+    if (accept(cxt, tk::mult))
     {
       valuation = number(cxt);
     }
@@ -361,12 +293,12 @@ transition(parse_cxt& cxt, pn::net& n)
   const auto tid = id(cxt);
   n.add_transition(tid);
 
-  if (accept(cxt, token_t::colon)) // label
+  if (accept(cxt, tk::colon)) // label
   {
     id(cxt);
   }
 
-  if (accept(cxt, token_t::lbracket) or accept(cxt, token_t::rbracket)) // time interval
+  if (accept(cxt, tk::lbracket) or accept(cxt, tk::rbracket)) // time interval
   {
     static constexpr auto inf = std::numeric_limits<unsigned int>::max();
 
@@ -379,10 +311,10 @@ transition(parse_cxt& cxt, pn::net& n)
 
     auto low = number(cxt);
 
-    expect(cxt, token_t::comma);
+    expect(cxt, tk::comma);
 
     auto high = 0u;
-    if (accept(cxt, token_t::name))
+    if (accept(cxt, tk::name))
     {
       if (cxt.val() != "w") {error(cxt);}
       high = inf;
@@ -392,9 +324,9 @@ transition(parse_cxt& cxt, pn::net& n)
       high = number(cxt);
     }
 
-    if (not accept(cxt, token_t::rbracket))
+    if (not accept(cxt, tk::rbracket))
     {
-      expect(cxt, token_t::lbracket);
+      expect(cxt, tk::lbracket);
       open_upper_endpoint = cxt.val() == "[";
     }
 
@@ -413,7 +345,7 @@ transition(parse_cxt& cxt, pn::net& n)
                      {
                        n.add_pre_place(tid, pre, weight, ty);
                      });
-  if (accept(cxt, token_t::arrow))
+  if (accept(cxt, tk::arrow))
   {
     output_arcs(cxt, [&](const auto& post, unsigned int weight, pn::arc::type ty)
                         {
@@ -429,14 +361,14 @@ place(parse_cxt& cxt, pn::net& n)
 {
   const auto name = id(cxt);
   auto marking = 0u;
-  if (accept(cxt, token_t::colon)) // label
+  if (accept(cxt, tk::colon)) // label
   {
     id(cxt);
   }
-  if (accept(cxt, token_t::lparen)) // initial marking
+  if (accept(cxt, tk::lparen)) // initial marking
   {
     marking = number(cxt);
-    expect(cxt, token_t::rparen);
+    expect(cxt, tk::rparen);
   }
   n.add_place(name, marking);
 }
@@ -448,25 +380,22 @@ place(parse_cxt& cxt, pn::net& n)
 /*------------------------------------------------------------------------------------------------*/
 
 std::shared_ptr<pn::net>
-tina(std::istream& in)
+net(std::istream& in)
 {
+  const std::string text{std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}};
   auto net_ptr = std::make_shared<pn::net>();
 
-  const auto tks = [&]
-  {
-    std::string text{std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}};
-    return tokens(text.cbegin(), text.cend());
-  }();
+  const auto tks = tokens(begin(text), end(text));
   parse_cxt cxt {tks.cbegin(), tks.cend()};
 
   while (not cxt.eof())
   {
-    if      (accept(cxt, token_t::net))        {net_ptr->name = id(cxt);}
-    else if (accept(cxt, token_t::transition)) {transition(cxt, *net_ptr);}
-    else if (accept(cxt, token_t::place))      {place(cxt, *net_ptr);}
+    if      (accept(cxt, tk::net))        {net_ptr->name = id(cxt);}
+    else if (accept(cxt, tk::transition)) {transition(cxt, *net_ptr);}
+    else if (accept(cxt, tk::place))      {place(cxt, *net_ptr);}
     else                                       {error(cxt);}
   };
-  net_ptr->format = conf::pn_format::tina;
+  net_ptr->format = conf::pn_format::net;
   return net_ptr;
 }
 

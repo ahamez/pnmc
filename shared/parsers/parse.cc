@@ -17,10 +17,11 @@
 #pragma clang diagnostic pop
 #endif
 
+#include "shared/parsers/ndr.hh"
+#include "shared/parsers/net.hh"
 #include "shared/parsers/nupn.hh"
 #include "shared/parsers/parse.hh"
 #include "shared/parsers/pnml.hh"
-#include "shared/parsers/tina.hh"
 #include "shared/parsers/xml.hh"
 #include "shared/util/paths.hh"
 
@@ -81,12 +82,12 @@ parse(const configuration& conf)
 
   switch (conf.file_type)
   {
+    case (conf::pn_format::ndr)  : return parsers::ndr(*in);
+    case (conf::pn_format::net)  : return parsers::net(*in);
     case (conf::pn_format::nupn) : return parsers::nupn(*in);
     case (conf::pn_format::pnml) : return parsers::pnml(*in);
-    case (conf::pn_format::tina) : return parsers::tina(*in);
-    case (conf::pn_format::xml)  : break;
+    case (conf::pn_format::xml)  : return parsers::xml(*in);
   }
-  return parsers::xml(*in);
 }
 
 /*------------------------------------------------------------------------------------------------*/
