@@ -27,8 +27,8 @@ static constexpr auto keywords_gap = 1000u;
 // token and because submatches of regular expressions start at 1 (0 is the whole match).
 enum class tk { skip = 1u, newline, number, qname, name, colon, comma
               , lbracket, rbracket, arrow, lparen, rparen, question, exclamation, minus, mult
-              , comment
-              , net = keywords_gap, transition, place};
+              , comment, lt, gt
+              , net = keywords_gap, transition, place, prio};
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -42,7 +42,7 @@ template <typename InputIterator>
 auto
 tokens(InputIterator&& begin, InputIterator&& end)
 {
-  static constexpr std::array<const char*, 3> keywords = {{"net", "tr", "pl"}};
+  static constexpr std::array<const char*, 4> keywords = {{"net", "tr", "pl", "pr"}};
   // Order must match enum token_t
   static const std::regex regex
   {
@@ -62,7 +62,9 @@ tokens(InputIterator&& begin, InputIterator&& end)
     "(!)|"                        // exclamation mark
     "(-)|"                        // minus
     "(\\*)|"                      // multiplication
-    "(^#[^\\n]*)"                 // comments start at the beginning of a line
+    "(^#[^\\n]*)|"                // comments start at the beginning of a line
+    "(<)|"                        // less than
+    "(>)"                         // upper than
   };
 
   // To report error location, if any.
@@ -201,6 +203,16 @@ id(parse_cxt& cxt)
 
 /*------------------------------------------------------------------------------------------------*/
 
+boost::optional<std::string>
+accept_id(parse_cxt& cxt)
+{
+  if      (const auto maybe_name = accept_name(cxt)) {return *maybe_name;}
+  else if (accept(cxt, tk::qname))                   {return cxt.val();}
+  else                                               {return {};}
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 unsigned int
 number(parse_cxt& cxt)
 {
@@ -216,23 +228,13 @@ number(parse_cxt& cxt)
 
 /*------------------------------------------------------------------------------------------------*/
 
-boost::optional<std::string>
-target(parse_cxt& cxt)
-{
-  if      (const auto maybe_name = accept_name(cxt)) {return *maybe_name;}
-  else if (accept(cxt, tk::qname))              {return cxt.val();}
-  else                                               {return {};}
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
 template <typename Fun>
 void
 input_arcs(parse_cxt& cxt, Fun&& add_arc)
 {
   while (true)
   {
-    const auto maybe_target = target(cxt);
+    const auto maybe_target = accept_id(cxt);
     if (not maybe_target) {break;} // no more arcs
 
     auto arc_ty = pn::arc::type::normal;
@@ -271,7 +273,7 @@ output_arcs(parse_cxt& cxt, Fun&& add_arc)
 {
   while (true)
   {
-    const auto maybe_target = target(cxt);
+    const auto maybe_target = accept_id(cxt);
     if (not maybe_target)
     {
       break; // no more arcs
@@ -375,6 +377,21 @@ place(parse_cxt& cxt, pn::net& n)
 
 /*------------------------------------------------------------------------------------------------*/
 
+void
+priority(parse_cxt& cxt, pn::net&)
+{
+  id(cxt);
+  while (accept_id(cxt)) {}
+  if (not accept(cxt, tk::lt))
+  {
+    expect(cxt, tk::gt);
+  }
+  id(cxt);
+  while (accept_id(cxt)) {}
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 } // namespace anonymous
 
 /*------------------------------------------------------------------------------------------------*/
@@ -393,7 +410,8 @@ net(std::istream& in)
     if      (accept(cxt, tk::net))        {net_ptr->name = id(cxt);}
     else if (accept(cxt, tk::transition)) {transition(cxt, *net_ptr);}
     else if (accept(cxt, tk::place))      {place(cxt, *net_ptr);}
-    else                                       {error(cxt);}
+    else if (accept(cxt, tk::prio))       {priority(cxt, *net_ptr);}
+    else                                  {error(cxt);}
   };
   net_ptr->format = conf::pn_format::net;
   return net_ptr;

@@ -168,15 +168,9 @@ accept_name(parse_cxt& cxt)
 boost::optional<std::string>
 accept_id(parse_cxt& cxt)
 {
-  if (const auto maybe_name = accept_name(cxt))
-  {
-    return *maybe_name;
-  }
-  else
-  {
-    if   (accept(cxt, tk::qname)) {return cxt.val();}
-    else                               {return {};}
-  }
+  if      (const auto maybe_name = accept_name(cxt)) {return *maybe_name;}
+  else if (accept(cxt, tk::qname))                   {return cxt.val();}
+  else                                               {return {};}
 }
 
 /*------------------------------------------------------------------------------------------------*/
