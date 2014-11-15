@@ -59,7 +59,7 @@ error(Cxt& cxt)
 {
   const auto tk = cxt.current();
   throw parse_error( "Unexpected '" + tk.val + "' at " + std::to_string(tk.line) + ":"
-                   + std::to_string(tk.column));
+                   + std::to_string(tk.column - tk.val.size()));
 }
 
 /*------------------------------------------------------------------------------------------------*/
