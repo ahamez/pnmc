@@ -1,12 +1,16 @@
-#include <algorithm>
+#include <algorithm> // search
 #include <array>
 #include <cassert>
 #include <deque>
 #include <iostream>
 #include <limits>
 #include <regex>
+#include <sstream>
 #include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/optional.hpp>
 
 #include "shared/parsers/parse_error.hh"
@@ -27,11 +31,12 @@ static constexpr auto keywords_gap = 1000u;
 // token and because submatches of regular expressions start at 1 (0 is the whole match).
 enum class tk { skip = 1u, newline, number, qname, name, colon, comma
               , lbracket, rbracket, arrow, lparen, rparen, question, exclamation, minus, mult
-              , comment, lt, gt
-              , net = keywords_gap, transition, place, prio};
+              , lt, gt
+              , net = keywords_gap, transition, place, prio, module};
 
 /*------------------------------------------------------------------------------------------------*/
 
+using namespace std::string_literals;
 using token = token_holder<tk>;
 using parse_cxt = parse_context<tk>;
 
@@ -42,7 +47,7 @@ template <typename InputIterator>
 auto
 tokens(InputIterator&& begin, InputIterator&& end)
 {
-  static constexpr std::array<const char*, 4> keywords = {{"net", "tr", "pl", "pr"}};
+  static constexpr std::array<const char*, 5> keywords = {{"net", "tr", "pl", "pr", "md"}};
   // Order must match enum token_t
   static const std::regex regex
   {
@@ -62,7 +67,6 @@ tokens(InputIterator&& begin, InputIterator&& end)
     "(!)|"                        // exclamation mark
     "(-)|"                        // minus
     "(\\*)|"                      // multiplication
-    "(^#[^\\n]*)|"                // comments start at the beginning of a line
     "(<)|"                        // less than
     "(>)"                         // upper than
   };
@@ -71,7 +75,6 @@ tokens(InputIterator&& begin, InputIterator&& end)
   auto line = 1ul;
   auto column = 1ul;
   std::smatch match;
-  bool last_match_is_newline = true;
   std::deque<token> tokens;
 
   while (true)
@@ -83,34 +86,14 @@ tokens(InputIterator&& begin, InputIterator&& end)
     if (match.position() != 0)
     {
       throw parse_error( "Unexpected '" + match.prefix().str() + "' at " + std::to_string(line)
-                       + ':' + std::to_string(column));
+                       + ':' + std::to_string(column - match.prefix().str().size()));
     }
 
     column += match.length();
     begin += match.length();
 
-    if (match[pos(tk::skip)].matched)
-    {
-      continue;
-    }
-
-    if (match[pos(tk::newline)].matched)
-    {
-      last_match_is_newline = true;
-      column = 1;
-      line += 1;
-      continue;
-    }
-
-    if (match[pos(tk::comment)].matched)
-    {
-      if (not last_match_is_newline)
-      {
-        throw parse_error("Invalid comment at line " + std::to_string(line));
-      }
-      continue;
-    }
-    last_match_is_newline = false;
+    if (match[pos(tk::skip)].matched)    {continue;}
+    if (match[pos(tk::newline)].matched) {column = 1; ++line; continue;}
 
     // Get the type of token by looking for the first successful submatch.
     const auto ty = [&match]
@@ -206,9 +189,9 @@ id(parse_cxt& cxt)
 boost::optional<std::string>
 accept_id(parse_cxt& cxt)
 {
-  if      (const auto maybe_name = accept_name(cxt)) {return *maybe_name;}
-  else if (accept(cxt, tk::qname))                   {return cxt.val();}
-  else                                               {return {};}
+  if      (const auto n = accept_name(cxt)) {return *n;}
+  else if (accept(cxt, tk::qname))          {return cxt.val();}
+  else                                      {return {};}
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -253,8 +236,8 @@ input_arcs(parse_cxt& cxt, Fun&& add_arc)
     }
     else if (accept(cxt, tk::question))
     {
-      if (accept(cxt, tk::minus)) {arc_ty = pn::arc::type::inhibitor;}
-      else                             {arc_ty = pn::arc::type::read;}
+      if   (accept(cxt, tk::minus)) {arc_ty = pn::arc::type::inhibitor;}
+      else                          {arc_ty = pn::arc::type::read;}
       valuation = number(cxt);
     }
     else if (accept(cxt, tk::exclamation))
@@ -392,6 +375,70 @@ priority(parse_cxt& cxt, pn::net&)
 
 /*------------------------------------------------------------------------------------------------*/
 
+void
+module(parse_cxt& cxt, std::unordered_map<std::string, std::vector<std::string>>& modules_id)
+{
+  const auto insertion = modules_id.emplace(id(cxt), std::vector<std::string>{});
+  while (const auto pl = accept_id(cxt))
+  {
+    insertion.first->second.emplace_back(*pl);
+  }
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+/// @brief Remove commented lines and uncomment '#!' pragmas.
+std::string
+preprocess(std::istream& in)
+{
+  std::stringstream ss;
+  std::for_each( std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}
+               , [&](char c)
+                 {
+                   static bool comment = false;
+                   if      (comment and c == '!')     {comment = false; ss << ' ';}
+                   else if (comment and c == '\n')    {comment = false; ss << c;}
+                   else if (not comment and c == '#') {comment = true;  ss << ' ';}
+                   else if (not comment)              {ss << c;}
+                 });
+  return ss.str();
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+pn::module
+make_module( const std::string& id, std::unordered_map<std::string, std::vector<std::string>>& graph
+           , pn::net& net, const std::string& container, std::unordered_set<std::string>& places)
+{
+  const auto place_search = net.places_by_id().find(id);
+  if (place_search != end(net.places_by_id()))
+  {
+    places.insert(place_search->id);
+    return pn::make_module(*place_search);
+  }
+  else
+  {
+    pn::module_node m{id};
+    const auto submodule_search = graph.find(id);
+    if (submodule_search == end(graph))
+    {
+      throw parse_error("Undefined module or place " + id + " in module " + container);
+    }
+    for (const auto& sub : submodule_search->second)
+    {
+      m.add_submodule(make_module(sub, graph, net, id, places));
+    }
+    const auto insertion = net.modules.emplace(id, pn::make_module(m));
+    if (not insertion.second)
+    {
+      throw parse_error("Module or place " + id + " is present in another module");
+    }
+    return insertion.first->second;
+  }
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 } // namespace anonymous
 
 /*------------------------------------------------------------------------------------------------*/
@@ -399,11 +446,13 @@ priority(parse_cxt& cxt, pn::net&)
 std::shared_ptr<pn::net>
 net(std::istream& in)
 {
-  const std::string text{std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}};
   auto net_ptr = std::make_shared<pn::net>();
 
+  const auto text = preprocess(in);
   const auto tks = tokens(begin(text), end(text));
-  parse_cxt cxt {tks.cbegin(), tks.cend()};
+  parse_cxt cxt{tks.cbegin(), tks.cend()};
+
+  std::unordered_map<std::string, std::vector<std::string>> modules_id;
 
   while (not cxt.eof())
   {
@@ -411,8 +460,46 @@ net(std::istream& in)
     else if (accept(cxt, tk::transition)) {transition(cxt, *net_ptr);}
     else if (accept(cxt, tk::place))      {place(cxt, *net_ptr);}
     else if (accept(cxt, tk::prio))       {priority(cxt, *net_ptr);}
+    else if (accept(cxt, tk::module))     {module(cxt, modules_id);}
     else                                  {error(cxt);}
   };
+
+  if (modules_id.size() > 0)
+  {
+    const auto& net_name = net_ptr->name;
+    const auto& root_search = modules_id.find(net_name);
+    std::unordered_set<std::string> places_encountered;
+
+    if (root_search == end(modules_id))
+    {
+      throw parse_error("No root module(s).");
+    }
+    for (const auto& submodule : root_search->second)
+    {
+      net_ptr->root_modules.emplace_back(make_module( submodule, modules_id, *net_ptr, net_name
+                                                    , places_encountered));
+    }
+    std::vector<std::string> invalid;
+    std::for_each( begin(net_ptr->places_by_id()), end(net_ptr->places_by_id())
+                 , [&](const auto& p)
+                      {
+                        if (not places_encountered.count(p.id)) {invalid.push_back(p.id);}
+                      });
+    std::for_each( begin(modules_id), end(modules_id)
+                 , [&](const auto& kv)
+                      {
+                        if (kv.first != net_ptr->name and not net_ptr->modules.count(kv.first))
+                        {
+                          invalid.push_back(kv.first);
+                        }
+                      });
+    if (not invalid.empty())
+    {
+      const auto msg = boost::algorithm::join(invalid, ", ");
+      throw parse_error("The following modules or places do not belong to any module: " + msg);
+    }
+  }
+
   net_ptr->format = conf::pn_format::net;
   return net_ptr;
 }

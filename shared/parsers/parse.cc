@@ -22,7 +22,6 @@
 #include "shared/parsers/nupn.hh"
 #include "shared/parsers/parse.hh"
 #include "shared/parsers/pnml.hh"
-#include "shared/parsers/xml.hh"
 #include "shared/util/paths.hh"
 
 namespace pnmc { namespace parsers {
@@ -86,7 +85,6 @@ parse(const configuration& conf)
     case (conf::pn_format::net)  : return parsers::net(*in);
     case (conf::pn_format::nupn) : return parsers::nupn(*in);
     case (conf::pn_format::pnml) : return parsers::pnml(*in);
-    case (conf::pn_format::xml)  : return parsers::xml(*in);
   }
 }
 

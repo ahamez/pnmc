@@ -7,7 +7,7 @@ namespace pnmc { namespace pn {
 /*------------------------------------------------------------------------------------------------*/
 
 net::net()
-  : name(), places_set(), transitions_set(), modules(nullptr)
+  : name(), places_set(), transitions_set(), modules(), root_modules()
 {}
 
 /*------------------------------------------------------------------------------------------------*/

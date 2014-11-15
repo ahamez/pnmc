@@ -21,40 +21,51 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-struct mk_order_visitor
-  : public boost::static_visitor<order_builder>
+order_builder
+make_hierarchical_order(const std::vector<pn::module>& modules)
 {
-  using result_type = order_builder;
-
-  // Place: base case of the recursion, there's no more possible nested hierarchies.
-  result_type
-  operator()(const pn::place* p)
-  const
+  struct mk_order_visitor
+    : public boost::static_visitor<order_builder>
   {
-    return p->connected() ? order_builder(p->id) : order_builder();
-  }
+    using result_type = order_builder;
 
-  // Hierarchy.
-  result_type
-  operator()(const pn::module_node& m)
-  const
-  {
-    assert(not m.nested.empty());
-    order_builder local_ob;
-    if (m.nested.size() == 1)
+    // Place: base case of the recursion, there's no more possible nested hierarchies.
+    result_type
+    operator()(const pn::place& p)
+    const
     {
-      return boost::apply_visitor(*this, *m.nested.front());
+      return p.connected() ? order_builder(p.id) : order_builder();
     }
-    else
+
+    // Hierarchy.
+    result_type
+    operator()(const pn::module_node& m)
+    const
     {
-      for (const auto& nested_module : m.nested)
+      assert(not m.all().empty());
+      order_builder local_ob;
+      if (m.all().size() == 1)
       {
-        local_ob = local_ob << boost::apply_visitor(*this, *nested_module);
+        return boost::apply_visitor(*this, m.all().front().variant());
       }
-      return order_builder(m.id, local_ob);
+      else
+      {
+        for (const auto& nested_module : m.all())
+        {
+          local_ob << boost::apply_visitor(*this, nested_module.variant());
+        }
+        return order_builder(m.id(), local_ob);
+      }
     }
+  };
+
+  order_builder current;
+  for (const auto& sub : modules)
+  {
+    current << boost::apply_visitor(mk_order_visitor{}, sub.variant());
   }
-};
+  return current;
+}
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -70,7 +81,7 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
       {
         std::cerr << " and has an initial marking";
       }
-      std::cerr << "." << std::endl;
+      std::cerr << ".\n";
     }
   }
 
@@ -217,20 +228,20 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
     shared::dump_hypergraph_dot(conf, graph);
   }
   // Use model's hierarchy, if any.
-  else if (not conf.order_flat and net.modules)
+  else if (not conf.order_flat and not net.modules.empty())
   {
     if (net.timed())
     {
-      throw std::invalid_argument("Hierarchical order for timed PN is not supported yet");
+      throw std::runtime_error("Hierarchical order for timed PN is not supported yet");
     }
-    ob = boost::apply_visitor(mk_order_visitor(), *net.modules).nested();
+    ob = make_hierarchical_order(net.root_modules);
   }
   // Random order, mostly used for developpement purposes.
   else if (conf.order_random)
   {
     if (net.timed())
     {
-      throw std::invalid_argument("Random order for timed PN is not supported yet");
+      throw std::runtime_error("Random order for timed PN is not supported yet");
     }
 
     std::vector<std::string> tmp;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+
 #pragma GCC diagnostic push
 #if defined(__GNUC__) && !defined(__clang__)
 # pragma GCC diagnostic ignored "-Wunused-local-typedefs"
@@ -77,8 +79,9 @@ public:
   /// @brief The set of transitions.
   transitions_type transitions_set;
 
-  /// @brief The hierarchical description, if any.
-  module modules;
+  /// @brief The hierarchical description.
+  std::unordered_map<std::string, module> modules;
+  std::vector<module> root_modules;
 
   /// @brief The original format of this net.
   conf::pn_format format;

@@ -21,8 +21,7 @@ static const auto format_map = std::map<std::string, pn_format>
   { std::make_pair("ndr" , pn_format::ndr)
   , std::make_pair("net" , pn_format::net)
   , std::make_pair("nupn", pn_format::nupn)
-  , std::make_pair("pnml", pn_format::pnml)
-  , std::make_pair("xml" , pn_format::xml)};
+  , std::make_pair("pnml", pn_format::pnml)};
 
 static const auto possible_format_values = [&]
 {
