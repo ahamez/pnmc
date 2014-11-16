@@ -161,11 +161,11 @@ const
   // Initialize the libsdd.
   sdd_conf sconf;
   sconf.sdd_unique_table_size = conf.sdd_ut_size;
-  sconf.sdd_difference_cache_size = conf.sdd_diff_cache_size;
-  sconf.sdd_intersection_cache_size = conf.sdd_inter_cache_size;
-  sconf.sdd_sum_cache_size = conf.sdd_sum_cache_size;
+  sconf.sdd_difference_cache_size = conf.cache_sizes.at("diff");
+  sconf.sdd_intersection_cache_size = conf.cache_sizes.at("inter");
+  sconf.sdd_intersection_cache_size = conf.cache_sizes.at("sum");
   sconf.hom_unique_table_size = conf.hom_ut_size;
-  sconf.hom_cache_size = conf.hom_cache_size;
+  sconf.sdd_intersection_cache_size = conf.cache_sizes.at("hom");
   auto manager_ptr = std::make_unique<sdd::manager<sdd_conf>>(sdd::init(sconf));
   auto& manager = *manager_ptr;
 

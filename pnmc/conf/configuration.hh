@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <map>
 #include <set>
 #include <string>
 
@@ -76,11 +77,7 @@ struct configuration
   bool pn_statistics;
 
   std::size_t sdd_ut_size;
-  std::size_t sdd_diff_cache_size;
-  std::size_t sdd_inter_cache_size;
-  std::size_t sdd_sum_cache_size;
   std::size_t hom_ut_size;
-  std::size_t hom_cache_size;
 
   boost::filesystem::path output_dir;
 
@@ -93,6 +90,8 @@ struct configuration
 
   /// @brief Stop state space generation after this much time.
   std::chrono::duration<double> max_time;
+
+  std::map<std::string, std::size_t> cache_sizes;
 };
 
 /*------------------------------------------------------------------------------------------------*/

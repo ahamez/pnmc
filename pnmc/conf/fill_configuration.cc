@@ -1,3 +1,4 @@
+#include <algorithm> // copy, transform
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -30,6 +31,7 @@ const auto help_str = "help";
 const auto help_exp_str = "help-exp";
 const auto version_str = "version";
 const auto conf_str = "conf";
+const auto output_dir_str = "output-dir";
 
 // Order options
 const auto order_show_str = "order-show";
@@ -56,13 +58,7 @@ const auto mc_count_tokens_str = "count-tokens";
 
 // libsdd options
 const auto libsdd_sdd_ut_size_str = "sdd-ut-size";
-const auto libsdd_sdd_diff_cache_size_str = "sdd-diff-cache-size";
-const auto libsdd_sdd_inter_cache_size_str = "sdd-inter-cache-size";
-const auto libsdd_sdd_sum_cache_size_str = "sdd-sum-size-cache";
 const auto libsdd_hom_ut_size_str = "hom-ut-size";
-const auto libsdd_hom_cache_size_str = "hom-cache-size";
-
-const auto output_dir_str = "output-dir";
 
 // Advanced options
 const auto limit_time_str = "time-limit";
@@ -77,12 +73,27 @@ const auto hom_json_export_str = "hom-json";
 
 /*------------------------------------------------------------------------------------------------*/
 
+// Caches size
+const auto cache_str = "cache";
+static const auto default_cache_sizes = std::map<std::string, std::size_t>
+  { {"hom" , 8'000'000}
+  , {"diff", 2'000'000}
+  , {"inter", 2'000'000}
+  , {"sum", 2'000'000}};
+static const auto cache_values = [&]
+{
+  using namespace boost::adaptors;
+  return "["s + boost::algorithm::join(default_cache_sizes | map_keys, "|") + "]+"s;
+}();
+
+/*------------------------------------------------------------------------------------------------*/
+
 // DOT export
-const auto dot_str = "dot";
+const auto dot_export_str = "dot";
 static const auto dot_export_values_map = std::map<std::string, mc::shared::dot_export>
-  { std::make_pair("force" , mc::shared::dot_export::force)
-  , std::make_pair("hom"   , mc::shared::dot_export::hom)
-  , std::make_pair("sdd"   , mc::shared::dot_export::sdd)};
+  { {"force" , mc::shared::dot_export::force}
+  , {"hom"   , mc::shared::dot_export::hom}
+  , {"sdd"   , mc::shared::dot_export::sdd}};
 static const auto dot_export_values = [&]
 {
   using namespace boost::adaptors;
@@ -149,23 +160,21 @@ fill_configuration(int argc, const char** argv)
     (show_final_sdd_bytes_str   , "Show the number of bytes used by the final state space's SDD")
     (hom_json_export_str        , po::value<std::string>()
                                 , "Export homomorphism to a JSON file")
-    (dot_str                    , po::value<std::string>()
+    (dot_export_str             , po::value<std::string>()
                                 , dot_export_values.c_str())
     (order_load_str             , po::value<std::string>()
                                 , "Load order from a JSON file")
     (sample_nb_sdd_str          , "Sample the number of SDD regularly")
     (final_sdd_stats_str        , "Export final SDD's statistics (may be costly) to JSON file")
     (pn_stats_str               , "Export model's statistics to JSON file")
+    (cache_str                  , po::value<std::string>()
+                                , cache_values.c_str())
   ;
 
   po::options_description hidden_libsdd_options("Hidden libsdd options");
   hidden_libsdd_options.add_options()
     (libsdd_sdd_ut_size_str          , po::value<unsigned int>()->default_value(2000000))
-    (libsdd_sdd_diff_cache_size_str  , po::value<unsigned int>()->default_value(500000))
-    (libsdd_sdd_inter_cache_size_str , po::value<unsigned int>()->default_value(500000))
-    (libsdd_sdd_sum_cache_size_str   , po::value<unsigned int>()->default_value(2000000))
     (libsdd_hom_ut_size_str          , po::value<unsigned int>()->default_value(25000))
-    (libsdd_hom_cache_size_str       , po::value<unsigned int>()->default_value(4000000))
   ;
 
   po::options_description hidden_options("Hidden options");
@@ -296,11 +305,7 @@ fill_configuration(int argc, const char** argv)
 
   // Hidden libsdd options
   conf.sdd_ut_size= vm[libsdd_sdd_ut_size_str].as<unsigned int>();
-  conf.sdd_diff_cache_size = vm[libsdd_sdd_diff_cache_size_str].as<unsigned int>();;
-  conf.sdd_inter_cache_size = vm[libsdd_sdd_inter_cache_size_str].as<unsigned int>();;
-  conf.sdd_sum_cache_size = vm[libsdd_sdd_sum_cache_size_str].as<unsigned int>();;
   conf.hom_ut_size = vm[libsdd_hom_ut_size_str].as<unsigned int>();;
-  conf.hom_cache_size = vm[libsdd_hom_cache_size_str].as<unsigned int>();;
 
   // Model checking options
   conf.compute_dead_states = vm.count(mc_dead_states_str);
@@ -340,20 +345,50 @@ fill_configuration(int argc, const char** argv)
     conf.output_dir = boost::filesystem::current_path();
   }
 
-  if (vm.count(dot_str))
+  if (vm.count(dot_export_str))
   {
     using separator = boost::char_separator<char>;
-    boost::tokenizer<separator> tks{vm[dot_str].as<std::string>(), separator{","}};
+    boost::tokenizer<separator> tks{vm[dot_export_str].as<std::string>(), separator{","}};
     std::transform( begin(tks), end(tks), std::inserter(conf.dot_dump, end(conf.dot_dump))
                   , [](const auto& s)
                       {
                         const auto search = dot_export_values_map.find(s);
                         if (search == end(dot_export_values_map))
                         {
-                          throw po::error("Invalid "s + dot_str + " option value: "s + s);
+                          throw po::error("Invalid "s + dot_export_str + " option value: "s + s);
                         }
                         return search->second;
                       });
+  }
+
+  conf.cache_sizes = default_cache_sizes;
+  if (vm.count(cache_str))
+  {
+    using separator = boost::char_separator<char>;
+    boost::tokenizer<separator> tks{vm[cache_str].as<std::string>(), separator{","}};
+    for (const auto& tk : tks)
+    {
+      std::vector<std::string> tmp;
+      boost::tokenizer<separator> subtks{tk, separator{":"}};
+      std::copy(begin(subtks), end(subtks), std::back_inserter(tmp));
+      if (tmp.size() != 2)
+      {
+        throw po::error("Invalid "s + cache_str + " option value: "s + tk);
+      }
+      const auto search = conf.cache_sizes.find(tmp[0]);
+      if (search == end(conf.cache_sizes))
+      {
+        throw po::error("Invalid "s + cache_str + " option value: "s + tk);
+      }
+      try
+      {
+        search->second = std::stoul(tmp[1]);
+      }
+      catch (std::invalid_argument&)
+      {
+        throw po::error("Invalid "s + cache_str + " option value: "s + tk);
+      }
+    }
   }
 
   return conf;
