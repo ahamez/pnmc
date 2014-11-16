@@ -37,7 +37,7 @@ input_options()
 {
   po::options_description options("Input file format options");
   options.add_options()
-    (pn_input_str   , po::value<std::string>()->default_value("xml")
+    (pn_input_str   , po::value<std::string>()->default_value("net")
                     , possible_format_values.c_str())
     (decompress_str , "Decompress file to read");
   return options;
