@@ -10,7 +10,6 @@
 #include "shared/parsers/nupn.hh"
 #include "shared/parsers/parse.hh"
 #include "shared/parsers/pnml.hh"
-#include "shared/util/paths.hh"
 
 namespace pnmc { namespace parsers {
   
