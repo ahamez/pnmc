@@ -4,7 +4,7 @@
 
 #include "conf/configuration.hh"
 #include "mc/mc_impl.hh"
-#include "shared/pn/net.hh"
+#include "support/pn/net.hh"
 
 namespace pnmc { namespace mc {
 

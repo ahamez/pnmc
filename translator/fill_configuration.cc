@@ -10,8 +10,8 @@
 #pragma GCC diagnostic pop
 
 #include "fill_configuration.hh"
-#include "shared/conf/options.hh"
-#include "shared/util/paths.hh"
+#include "support/conf/options.hh"
+#include "support/util/paths.hh"
 
 namespace pnmc { namespace conf {
 

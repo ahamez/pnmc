@@ -7,9 +7,9 @@
 
 #include "conf/fill_configuration.hh"
 #include "mc/mc.hh"
-#include "shared/parsers/parse.hh"
-#include "shared/parsers/parse_error.hh"
-#include "shared/util/paths.hh"
+#include "support/parsers/parse.hh"
+#include "support/parsers/parse_error.hh"
+#include "support/util/paths.hh"
 
 /*------------------------------------------------------------------------------------------------*/
 

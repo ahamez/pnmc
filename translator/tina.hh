@@ -3,7 +3,7 @@
 #include <iosfwd>
 #include <string>
 
-#include "shared/pn/net.hh"
+#include "support/pn/net.hh"
 
 namespace pnmc { namespace translator {
 

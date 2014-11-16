@@ -3,23 +3,22 @@
 #include <sstream>
 #include <string>
 
-#pragma GCC diagnostic push
-#if defined(__GNUC__) && !defined(__clang__)
-# pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-#endif
+#include <boost/algorithm/string/join.hpp>
 #include <boost/program_options.hpp>
-#pragma GCC diagnostic pop
+#include <boost/range/adaptor/map.hpp>
+#include <boost/tokenizer.hpp>
 
 #include "conf/configuration.hh"
 #include "conf/fill_configuration.hh"
-#include "shared/conf/options.hh"
-#include "shared/util/paths.hh"
+#include "support/conf/options.hh"
+#include "support/util/paths.hh"
 
 namespace pnmc { namespace conf {
 
 /*------------------------------------------------------------------------------------------------*/
 
 namespace po = boost::program_options;
+using namespace std::string_literals;
 
 const std::string version
   = "Petri Net Model Checker (built " + std::string(__DATE__) + " " + std::string(__TIME__)  + ")";
@@ -43,9 +42,6 @@ const auto order_reverse_str = "order-reverse";
 const auto order_id_per_hier_str = "order-ids-per-hierarchy";
 const auto order_load_str = "order-load";
 
-// Homomorphisms options
-const auto hom_show_relation_str = "hom-show-relation";
-
 // Statistics options
 const auto show_final_sdd_bytes_str = "show-final-sdd-bytes";
 
@@ -66,20 +62,34 @@ const auto libsdd_sdd_sum_cache_size_str = "sdd-sum-size-cache";
 const auto libsdd_hom_ut_size_str = "hom-ut-size";
 const auto libsdd_hom_cache_size_str = "hom-cache-size";
 
+const auto output_dir_str = "output-dir";
+
 // Advanced options
 const auto limit_time_str = "time-limit";
-const auto final_sdd_dot_export_str = "final-sdd-dot";
 const auto json_str = "json";
 const auto final_sdd_stats_str = "final-sdd-stats";
 const auto results_json_str = "results-json";
 const auto show_time_str = "show-time";
-const auto hypergraph_dot_str = "hypergraph-force-dot";
 const auto fast_exit_str = "fast-exit";
-const auto hom_json_export_str = "hom-json";
-const auto hom_dot_export_str = "hom-dot";
-const auto hom_sat_dot_export_str = "sat-hom-dot";
 const auto sample_nb_sdd_str = "sample-nb-sdd";
 const auto pn_stats_str = "pn-stats";
+const auto hom_json_export_str = "hom-json";
+
+/*------------------------------------------------------------------------------------------------*/
+
+// DOT export
+const auto dot_str = "dot";
+static const auto dot_export_values_map = std::map<std::string, mc::shared::dot_export>
+  { std::make_pair("force" , mc::shared::dot_export::force)
+  , std::make_pair("hom"   , mc::shared::dot_export::hom)
+  , std::make_pair("sdd"   , mc::shared::dot_export::sdd)};
+static const auto dot_export_values = [&]
+{
+  using namespace boost::adaptors;
+  return "["s + boost::algorithm::join(dot_export_values_map | map_keys, "|") + "]+"s;
+}();
+
+/*------------------------------------------------------------------------------------------------*/
 
 boost::optional<configuration>
 fill_configuration(int argc, const char** argv)
@@ -88,11 +98,13 @@ fill_configuration(int argc, const char** argv)
 
   po::options_description general_options("General options");
   general_options.add_options()
-    (help_str     , "Show this help")
-    (help_exp_str , "Show experimental/dev features help")
-    (version_str  , "Show version")
-    (conf_str     , po::value<std::string>()
-                  , "Configure pnmc with a file")
+    (help_str       , "Show this help")
+    (help_exp_str   , "Show experimental/dev features help")
+    (version_str    , "Show version")
+    (conf_str       , po::value<std::string>()
+                    , "Configure pnmc with a file")
+    (output_dir_str , po::value<std::string>()
+                    , "Output directory path")
   ;
 
   po::options_description order_options("Order options");
@@ -135,17 +147,10 @@ fill_configuration(int argc, const char** argv)
                                 , "Number of identifiers per hierarchy")
     (order_only_str             , "Compute order only")
     (show_final_sdd_bytes_str   , "Show the number of bytes used by the final state space's SDD")
-    (final_sdd_dot_export_str   , po::value<std::string>()
-                                , "Export the SDD state space to a DOT file")
-    (hypergraph_dot_str         , po::value<std::string>()
-                                , "Export FORCE's hypergraph to a DOT file")
     (hom_json_export_str        , po::value<std::string>()
                                 , "Export homomorphism to a JSON file")
-    (hom_dot_export_str         , po::value<std::string>()
-                                , "Export homomorphism to a DOT file")
-    (hom_sat_dot_export_str     , po::value<std::string>()
-                                , "Export saturated homomorphism to a DOT file")
-    (hom_show_relation_str      , "Show the transition relation")
+    (dot_str                    , po::value<std::string>()
+                                , dot_export_values.c_str())
     (order_load_str             , po::value<std::string>()
                                 , "Load order from a JSON file")
     (sample_nb_sdd_str          , "Sample the number of SDD regularly")
@@ -282,9 +287,6 @@ fill_configuration(int argc, const char** argv)
   conf.order_reverse = vm.count(order_reverse_str);
   conf.order_id_per_hierarchy = vm[order_id_per_hier_str].as<unsigned int>();
 
-  // Hom options
-  conf.show_relation = vm.count(hom_show_relation_str);
-
   // Statistics options
   conf.show_final_sdd_bytes = vm.count(show_final_sdd_bytes_str);
 
@@ -311,10 +313,6 @@ fill_configuration(int argc, const char** argv)
   conf.sample_nb_sdd = vm.count(sample_nb_sdd_str);
   conf.final_sdd_statistics = vm.count(final_sdd_stats_str);
   conf.pn_statistics = vm.count(pn_stats_str);
-  if (vm.count(final_sdd_dot_export_str))
-  {
-    conf.final_sdd_dot_file = vm[final_sdd_dot_export_str].as<std::string>();
-  }
   if (vm.count(json_str))
   {
     conf.json_file = util::file(vm[json_str].as<std::string>());
@@ -328,26 +326,36 @@ fill_configuration(int argc, const char** argv)
     conf.order_flat = true;
   }
   conf.max_time = std::chrono::duration<double>(vm[limit_time_str].as<unsigned int>());
-  if (vm.count(hypergraph_dot_str))
-  {
-    conf.hypergraph_dot_file = util::file(vm[hypergraph_dot_str].as<std::string>());
-  }
-  if (vm.count(hom_json_export_str))
-  {
-    conf.hom_json_file = util::file(vm[hom_json_export_str].as<std::string>());
-  }
-  if (vm.count(hom_dot_export_str))
-  {
-    conf.hom_dot_file = util::file(vm[hom_dot_export_str].as<std::string>());
-  }
-  if (vm.count(hom_sat_dot_export_str))
-  {
-    conf.sat_hom_dot_file = util::file(vm[hom_sat_dot_export_str].as<std::string>());
-  }
   if (vm.count(order_load_str))
   {
     conf.order_file = util::in_file(vm[order_load_str].as<std::string>());
   }
+
+  if (vm.count(output_dir_str))
+  {
+    conf.output_dir = util::file(vm[output_dir_str].as<std::string>());
+  }
+  else
+  {
+    conf.output_dir = boost::filesystem::current_path();
+  }
+
+  if (vm.count(dot_str))
+  {
+    using separator = boost::char_separator<char>;
+    boost::tokenizer<separator> tks{vm[dot_str].as<std::string>(), separator{","}};
+    std::transform( begin(tks), end(tks), std::inserter(conf.dot_dump, end(conf.dot_dump))
+                  , [](const auto& s)
+                      {
+                        const auto search = dot_export_values_map.find(s);
+                        if (search == end(dot_export_values_map))
+                        {
+                          throw po::error("Invalid "s + dot_str + " option value: "s + s);
+                        }
+                        return search->second;
+                      });
+  }
+
   return conf;
 }
 

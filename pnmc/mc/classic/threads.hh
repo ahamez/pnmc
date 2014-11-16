@@ -5,7 +5,7 @@
 #include "conf/configuration.hh"
 #include "mc/classic/sdd.hh"
 #include "mc/shared/statistics.hh"
-#include "shared/util/timer.hh"
+#include "support/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

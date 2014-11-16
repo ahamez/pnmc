@@ -1,15 +1,17 @@
 #pragma once
 
 #include <chrono>
+#include <set>
 #include <string>
 
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 
-#include "shared/parsers/configuration.hh"
+#include "mc/shared/export_configuration.hh"
+#include "support/parsers/configuration.hh"
 
 namespace pnmc { namespace conf {
-  
+
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief The configuration of pnmc at runtime.
@@ -39,9 +41,6 @@ struct configuration
 
   /// @brief Stop after order computation.
   bool order_only;
-
-  /// @brief Show the homomorphism of the transition relation.
-  bool show_relation;
 
   /// @brief Show the time spent in various steps.
   bool show_time;
@@ -83,14 +82,14 @@ struct configuration
   std::size_t hom_ut_size;
   std::size_t hom_cache_size;
 
-  boost::optional<boost::filesystem::path> final_sdd_dot_file;
+  boost::filesystem::path output_dir;
+
   boost::optional<boost::filesystem::path> json_file;
   boost::optional<boost::filesystem::path> results_json_file;
-  boost::optional<boost::filesystem::path> hypergraph_dot_file;
-  boost::optional<boost::filesystem::path> hom_dot_file;
-  boost::optional<boost::filesystem::path> sat_hom_dot_file;
   boost::optional<boost::filesystem::path> hom_json_file;
   boost::optional<boost::filesystem::path> order_file;
+
+  std::set<mc::shared::dot_export> dot_dump;
 
   /// @brief Stop state space generation after this much time.
   std::chrono::duration<double> max_time;

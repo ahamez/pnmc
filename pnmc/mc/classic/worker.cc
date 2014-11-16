@@ -15,11 +15,11 @@
 #include "mc/classic/sharp_output.hh"
 #include "mc/classic/threads.hh"
 #include "mc/classic/worker.hh"
-#include "mc/shared/dump.hh"
+#include "mc/shared/export.hh"
 #include "mc/shared/results.hh"
 #include "mc/shared/statistics.hh"
 #include "mc/shared/exceptions.hh"
-#include "shared/util/timer.hh"
+#include "support/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -154,6 +154,8 @@ void
 worker::operator()(const pn::net& net)
 const
 {
+  using dot_sdd = shared::dot_sdd<sdd_conf>;
+
   util::timer total_timer;
 
   // Initialize the libsdd.
@@ -189,22 +191,13 @@ const
 
   // Compute the transition relation.
   const auto h_classic = firing_rule(conf, o, net, transitions_bitset, stats, stop);
-  if (conf.show_relation)
-  {
-    std::cout << h_classic << std::endl;
-  }
-
   // Rewrite the transition relation.
   const auto h = rewrite(conf, o, h_classic, stats);
-  if (conf.show_relation)
-  {
-    std::cout << h << std::endl;
-  }
 
   if (conf.order_only)
   {
     dump_json(conf, stats, manager, sdd::zero<sdd_conf>(), net);
-    shared::dump_hom(conf, h_classic, h);
+    shared::export_dot(conf, "classic", h_classic, "rewritten", h);
     return;
   }
 
@@ -220,7 +213,7 @@ const
               << std::endl;
     stats.interrupted = true;
     dump_json(conf, stats, manager, m, net);
-    shared::dump_hom(conf, h_classic, h);
+    shared::export_dot(conf, "classic", h_classic, "rewritten", h);
     return;
   }
   catch (const shared::interrupted&)
@@ -229,7 +222,7 @@ const
               << "s." << std::endl;
     stats.interrupted = true;
     dump_json(conf, stats, manager, m, net);
-    shared::dump_hom(conf, h_classic, h);
+    shared::export_dot(conf, "classic", h_classic, "rewritten", h);
     return;
   }
 
@@ -343,10 +336,12 @@ const
 
   stats.total_duration = total_timer.duration();
 
-  shared::dump_sdd_dot(conf, m, o);
   shared::dump_json(conf, stats, manager, m, net);
   shared::dump_results(conf, res);
-  shared::dump_hom(conf, h_classic, h);
+
+  shared::export_dot(conf, "classic", h_classic, "rewritten", h);
+  shared::export_dot(conf, "initial", dot_sdd{m0, o}, "final", dot_sdd{m, o});
+
 
   if (conf.fast_exit)
   {

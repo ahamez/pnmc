@@ -13,9 +13,9 @@
 #include <sdd/tools/order.hh>
 
 #include "mc/classic/make_order.hh"
-#include "mc/shared/dump.hh"
-#include "shared/util/paths.hh"
-#include "shared/util/timer.hh"
+#include "mc/shared/export.hh"
+#include "support/util/paths.hh"
+#include "support/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -225,7 +225,7 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
     stats.force_spans = force.spans();
 
     // Dump the hypergraph to a DOT file if required by the configuration.
-    shared::dump_hypergraph_dot(conf, graph);
+    shared::export_dot(conf, "force", graph);
   }
   // Use model's hierarchy, if any.
   else if (not conf.order_flat and not net.modules.empty())

@@ -2,7 +2,7 @@
 
 #include "mc/classic/sdd.hh"
 #include "mc/shared/results.hh"
-#include "shared/pn/net.hh"
+#include "support/pn/net.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

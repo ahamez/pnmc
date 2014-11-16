@@ -21,8 +21,8 @@
 #include "mc/classic/set.hh"
 #include "mc/shared/interruptible.hh"
 #include "mc/shared/live.hh"
-#include "shared/pn/constants.hh"
-#include "shared/util/timer.hh"
+#include "support/pn/constants.hh"
+#include "support/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

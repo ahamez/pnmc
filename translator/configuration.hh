@@ -3,7 +3,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 
-#include "shared/parsers/configuration.hh"
+#include "support/parsers/configuration.hh"
 
 namespace pnmc { namespace conf {
   
