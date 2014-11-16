@@ -16,7 +16,6 @@ namespace po = boost::program_options;
 /*------------------------------------------------------------------------------------------------*/
 
 static const auto pn_input_str   = "pn-format";
-static const auto decompress_str = "decompress";
 static const auto format_map = std::map<std::string, pn_format>
   { std::make_pair("ndr" , pn_format::ndr)
   , std::make_pair("net" , pn_format::net)
@@ -39,7 +38,7 @@ input_options()
   options.add_options()
     (pn_input_str   , po::value<std::string>()->default_value("net")
                     , possible_format_values.c_str())
-    (decompress_str , "Decompress file to read");
+  ;
   return options;
 }
 
@@ -72,7 +71,6 @@ configure_parser(const boost::program_options::variables_map& vm)
     conf.file = util::in_file(vm["input-file"].as<std::string>());
   }
   conf.file_type = pn_format_from_options(vm);
-  conf.decompress = vm.count(decompress_str);
   return conf;
 }
 

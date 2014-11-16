@@ -14,7 +14,6 @@ namespace pnmc { namespace parsers {
 struct configuration
 {
   boost::optional<boost::filesystem::path> file;
-  bool decompress;
   conf::pn_format file_type;
 };
 
