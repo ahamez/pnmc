@@ -10,6 +10,7 @@
 #include <boost/tokenizer.hpp>
 
 #include "conf/configuration.hh"
+#include "conf/default.hh"
 #include "conf/fill_configuration.hh"
 #include "support/conf/options.hh"
 #include "support/util/paths.hh"
@@ -44,9 +45,6 @@ const auto order_reverse_str = "order-reverse";
 const auto order_id_per_hier_str = "order-ids-per-hierarchy";
 const auto order_load_str = "order-load";
 
-// Statistics options
-const auto show_final_sdd_bytes_str = "show-final-sdd-bytes";
-
 // Petri net options
 const auto pn_marking_bound_str = "marking-bound";
 const auto pn_one_safe_str = "1-safe";
@@ -55,10 +53,6 @@ const auto pn_one_safe_str = "1-safe";
 const auto mc_dead_transitions_str = "dead-transitions";
 const auto mc_dead_states_str = "dead-states";
 const auto mc_count_tokens_str = "count-tokens";
-
-// libsdd options
-const auto libsdd_sdd_ut_size_str = "sdd-ut-size";
-const auto libsdd_hom_ut_size_str = "hom-ut-size";
 
 // Advanced options
 const auto limit_time_str = "time-limit";
@@ -75,15 +69,20 @@ const auto hom_json_export_str = "hom-json";
 
 // Caches size
 const auto cache_str = "cache";
-static const auto default_cache_sizes = std::map<std::string, std::size_t>
-  { {"hom" , 8'000'000}
-  , {"diff", 2'000'000}
-  , {"inter", 2'000'000}
-  , {"sum", 2'000'000}};
 static const auto cache_values = [&]
 {
   using namespace boost::adaptors;
-  return "["s + boost::algorithm::join(default_cache_sizes | map_keys, "|") + "]+"s;
+  return "(["s + boost::algorithm::join(default_cache_sizes | map_keys, "|") + "]:value)+"s;
+}();
+
+/*------------------------------------------------------------------------------------------------*/
+
+// Unicity tables size
+const auto ut_str = "ut";
+static const auto ut_values = [&]
+{
+  using namespace boost::adaptors;
+  return "(["s + boost::algorithm::join(default_ut_sizes | map_keys, "|") + "]:value)+"s;
 }();
 
 /*------------------------------------------------------------------------------------------------*/
@@ -157,7 +156,6 @@ fill_configuration(int argc, const char** argv)
     (order_id_per_hier_str      , po::value<unsigned int>()->default_value(0)
                                 , "Number of identifiers per hierarchy")
     (order_only_str             , "Compute order only")
-    (show_final_sdd_bytes_str   , "Show the number of bytes used by the final state space's SDD")
     (hom_json_export_str        , po::value<std::string>()
                                 , "Export homomorphism to a JSON file")
     (dot_export_str             , po::value<std::string>()
@@ -169,12 +167,8 @@ fill_configuration(int argc, const char** argv)
     (pn_stats_str               , "Export model's statistics to JSON file")
     (cache_str                  , po::value<std::string>()
                                 , cache_values.c_str())
-  ;
-
-  po::options_description hidden_libsdd_options("Hidden libsdd options");
-  hidden_libsdd_options.add_options()
-    (libsdd_sdd_ut_size_str          , po::value<unsigned int>()->default_value(2000000))
-    (libsdd_hom_ut_size_str          , po::value<unsigned int>()->default_value(25000))
+    (ut_str                     , po::value<std::string>()
+                                , ut_values.c_str())
   ;
 
   po::options_description hidden_options("Hidden options");
@@ -201,7 +195,6 @@ fill_configuration(int argc, const char** argv)
     .add(petri_options)
     .add(mc_options)
     .add(hidden_exp_options)
-    .add(hidden_libsdd_options)
     .add(stats_options)
     .add(advanced_options)
     .add(hidden_options);
@@ -212,7 +205,6 @@ fill_configuration(int argc, const char** argv)
     .add(petri_options)
     .add(mc_options)
     .add(hidden_exp_options)
-    .add(hidden_libsdd_options)
     .add(stats_options)
     .add(advanced_options)
     .add(hidden_options);
@@ -253,7 +245,6 @@ fill_configuration(int argc, const char** argv)
   else if (vm.count(help_exp_str))
   {
     std::cout << hidden_exp_options << std::endl;
-    std::cout << hidden_libsdd_options << std::endl;
     return boost::optional<configuration>();
   }
 
@@ -296,16 +287,9 @@ fill_configuration(int argc, const char** argv)
   conf.order_reverse = vm.count(order_reverse_str);
   conf.order_id_per_hierarchy = vm[order_id_per_hier_str].as<unsigned int>();
 
-  // Statistics options
-  conf.show_final_sdd_bytes = vm.count(show_final_sdd_bytes_str);
-
   // Petri net options
   conf.marking_bound = vm[pn_marking_bound_str].as<unsigned int>();
   conf.one_safe = vm.count(pn_one_safe_str);
-
-  // Hidden libsdd options
-  conf.sdd_ut_size= vm[libsdd_sdd_ut_size_str].as<unsigned int>();
-  conf.hom_ut_size = vm[libsdd_hom_ut_size_str].as<unsigned int>();;
 
   // Model checking options
   conf.compute_dead_states = vm.count(mc_dead_states_str);
@@ -361,11 +345,10 @@ fill_configuration(int argc, const char** argv)
                       });
   }
 
-  conf.cache_sizes = default_cache_sizes;
-  if (vm.count(cache_str))
+  const auto parse_sizes = [&](const std::string& option, auto& map)
   {
     using separator = boost::char_separator<char>;
-    boost::tokenizer<separator> tks{vm[cache_str].as<std::string>(), separator{","}};
+    boost::tokenizer<separator> tks{vm[option].as<std::string>(), separator{","}};
     for (const auto& tk : tks)
     {
       std::vector<std::string> tmp;
@@ -373,23 +356,36 @@ fill_configuration(int argc, const char** argv)
       std::copy(begin(subtks), end(subtks), std::back_inserter(tmp));
       if (tmp.size() != 2)
       {
-        throw po::error("Invalid "s + cache_str + " option value: "s + tk);
+        throw po::error("Invalid "s + option + " option value: "s + tk);
       }
-      const auto search = conf.cache_sizes.find(tmp[0]);
+      const auto search = map.find(tmp[0]);
       if (search == end(conf.cache_sizes))
       {
-        throw po::error("Invalid "s + cache_str + " option value: "s + tk);
+        throw po::error("Invalid "s + option + " option value: "s + tk);
       }
       try
       {
-        search->second = std::stoul(tmp[1]);
+        search->second = std::max(min_cache_size, std::stoul(tmp[1]));
       }
       catch (std::invalid_argument&)
       {
-        throw po::error("Invalid "s + cache_str + " option value: "s + tk);
+        throw po::error("Invalid "s + option + " option value: "s + tk);
       }
     }
+  };
+
+  conf.cache_sizes = default_cache_sizes;
+  if (vm.count(cache_str))
+  {
+    parse_sizes(cache_str, conf.cache_sizes);
   }
+
+  conf.ut_sizes = default_ut_sizes;
+  if (vm.count(ut_str))
+  {
+    parse_sizes(ut_str, conf.ut_sizes);
+  }
+
 
   return conf;
 }

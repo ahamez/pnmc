@@ -55,9 +55,6 @@ struct configuration
   /// @brief Stop state space generation if a place's marking reaches this limit.
   unsigned int marking_bound;
 
-  /// @brief Display the memory usage of the state space's SDD.
-  bool show_final_sdd_bytes;
-
   /// @brief Don't cleanup memory on exit.
   bool fast_exit;
 
@@ -76,9 +73,6 @@ struct configuration
   /// @brief Compute some statistics on the Petri net.
   bool pn_statistics;
 
-  std::size_t sdd_ut_size;
-  std::size_t hom_ut_size;
-
   boost::filesystem::path output_dir;
 
   boost::optional<boost::filesystem::path> json_file;
@@ -92,6 +86,7 @@ struct configuration
   std::chrono::duration<double> max_time;
 
   std::map<std::string, std::size_t> cache_sizes;
+  std::map<std::string, std::size_t> ut_sizes;
 };
 
 /*------------------------------------------------------------------------------------------------*/

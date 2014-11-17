@@ -15,12 +15,13 @@ namespace po = boost::program_options;
 
 /*------------------------------------------------------------------------------------------------*/
 
-static const auto pn_input_str   = "pn-format";
+static const auto pn_input_str   = "input";
 static const auto format_map = std::map<std::string, pn_format>
   { std::make_pair("ndr" , pn_format::ndr)
   , std::make_pair("net" , pn_format::net)
   , std::make_pair("nupn", pn_format::nupn)
-  , std::make_pair("pnml", pn_format::pnml)};
+  , std::make_pair("pnml", pn_format::pnml)
+  };
 
 static const auto possible_format_values = [&]
 {
@@ -36,9 +37,7 @@ input_options()
 {
   po::options_description options("Input file format options");
   options.add_options()
-    (pn_input_str   , po::value<std::string>()->default_value("net")
-                    , possible_format_values.c_str())
-  ;
+    (pn_input_str, po::value<std::string>()->default_value("net"), possible_format_values.c_str());
   return options;
 }
 

@@ -160,11 +160,11 @@ const
 
   // Initialize the libsdd.
   sdd_conf sconf;
-  sconf.sdd_unique_table_size = conf.sdd_ut_size;
+  sconf.sdd_unique_table_size = conf.ut_sizes.at("sdd");
   sconf.sdd_difference_cache_size = conf.cache_sizes.at("diff");
   sconf.sdd_intersection_cache_size = conf.cache_sizes.at("inter");
   sconf.sdd_intersection_cache_size = conf.cache_sizes.at("sum");
-  sconf.hom_unique_table_size = conf.hom_ut_size;
+  sconf.hom_unique_table_size = conf.ut_sizes.at("hom");
   sconf.sdd_intersection_cache_size = conf.cache_sizes.at("hom");
   auto manager_ptr = std::make_unique<sdd::manager<sdd_conf>>(sdd::init(sconf));
   auto& manager = *manager_ptr;
@@ -327,11 +327,6 @@ const
     {
       std::cout << "FORCE                : " << stats.force_duration.count() << "s" << std::endl;
     }
-  }
-
-  if (conf.show_final_sdd_bytes)
-  {
-    std::cout << "Final SDD size: " << sdd::tools::size(m) << " bytes" << std::endl;
   }
 
   stats.total_duration = total_timer.duration();
