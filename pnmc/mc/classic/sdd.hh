@@ -2,6 +2,9 @@
 
 #include <sdd/sdd.hh>
 
+#include "mc/shared/results.hh"
+#include "mc/shared/statistics.hh"
+
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
@@ -25,6 +28,9 @@ using sdd::sum;
 using order_identifier = sdd::order_identifier<sdd_conf>;
 using order_builder    = sdd::order_builder<sdd_conf>;
 using order            = sdd::order<sdd_conf>;
+
+using results    = shared::results<sdd_conf>;
+using statistics = shared::statistics<sdd_conf>;
 
 /*------------------------------------------------------------------------------------------------*/
 

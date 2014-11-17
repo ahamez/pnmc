@@ -9,6 +9,7 @@
 #include <boost/optional.hpp>
 
 #include "mc/shared/export_configuration.hh"
+#include "mc/shared/statistics_configuration.hh"
 #include "support/parsers/configuration.hh"
 
 namespace pnmc { namespace conf {
@@ -24,9 +25,6 @@ struct configuration
   /// @brief A random order is computed.
   bool order_random;
 
-  /// @brief Show order after its creation.
-  bool order_show;
-
   /// @brief Remove all hierarchy from order.
   bool order_flat;
 
@@ -40,12 +38,6 @@ struct configuration
   /// @brief Maximum number of identifiers per hierarchy.
   unsigned int order_id_per_hierarchy;
 
-  /// @brief Stop after order computation.
-  bool order_only;
-
-  /// @brief Show the time spent in various steps.
-  bool show_time;
-
   /// @bref Display, if any, dead transitions.
   bool compute_dead_transitions;
 
@@ -58,32 +50,24 @@ struct configuration
   /// @brief Don't cleanup memory on exit.
   bool fast_exit;
 
-  /// @brief Sample the number of SDD regularly.
-  bool sample_nb_sdd;
-
   /// @brief Compute the maximal markings.
   bool count_tokens;
 
   /// @brief The processed Petri net is 1-safe.
   bool one_safe;
 
-  /// @brief Export costly SDD statistics.
-  bool final_sdd_statistics;
+  /// @brief Stop state space generation after this much time.
+  boost::optional<std::chrono::duration<double>> max_time;
 
-  /// @brief Compute some statistics on the Petri net.
-  bool pn_statistics;
-
+  /// @brief Where to save all output files.
   boost::filesystem::path output_dir;
 
-  boost::optional<boost::filesystem::path> json_file;
-  boost::optional<boost::filesystem::path> results_json_file;
-  boost::optional<boost::filesystem::path> hom_json_file;
+  /// @brief Path to a file containing an order.
   boost::optional<boost::filesystem::path> order_file;
 
-  std::set<mc::shared::dot_export> dot_dump;
-
-  /// @brief Stop state space generation after this much time.
-  std::chrono::duration<double> max_time;
+  std::set<mc::shared::dot_export> dot_conf;
+  std::set<mc::shared::stats> stats_conf;
+  std::set<mc::shared::json_export> json_conf;
 
   std::map<std::string, std::size_t> cache_sizes;
   std::map<std::string, std::size_t> ut_sizes;

@@ -3,42 +3,42 @@
 #include <chrono>
 #include <deque>
 
-#include "conf/configuration.hh"
+#include <boost/optional.hpp>
+
+#include <sdd/tools/manager_statistics.hh>
+#include <sdd/tools/sdd_statistics.hh>
+
+#include "support/pn/statistics.hh"
 
 namespace pnmc { namespace mc { namespace shared {
 
 /*------------------------------------------------------------------------------------------------*/
 
+template <typename C>
 struct statistics
 {
-  const conf::configuration& conf;
+  boost::optional<std::chrono::duration<double>> max_time;
 
+  std::chrono::duration<double> total_duration;
   std::chrono::duration<double> relation_duration;
   std::chrono::duration<double> rewrite_duration;
   std::chrono::duration<double> state_space_duration;
-  std::chrono::duration<double> tokens_duration;
-  std::chrono::duration<double> force_duration;
-  std::chrono::duration<double> dead_states_relation_duration;
-  std::chrono::duration<double> dead_states_rewrite_duration;
-  std::chrono::duration<double> dead_states_duration;
-  std::chrono::duration<double> total_duration;
 
-  long double nb_states;
+  boost::optional<std::chrono::duration<double>> tokens_duration;
+  boost::optional<std::chrono::duration<double>> force_duration;
+  boost::optional<std::chrono::duration<double>> dead_states_duration;
 
   bool interrupted;
 
-  std::deque<unsigned int> sdd_ut_size;
+  boost::optional<std::deque<unsigned int>> sdd_ut_size;
+  boost::optional<std::deque<double>> force_spans;
+  boost::optional<pn::statistics> pn_statistics;
 
-  std::deque<double> force_spans;
-
-  statistics(const conf::configuration& c)
-    : conf(c), relation_duration(), rewrite_duration(), state_space_duration(), tokens_duration()
-    , force_duration(), dead_states_relation_duration(), dead_states_rewrite_duration()
-    , dead_states_duration(), total_duration(), nb_states(0), interrupted(false), sdd_ut_size()
-    , force_spans()
-  {}
+  boost::optional<sdd::tools::manager_statistics<C>> manager_statistics;
+  boost::optional<sdd::tools::sdd_statistics<C>> sdd_statistics;
 };
 
 /*------------------------------------------------------------------------------------------------*/
 
 }}} // namespace pnmc::mc::shared
+

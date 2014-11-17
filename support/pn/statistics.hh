@@ -11,9 +11,9 @@ namespace pnmc { namespace pn {
 
 struct statistics
 {
-  const std::size_t nb_places;
-  const std::size_t nb_transitions;
-  const std::vector<std::pair<unsigned int /*pre*/, unsigned int /*post*/>> place_transition;
+  std::size_t nb_places;
+  std::size_t nb_transitions;
+  std::vector<std::pair<unsigned int /*pre*/, unsigned int /*post*/>> place_transition;
 
   statistics(const net& n)
     : nb_places(n.places().size())

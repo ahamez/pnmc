@@ -14,8 +14,8 @@
 
 #include "mc/classic/make_order.hh"
 #include "mc/shared/export.hh"
+#include "mc/shared/step.hh"
 #include "support/util/paths.hh"
-#include "support/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -70,7 +70,7 @@ make_hierarchical_order(const std::vector<pn::module>& modules)
 /*------------------------------------------------------------------------------------------------*/
 
 order
-make_order(const conf::configuration& conf, shared::statistics& stats, const pn::net& net)
+make_order(const conf::configuration& conf, statistics& stats, const pn::net& net)
 {
   for (const auto& place : net.places())
   {
@@ -164,7 +164,8 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
   order_builder ob;
   if (conf.order_ordering_force)
   {
-    util::timer timer;
+    stats.force_duration.emplace();
+    shared::step s{"force", &*stats.force_duration};
     using identifier_type = sdd_conf::Identifier;
 
     // Temporary placeholder for identifiers.
@@ -221,11 +222,10 @@ make_order(const conf::configuration& conf, shared::statistics& stats, const pn:
     // Apply the FORCE ordering strategy.
     auto force = sdd::force::worker<sdd_conf>(graph, conf.order_reverse);
     ob = force(conf.order_force_iterations);
-    stats.force_duration = timer.duration();
     stats.force_spans = force.spans();
 
     // Dump the hypergraph to a DOT file if required by the configuration.
-    shared::export_dot(conf, "force", graph);
+    shared::export_dot(conf, conf::filename::dot_force, graph);
   }
   // Use model's hierarchy, if any.
   else if (not conf.order_flat and not net.modules.empty())

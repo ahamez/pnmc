@@ -13,7 +13,9 @@ struct worker
 {
   const conf::configuration& conf;
 
-  worker(const conf::configuration& c);
+  worker(const conf::configuration& c)
+    : conf{c}
+  {}
 
   void
   operator()(const pn::net& net) const;

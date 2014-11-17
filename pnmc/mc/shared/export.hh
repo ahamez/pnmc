@@ -1,9 +1,12 @@
 #pragma once
 
+#include <iostream>
+
 #include <sdd/tools/dot/force_hypergraph.hh>
 #include <sdd/tools/dot/homomorphism.hh>
 #include <sdd/tools/dot/sdd.hh>
 #include <sdd/tools/js.hh>
+#include <sdd/tools/order.hh>
 #include <sdd/tools/sdd_statistics.hh>
 #include <sdd/tools/serialization.hh>
 
@@ -25,14 +28,24 @@ namespace pnmc { namespace mc { namespace shared {
 
 /*------------------------------------------------------------------------------------------------*/
 
+template <typename T>
+void
+exporter_helper(const conf::configuration& conf, const std::string& name, T&& fn)
+{
+  const auto path = conf.output_dir / boost::filesystem::path{name};
+  boost::filesystem::ofstream stream{path};
+  if   (stream.is_open()) {fn(stream);}
+  else                    {std::cerr << "Can't write to " << path.string() << '\n';}
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 template <typename... Xs>
 void
 dot_exporter_helper(const conf::configuration& conf, const std::string& name, Xs&&... args)
 {
-  const auto path = conf.output_dir / boost::filesystem::path(name + ".dot");
-  boost::filesystem::ofstream file(path);
-  if   (file.is_open()) {file << sdd::tools::dot(std::forward<Xs>(args)...);}
-  else                  {std::cerr << "Can't write to " << path.string() << '\n';}
+  exporter_helper( conf, name + ".dot"
+                 , [&](auto& file){file << sdd::tools::dot(std::forward<Xs>(args)...);});
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -61,7 +74,7 @@ struct dot_exporter<dot_sdd<C>>
   operator()(const dot_sdd<C>& x)
   const
   {
-    if (conf.dot_dump.count(dot_export::sdd)) {dot_exporter_helper(conf, name, x.sdd, x.order);}
+    if (conf.dot_conf.count(dot_export::sdd)) {dot_exporter_helper(conf, name, x.sdd, x.order);}
   }
 };
 
@@ -77,7 +90,7 @@ struct dot_exporter<sdd::homomorphism<C>>
   operator()(const sdd::homomorphism<C>& h)
   const
   {
-    if (conf.dot_dump.count(dot_export::hom)) {dot_exporter_helper(conf, name, h);}
+    if (conf.dot_conf.count(dot_export::hom)) {dot_exporter_helper(conf, name, h);}
   }
 };
 
@@ -93,7 +106,7 @@ struct dot_exporter<sdd::force::hypergraph<C>>
   operator()(const sdd::force::hypergraph<C>& h)
   const
   {
-    if (conf.dot_dump.count(dot_export::force)) {dot_exporter_helper(conf, name, h);}
+    if (conf.dot_conf.count(dot_export::force)) {dot_exporter_helper(conf, name, h);}
   }
 };
 
@@ -108,93 +121,116 @@ export_dot(const conf::configuration&)
 
 template <typename X, typename... Xs>
 void
-export_dot(const conf::configuration& conf, std::string name, X&& x, Xs&&... xs)
+export_dot(const conf::configuration& conf, conf::filename name, X&& x, Xs&&... xs)
 {
-  dot_exporter<std::decay_t<X>>{conf, name}(std::forward<X>(x));
+  dot_exporter<std::decay_t<X>>{conf, conf::default_filenames.at(name)}(std::forward<X>(x));
   export_dot(conf, std::forward<Xs>(xs)...);
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief Export statistics to a JSON file when required by the configuration.
-template <typename Manager, typename SDD>
-void
-dump_json( const conf::configuration& conf, const statistics& stats, const Manager& manager
-         , const SDD& s, const pn::net& net)
-{
-  if (conf.json_file)
-  {
-    boost::filesystem::ofstream file(*conf.json_file);
-    if (file.is_open())
-    {
-      cereal::JSONOutputArchive archive(file);
-      if (not conf.input.file)
-      {
-        archive(cereal::make_nvp("file", "stdin"));
-      }
-      else
-      {
-        archive(cereal::make_nvp("file", conf.input.file->string()));
-      }
-      archive(cereal::make_nvp("pnmc", stats), cereal::make_nvp("libsdd", manager));
-      if (conf.final_sdd_statistics)
-      {
-        archive(cereal::make_nvp("final sdd", sdd::tools::statistics(s)));
-      }
-      if (conf.pn_statistics)
-      {
-        archive(cereal::make_nvp("pn", pn::statistics(net)));
-      }
-    }
-    else
-    {
-      std::cerr << "Can't export statistics to " << *conf.json_file << std::endl;
-    }
-  }
-}
+template <typename T>
+struct json_exporter;
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief Export results to a JSON file when required by the configuration.
+template <typename C>
+struct json_exporter<sdd::order<C>>
+{
+  const conf::configuration& conf;
+  const std::string& name;
+
+  void
+  operator()(const sdd::order<C>& o)
+  const
+  {
+    if (conf.json_conf.count(json_export::order))
+    {
+      exporter_helper(conf, name, [&](auto& file) {sdd::tools::dump_order(o, file);});
+    }
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+template <typename C>
+struct json_exporter<sdd::homomorphism<C>>
+{
+  const conf::configuration& conf;
+  const std::string& name;
+
+  void
+  operator()(const sdd::homomorphism<C>& h)
+  const
+  {
+    if (conf.json_conf.count(json_export::hom))
+    {
+      exporter_helper(conf, name, [&](auto& file) {file << sdd::tools::js(h);});
+    }
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+template <typename C>
+struct json_exporter<results<C>>
+{
+  const conf::configuration& conf;
+  const std::string& name;
+
+  void
+  operator()(const results<C>& r)
+  const
+  {
+    exporter_helper( conf, name
+                   , [&](auto& file)
+                        {
+                          cereal::JSONOutputArchive archive(file);
+                          archive(cereal::make_nvp("pnmc", r));
+                        });
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+template <typename C>
+struct json_exporter<statistics<C>>
+{
+  const conf::configuration& conf;
+  const std::string& name;
+
+  void
+  operator()(const statistics<C>& s)
+  const
+  {
+    if (conf.json_conf.count(json_export::stats))
+    {
+      exporter_helper( conf, name
+                     , [&](auto& file)
+                          {
+                            cereal::JSONOutputArchive archive(file);
+                            archive(cereal::make_nvp("pnmc", s));
+                          });
+    }
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
 inline
 void
-dump_results(const conf::configuration& conf, const results& res)
-{
-  if (conf.results_json_file)
-  {
-    boost::filesystem::ofstream file(*conf.results_json_file);
-    if (file.is_open())
-    {
-      cereal::JSONOutputArchive archive(file);
-      archive(cereal::make_nvp("pnmc", res));
-    }
-    else
-    {
-      std::cerr << "Can't export results to " << *conf.results_json_file << std::endl;
-    }
-  }
-}
+export_json(const conf::configuration&)
+{}
 
 /*------------------------------------------------------------------------------------------------*/
 
-///// @brief Export homomorphisms to the DOT format when required by the configuration.
-//template <typename Homomorphism>
-//void
-//dump_hom(const conf::configuration& conf, const Homomorphism& classic, const Homomorphism& sat)
-//{
-//  if (conf.hom_json_file)
-//  {
-//    boost::filesystem::ofstream file(*conf.hom_json_file);
-//    if (file.is_open())
-//    {
-//      file << sdd::tools::js(classic) << std::endl;
-//    }
-//    else
-//    {
-//      std::cerr << "Can't export homomorphism to " << *conf.hom_json_file << std::endl;
-//    }
-//  }
-//}
+template <typename X, typename... Xs>
+void
+export_json(const conf::configuration& conf, conf::filename name, X&& x, Xs&&... xs)
+{
+  json_exporter<std::decay_t<X>>{conf, conf::default_filenames.at(name)}(std::forward<X>(x));
+  export_json(conf, std::forward<Xs>(xs)...);
+}
 
 /*------------------------------------------------------------------------------------------------*/
 

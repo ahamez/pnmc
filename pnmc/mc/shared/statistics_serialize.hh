@@ -3,6 +3,8 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/types/deque.hpp>
 
+#include <sdd/tools/serialization.hh>
+
 #include "conf/configuration.hh"
 #include "mc/shared/statistics.hh"
 
@@ -10,46 +12,50 @@ namespace pnmc { namespace mc { namespace shared {
 
 /*------------------------------------------------------------------------------------------------*/
 
-template<class Archive>
+template <typename Archive, typename C>
 void
-save(Archive& archive, const statistics& s)
+save(Archive& archive, const statistics<C>& s)
 {
-  if (s.conf.order_only)
+  if (s.max_time)
   {
-    archive(cereal::make_nvp("order only", true));
-    if (s.conf.order_ordering_force)
-    {
-      archive( cereal::make_nvp("FORCE time", s.force_duration.count())
-             , cereal::make_nvp("FORCE spans", s.force_spans));
-    }
-    return;
+    archive(cereal::make_nvp("time limit", s.max_time->count()));
   }
-  archive( cereal::make_nvp("order only", false)
-         , cereal::make_nvp("interrupted", s.interrupted)
-         , cereal::make_nvp("time limit", s.conf.max_time.count())
-         , cereal::make_nvp("states", s.nb_states)
+  archive( cereal::make_nvp("interrupted", s.interrupted)
          , cereal::make_nvp("total time", s.total_duration.count())
          , cereal::make_nvp("relation time", s.relation_duration.count())
          , cereal::make_nvp("rewrite time", s.rewrite_duration.count())
          , cereal::make_nvp("state space time", s.state_space_duration.count()));
-  if (s.conf.count_tokens)
+  if (s.dead_states_duration)
   {
-    archive(cereal::make_nvp("count tokens time", s.tokens_duration.count()));
+    archive(cereal::make_nvp("dead states time", s.dead_states_duration->count()));
   }
-  if (s.conf.sample_nb_sdd)
+  if (s.force_duration)
   {
-    archive(cereal::make_nvp("sdd samples", s.sdd_ut_size));
+    archive(cereal::make_nvp("FORCE time", s.force_duration->count()));
   }
-  if (s.conf.order_ordering_force)
+  if (s.tokens_duration)
   {
-    archive( cereal::make_nvp("FORCE time", s.force_duration.count())
-           , cereal::make_nvp("FORCE spans", s.force_spans));
+    archive(cereal::make_nvp("count tokens time", s.tokens_duration->count()));
   }
-  if (s.conf.compute_dead_states)
+  if (s.manager_statistics)
   {
-    archive( cereal::make_nvp("dead states relation time", s.dead_states_relation_duration.count())
-           , cereal::make_nvp("dead states rewrite time", s.dead_states_rewrite_duration.count())
-           , cereal::make_nvp("dead states time", s.dead_states_duration.count()));
+    archive(cereal::make_nvp("libsdd", *s.manager_statistics));
+  }
+  if (s.force_spans)
+  {
+    archive(cereal::make_nvp("FORCE spans", *s.force_spans));
+  }
+  if (s.sdd_ut_size)
+  {
+    archive(cereal::make_nvp("sdd samples", *s.sdd_ut_size));
+  }
+  if (s.pn_statistics)
+  {
+    archive(cereal::make_nvp("pn", *s.pn_statistics));
+  }
+  if (s.sdd_statistics)
+  {
+    archive(cereal::make_nvp("state space", *s.sdd_statistics));
   }
 }
 

@@ -10,7 +10,7 @@ namespace pnmc { namespace mc { namespace classic {
 /*------------------------------------------------------------------------------------------------*/
 
 order
-make_order(const conf::configuration&, shared::statistics&, const pn::net&);
+make_order(const conf::configuration&, statistics&, const pn::net&);
 
 /*------------------------------------------------------------------------------------------------*/
 
