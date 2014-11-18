@@ -7,9 +7,9 @@
 
 #include "fill_configuration.hh"
 #include "tina.hh"
-#include "shared/parsers/parse.hh"
-#include "shared/parsers/parse_error.hh"
-#include "shared/pn/net.hh"
+#include "support/parsers/parse.hh"
+#include "support/parsers/parse_error.hh"
+#include "support/pn/net.hh"
 
 /*------------------------------------------------------------------------------------------------*/
 

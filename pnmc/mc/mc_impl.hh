@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/pn/net.hh"
+#include "support/pn/net.hh"
 
 namespace pnmc { namespace mc {
 

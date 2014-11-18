@@ -2,7 +2,7 @@
 
 #include "conf/configuration.hh"
 #include "mc/mc_impl.hh"
-#include "shared/pn/net.hh"
+#include "support/pn/net.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -13,7 +13,9 @@ struct worker
 {
   const conf::configuration& conf;
 
-  worker(const conf::configuration& c);
+  worker(const conf::configuration& c)
+    : conf{c}
+  {}
 
   void
   operator()(const pn::net& net) const;

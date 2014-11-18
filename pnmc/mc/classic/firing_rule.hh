@@ -6,17 +6,15 @@
 
 #include "conf/configuration.hh"
 #include "mc/classic/sdd.hh"
-#include "mc/shared/statistics.hh"
-#include "shared/pn/net.hh"
+#include "support/pn/net.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
 std::set<homomorphism>
-firing_rule( const conf::configuration& conf, const order& o
-           , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-           , shared::statistics& stats, const bool& stop);
+firing_rule( const conf::configuration& conf, const order& o, const pn::net& net
+           , boost::dynamic_bitset<>& transitions_bitset, const bool& stop);
 
 /*------------------------------------------------------------------------------------------------*/
 

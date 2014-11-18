@@ -5,7 +5,7 @@
 #include "conf/configuration.hh"
 #include "mc/classic/sdd.hh"
 #include "mc/shared/statistics.hh"
-#include "shared/util/timer.hh"
+#include "support/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -17,7 +17,7 @@ struct threads
   std::thread clock;
   std::thread sdd_sampling;
 
-  threads( const conf::configuration& conf, shared::statistics& stats, bool& stop
+  threads( const conf::configuration& conf, statistics& stats, bool& stop
          , const sdd::manager<sdd_conf>& manager, util::timer& beginnning);
 
   ~threads();

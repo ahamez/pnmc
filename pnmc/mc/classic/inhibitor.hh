@@ -5,7 +5,7 @@
 #include <ostream>
 
 #include "mc/classic/sdd.hh"
-#include "shared/pn/types.hh"
+#include "support/pn/types.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

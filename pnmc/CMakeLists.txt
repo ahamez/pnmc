@@ -10,10 +10,9 @@ set(SOURCES
     mc/classic/path_to.cc
     mc/classic/threads.cc
     mc/classic/worker.cc
-    mc/shared/dump.cc
     mc/mc.cc
     )
 
 add_executable(pnmc ${SOURCES})
-target_link_libraries(pnmc shared ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} ${ZLIB_LIBRARIES})
+target_link_libraries(pnmc support ${Boost_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 install(TARGETS pnmc DESTINATION bin)

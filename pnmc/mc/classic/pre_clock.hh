@@ -6,9 +6,9 @@
 #include <sdd/util/hash.hh>
 
 #include "mc/classic/sdd.hh"
-#include "shared/pn/constants.hh"
-#include "shared/pn/transition.hh"
-#include "shared/pn/types.hh"
+#include "support/pn/constants.hh"
+#include "support/pn/transition.hh"
+#include "support/pn/types.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 

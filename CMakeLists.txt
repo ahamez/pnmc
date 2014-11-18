@@ -10,7 +10,7 @@ option (PACKED "Pack structs in memory (experimental)" OFF)
 ################################################################################
 
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options coroutine context system thread filesystem iostreams)
+find_package(Boost 1.55.0 REQUIRED COMPONENTS program_options coroutine context system thread filesystem)
 
 if (NOT Boost_FOUND)
   message(FATAL_ERROR "Boost not found")
@@ -46,7 +46,6 @@ if (NOT LIBSDD_INCLUDE_DIR)
 endif ()
 
 find_package (Threads)
-find_package(ZLIB)
 
 add_definitions("-Wall")
 add_definitions("-std=c++1y")
@@ -72,8 +71,8 @@ include_directories("${LIBSDD_INCLUDE_DIR}")
 
 ################################################################################
 
-add_subdirectory(shared)
-link_directories(${pnmc_BINARY_DIR}/shared)
+add_subdirectory(support)
+link_directories(${pnmc_BINARY_DIR}/support)
 add_subdirectory(pnmc)
 add_subdirectory(translator)
 

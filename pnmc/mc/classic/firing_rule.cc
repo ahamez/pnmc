@@ -21,8 +21,7 @@
 #include "mc/classic/set.hh"
 #include "mc/shared/interruptible.hh"
 #include "mc/shared/live.hh"
-#include "shared/pn/constants.hh"
-#include "shared/util/timer.hh"
+#include "support/pn/constants.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -292,7 +291,7 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
         std::any_of( t.post.cbegin(), t.post.cend()
                    , [&](const pn::transition::arcs_type::value_type& arc)
                         {
-                          const auto& p = *net.places_by_id().find(arc.first);
+                          const auto& p = *net.places().find(arc.first);
                           return std::any_of( p.post.cbegin(), p.post.cend()
                                             , [&](const auto& arc2)
                                                  {
@@ -597,18 +596,13 @@ post_and_advance_time:
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief Compute the transition relation corresponding to a petri net.
 std::set<homomorphism>
-firing_rule( const conf::configuration& conf, const order& o
-           , const pn::net& net, boost::dynamic_bitset<>& transitions_bitset
-           , shared::statistics& stats, const bool& stop)
+firing_rule( const conf::configuration& conf, const order& o, const pn::net& net
+           , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
-  util::timer timer;
-  const auto operands = net.timed()
-                      ? timed(conf, o, net, transitions_bitset, stop)
-                      : untimed(conf, o, net, transitions_bitset, stop);
-  stats.relation_duration = timer.duration();
-  return operands;
+  return net.timed()
+       ? timed(conf, o, net, transitions_bitset, stop)
+       : untimed(conf, o, net, transitions_bitset, stop);
 }
 
 /*------------------------------------------------------------------------------------------------*/

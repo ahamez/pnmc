@@ -4,7 +4,7 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-threads::threads( const conf::configuration& conf, shared::statistics& stats, bool& stop
+threads::threads( const conf::configuration& conf, statistics& stats, bool& stop
                 , const sdd::manager<sdd_conf>& manager, util::timer& beginnning)
     : finished(false), clock(), sdd_sampling()
 {
@@ -24,8 +24,9 @@ threads::threads( const conf::configuration& conf, shared::statistics& stats, bo
             });
   }
 
-  if (conf.sample_nb_sdd)
+  if (conf.stats_conf.count(shared::stats::nb_sdd))
   {
+    stats.sdd_ut_size.emplace();
     sdd_sampling = std::thread([&]
                    {
                      const auto sample_time = std::chrono::milliseconds(500);
@@ -36,7 +37,7 @@ threads::threads( const conf::configuration& conf, shared::statistics& stats, bo
                        auto now = std::chrono::system_clock::now();
                        if ((now - last) >= sample_time)
                        {
-                         stats.sdd_ut_size.emplace_back(manager.sdd_stats().size);
+                         stats.sdd_ut_size->emplace_back(manager.sdd_stats().size);
                          last = now;
                        }
                      }
