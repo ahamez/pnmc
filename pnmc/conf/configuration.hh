@@ -41,6 +41,9 @@ struct configuration
   /// @brief Display, if any, dead states.
   bool compute_dead_states;
 
+  /// @brief Compute the shortest trace to the closest dead state.
+  bool trace;
+
   /// @brief Stop state space generation if a place's marking reaches this limit.
   unsigned int marking_bound;
 

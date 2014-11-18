@@ -4,14 +4,13 @@
 #include <set>
 
 #include "mc/classic/sdd.hh"
-#include "mc/shared/statistics.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
 std::deque<SDD>
-path_to(const order& , const SDD&, const SDD&, const std::set<homomorphism>&, shared::statistics&);
+path_to(const order& , const SDD&, const SDD&, const std::set<homomorphism>&);
 
 /*------------------------------------------------------------------------------------------------*/
 

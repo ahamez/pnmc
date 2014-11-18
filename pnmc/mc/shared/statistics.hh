@@ -17,6 +17,8 @@ namespace pnmc { namespace mc { namespace shared {
 template <typename C>
 struct statistics
 {
+  bool interrupted;
+
   boost::optional<std::chrono::duration<double>> max_time;
 
   std::chrono::duration<double> total_duration;
@@ -27,8 +29,7 @@ struct statistics
   boost::optional<std::chrono::duration<double>> tokens_duration;
   boost::optional<std::chrono::duration<double>> force_duration;
   boost::optional<std::chrono::duration<double>> dead_states_duration;
-
-  bool interrupted;
+  boost::optional<std::chrono::duration<double>> trace_duration;
 
   boost::optional<std::deque<unsigned int>> sdd_ut_size;
   boost::optional<std::deque<double>> force_spans;

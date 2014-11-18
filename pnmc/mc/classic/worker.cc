@@ -8,8 +8,10 @@
 
 #include "mc/classic/count_tokens.hh"
 #include "mc/classic/dead.hh"
+#include "mc/classic/dead_states.hh"
 #include "mc/classic/firing_rule.hh"
 #include "mc/classic/make_order.hh"
+#include "mc/classic/path_to.hh"
 #include "mc/classic/sdd.hh"
 #include "mc/classic/sharp_output.hh"
 #include "mc/classic/threads.hh"
@@ -50,30 +52,6 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
                              ? flat_set{0}
                              : flat_set{pn::sharp};
                       }}};
-}
-
-/*------------------------------------------------------------------------------------------------*/
-
-SDD
-dead_states(const conf::configuration&, const order& o, const pn::net& net, const SDD& state_space)
-{
-  std::set<homomorphism> and_operands;
-  std::set<homomorphism> or_operands;
-
-  for (const auto& transition : net.transitions())
-  {
-    // We are only interested in pre actions.
-    for (const auto& arc : transition.pre)
-    {
-      or_operands.insert(function(o, arc.first, dead{arc.second.weight}));
-    }
-
-    and_operands.insert(sum(o, or_operands.cbegin(), or_operands.cend()));
-    or_operands.clear();
-  }
-  const auto tmp = intersection(o, and_operands.cbegin(), and_operands.cend());
-
-  return sdd::rewrite(o, tmp)(o, state_space); // compute dead states
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -196,9 +174,16 @@ const
 
   if (conf.compute_dead_states and not net.timed())
   {
-    stats.dead_states_duration.emplace();
-    shared::step s{"dead states", &*stats.dead_states_duration};
-    res.dead_states = dead_states(conf, *res.order, net, *res.states);
+    {
+      stats.dead_states_duration.emplace();
+      shared::step s{"dead states", &*stats.dead_states_duration};
+      res.dead_states = dead_states(*res.order, net, *res.states);
+    }
+    if (conf.trace)
+    {
+      shared::step s{"trace", &*stats.trace_duration};
+      const auto paths = path_to(*res.order, *res.m0, *res.dead_states, h_operands);
+    }
   }
 
   if (conf.stats_conf.count(shared::stats::final_sdd))

@@ -59,6 +59,7 @@ const auto pn_one_safe_str = "1-safe";
 const auto mc_dead_transitions_str = "dead-transitions";
 const auto mc_dead_states_str = "dead-states";
 const auto mc_count_tokens_str = "count-tokens";
+const auto mc_trace_str = "trace";
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -317,6 +318,7 @@ fill_configuration(int argc, const char** argv)
   conf.compute_dead_states = vm.count(mc_dead_states_str);
   conf.compute_dead_transitions = vm.count(mc_dead_transitions_str);
   conf.count_tokens = vm.count(mc_count_tokens_str);
+  conf.trace = vm.count(mc_trace_str);
 
   // Advanced options
   conf.fast_exit = vm.count(fast_exit_str);

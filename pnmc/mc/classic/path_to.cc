@@ -3,7 +3,6 @@
 #include <unordered_map>
 
 #include "mc/classic/path_to.hh"
-#include "shared/util/timer.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -101,10 +100,8 @@ struct apply_transition
 
 std::deque<SDD>
 path_to( const order& o, const SDD& initial, const SDD& targets
-       , const std::set<homomorphism>& operands, shared::statistics& stats)
+       , const std::set<homomorphism>& operands)
 {
-  util::timer timer;
-
   const auto firing_rule = rewrite(o, sum(o, begin(operands), end(operands)));
 
   SDD current_layer = initial;
@@ -155,8 +152,6 @@ path_to( const order& o, const SDD& initial, const SDD& targets
       }
     }
   }
-
-  stats.trace_duration = timer.duration();
 
   return initial_to_targets;
 }

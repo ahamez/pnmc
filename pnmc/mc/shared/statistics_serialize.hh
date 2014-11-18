@@ -25,13 +25,17 @@ save(Archive& archive, const statistics<C>& s)
          , cereal::make_nvp("relation time", s.relation_duration.count())
          , cereal::make_nvp("rewrite time", s.rewrite_duration.count())
          , cereal::make_nvp("state space time", s.state_space_duration.count()));
+  if (s.force_duration)
+  {
+    archive(cereal::make_nvp("FORCE time", s.force_duration->count()));
+  }
   if (s.dead_states_duration)
   {
     archive(cereal::make_nvp("dead states time", s.dead_states_duration->count()));
   }
-  if (s.force_duration)
+  if (s.trace_duration)
   {
-    archive(cereal::make_nvp("FORCE time", s.force_duration->count()));
+    archive(cereal::make_nvp("trace time", s.trace_duration->count()));
   }
   if (s.tokens_duration)
   {
