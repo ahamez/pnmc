@@ -25,19 +25,19 @@ static const auto default_ut_sizes = std::map<std::string, std::size_t>
 
 /*------------------------------------------------------------------------------------------------*/
 
-enum class filename { dot_m0, dot_final, dot_hclassic, dot_hrewritten, dot_force
-                    , json_results, json_hclassic, json_hrewritten, json_stats, json_order};
+enum class filename { dot_m0, dot_final, dot_h, dot_h_opt, dot_force
+                    , json_results, json_h, json_h_opt, json_stats, json_order};
 
 // Output files names
 static const auto default_filenames = std::map<filename, std::string>
   { {filename::dot_m0          , "initial_state.dot"}
   , {filename::dot_final       , "state_space.dot"}
-  , {filename::dot_hclassic    , "relation_transition.dot"}
-  , {filename::dot_hrewritten  , "relation_transition_opt.dot"}
+  , {filename::dot_h           , "relation_transition.dot"}
+  , {filename::dot_h_opt       , "relation_transition_opt.dot"}
   , {filename::dot_force       , "force.dot"}
   , {filename::json_results    , "results.json"}
-  , {filename::json_hclassic   , "relation_transition.json"}
-  , {filename::json_hrewritten , "relation_transition_opt.json"}
+  , {filename::json_h          , "relation_transition.json"}
+  , {filename::json_h_opt      , "relation_transition_opt.json"}
   , {filename::json_stats      , "stats.json"}
   , {filename::json_order      , "order.json"}
   };

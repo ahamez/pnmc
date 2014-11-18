@@ -130,17 +130,18 @@ const
   boost::dynamic_bitset<> live_transitions(net.transitions().size());
 
   // Compute the transition relation.
-  const auto h_classic = [&]
+  const auto h_operands = [&]
   {
     shared::step("firing rule", &stats.relation_duration);
     return firing_rule(conf, *res.order, net, live_transitions, stop_flag);
   }();
+  const auto h = fixpoint(sum(*res.order, begin(h_operands), end(h_operands)));
 
   // Rewrite the transition relation.
-  const auto h = [&]
+  const auto h_opt = [&]
   {
     shared::step("rewrite", &stats.rewrite_duration);
-    return sdd::rewrite(*res.order, h_classic);
+    return sdd::rewrite(*res.order, h);
   }();
 
   // Compute the state space.
@@ -149,7 +150,7 @@ const
     threads _{conf, stats, stop_flag, manager, s.timer}; // threads will be stopped at scope exit
     try
     {
-      res.states = h(*res.order, *res.m0);
+      res.states = h_opt(*res.order, *res.m0);
     }
     catch (const shared::bound_error& e)
     {
@@ -164,7 +165,7 @@ const
     if (stats.interrupted)
     {
       shared::export_json(conf, filename::json_stats, stats);
-      shared::export_dot(conf, filename::dot_hclassic, h_classic, filename::dot_hrewritten, h);
+      shared::export_dot(conf, filename::dot_h, h, filename::dot_h_opt, h_opt);
       return;
     }
   }
@@ -207,12 +208,12 @@ const
   std::cout << "\n\n-- Results\n";
   std::cout << res;
 
-  shared::export_dot(conf, filename::dot_hclassic, h_classic, filename::dot_hrewritten, h);
+  shared::export_dot(conf, filename::dot_h, h, filename::dot_h_opt, h_opt);
   shared::export_dot(conf, filename::dot_m0, dot_sdd{*res.m0, *res.order});
   shared::export_dot(conf, filename::dot_final, dot_sdd{*res.states, *res.order});
   shared::export_json(conf, filename::json_stats, stats);
   shared::export_json(conf, filename::json_results, res);
-  shared::export_json(conf, filename::json_hclassic, h_classic, filename::json_hrewritten, h);
+  shared::export_json(conf, filename::json_h, h, filename::json_h_opt, h_opt);
 
   if (conf.fast_exit)
   {
