@@ -81,11 +81,12 @@ struct results
           path_generator(); // advance generator
           auto id_cit = begin(identifiers);
           auto path_cit = begin(path);
+          os << "  ";
           for (; path_cit != std::prev(path.cend()); ++path_cit, ++id_cit)
           {
-            os << "  " << id_cit->get() << " : " << *path_cit << ", ";
+            os << id_cit->get() << " " << *path_cit << ", ";
           }
-          os << "  " << id_cit->get() << " : " << *path_cit << '\n';
+          os << id_cit->get() << " " << *path_cit << '\n';
         }
       }
     }
