@@ -181,6 +181,7 @@ const
     }
     if (conf.trace)
     {
+      stats.trace_duration.emplace();
       shared::step s{"trace", &*stats.trace_duration};
       const auto paths = path_to(*res.order, *res.m0, *res.dead_states, h_operands);
     }

@@ -185,6 +185,7 @@ fill_configuration(int argc, const char** argv)
   mc_options.add_options()
     (mc_dead_transitions_str   , "Compute dead transitions")
     (mc_dead_states_str        , "Compute dead states")
+    (mc_trace_str              , "Compute the shortest trace")
     (mc_count_tokens_str       , "Compute maximal markings")
   ;
 
