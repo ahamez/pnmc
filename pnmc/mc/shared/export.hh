@@ -44,8 +44,7 @@ template <typename... Xs>
 void
 dot_exporter_helper(const conf::configuration& conf, const std::string& name, Xs&&... args)
 {
-  exporter_helper( conf, name + ".dot"
-                 , [&](auto& file){file << sdd::tools::dot(std::forward<Xs>(args)...);});
+  exporter_helper(conf, name, [&](auto& file){file << sdd::tools::dot(std::forward<Xs>(args)...);});
 }
 
 /*------------------------------------------------------------------------------------------------*/
