@@ -291,7 +291,7 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
         std::any_of( t.post.cbegin(), t.post.cend()
                    , [&](const pn::transition::arcs_type::value_type& arc)
                         {
-                          const auto& p = *net.places_by_id().find(arc.first);
+                          const auto& p = *net.places().find(arc.first);
                           return std::any_of( p.post.cbegin(), p.post.cend()
                                             , [&](const auto& arc2)
                                                  {

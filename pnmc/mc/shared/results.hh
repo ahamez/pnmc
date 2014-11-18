@@ -21,6 +21,7 @@ template <typename C>
 struct results
 {
   boost::optional<sdd::order<C>> order;
+  boost::optional<sdd::SDD<C>> m0;
   boost::optional<sdd::SDD<C>> states;
   boost::optional<pn::valuation_type> max_token_markings;
   boost::optional<pn::valuation_type> max_token_places;

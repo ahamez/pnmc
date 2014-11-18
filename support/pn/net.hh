@@ -117,11 +117,11 @@ public:
 
   /// @brief Return all places by insertion order.
   const places_type::index<insertion_index>::type&
-  places() const noexcept;
+  places_by_insertion() const noexcept;
 
   /// @brief Return all places by identifier.
   const places_type::index<id_index>::type&
-  places_by_id() const noexcept;
+  places() const noexcept;
 
   /// @brief Return all transitions.
   const transitions_type::index<id_index>::type&

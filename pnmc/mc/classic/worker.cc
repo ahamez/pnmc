@@ -37,8 +37,8 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 
   return {order, [&](const auto& id)
                     {
-                      const auto cit = net.places_by_id().find(id);
-                      if (cit != end(net.places_by_id()))
+                      const auto cit = net.places().find(id);
+                      if (cit != end(net.places()))
                       {
                         return flat_set{cit->marking};
                       }
@@ -124,16 +124,16 @@ const
   shared::export_json(conf, filename::json_order, *res.order);
 
   // Get the initial state.
-  const SDD m0 = initial_state(*res.order, net);
+  res.m0 = initial_state(*res.order, net);
 
   // Map of live transitions.
-  boost::dynamic_bitset<> transitions_bitset(net.transitions().size());
+  boost::dynamic_bitset<> live_transitions(net.transitions().size());
 
   // Compute the transition relation.
   const auto h_classic = [&]
   {
     shared::step("firing rule", &stats.relation_duration);
-    return firing_rule(conf, *res.order, net, transitions_bitset, stop_flag);
+    return firing_rule(conf, *res.order, net, live_transitions, stop_flag);
   }();
 
   // Rewrite the transition relation.
@@ -150,8 +150,7 @@ const
     threads _{conf, stats, stop_flag, manager, s.timer}; // threads will be stopped at scope exit
     try
     {
-      m = h(*res.order, m0);
-      res.states = m;
+      res.states = h(*res.order, *res.m0);
     }
     catch (const shared::bound_error& e)
     {
@@ -175,7 +174,7 @@ const
   {
     stats.tokens_duration.emplace();
     shared::step s{"count tokens", &*stats.tokens_duration};
-    count_tokens(res, m, net);
+    count_tokens(res, *res.states, net);
   }
 
   if (conf.compute_dead_transitions)
@@ -184,7 +183,7 @@ const
     res.dead_transitions.emplace();
     for (std::size_t i = 0; i < net.transitions().size(); ++i)
     {
-      if (not transitions_bitset[i])
+      if (not live_transitions[i])
       {
         res.dead_transitions->push_back(net.get_transition_by_index(i).id);
       }
@@ -195,12 +194,12 @@ const
   {
     stats.dead_states_duration.emplace();
     shared::step s{"dead states", &*stats.dead_states_duration};
-    res.dead_states = dead_states(conf, *res.order, net, m);
+    res.dead_states = dead_states(conf, *res.order, net, *res.states);
   }
 
   if (conf.stats_conf.count(shared::stats::final_sdd))
   {
-    stats.sdd_statistics = sdd::tools::statistics(m);
+    stats.sdd_statistics = sdd::tools::statistics(*res.states);
   }
   stats.manager_statistics = sdd::tools::statistics(manager);
 
@@ -210,7 +209,7 @@ const
   std::cout << res;
 
   shared::export_dot(conf, filename::dot_hclassic, h_classic, filename::dot_hrewritten, h);
-  shared::export_dot(conf, filename::dot_m0, dot_sdd{m0, *res.order});
+  shared::export_dot(conf, filename::dot_m0, dot_sdd{*res.states, *res.order});
   shared::export_dot(conf, filename::dot_final, dot_sdd{m, *res.order});
   shared::export_json(conf, filename::json_stats, stats);
   shared::export_json(conf, filename::json_results, res);

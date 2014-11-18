@@ -100,7 +100,7 @@ pnml(std::istream& in)
           throw parse_error("Expected an integer for valuation, got " + std::string(text));
         }
       }
-      if (net_ptr->places_by_id().find(src) != net_ptr->places_by_id().end())
+      if (net_ptr->places().find(src) != end(net_ptr->places()))
       {
         // src is a place.
         net_ptr->add_pre_place(dst, src, valuation, pn::arc::type::normal);

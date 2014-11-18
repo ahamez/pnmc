@@ -107,7 +107,7 @@ operator<<(std::ostream& os, const net_to_tina& manip)
     os << '\n';
   }
 
-  for (const auto& p : manip.net.places())
+  for (const auto& p : manip.net.places_by_insertion())
   {
     os << "pl " << tina(p.id)<< " (" << p.marking << ")\n";
   }

@@ -410,8 +410,8 @@ pn::module
 make_module( const std::string& id, std::unordered_map<std::string, std::vector<std::string>>& graph
            , pn::net& net, const std::string& container, std::unordered_set<std::string>& places)
 {
-  const auto place_search = net.places_by_id().find(id);
-  if (place_search != end(net.places_by_id()))
+  const auto place_search = net.places().find(id);
+  if (place_search != end(net.places()))
   {
     places.insert(place_search->id);
     return pn::make_module(*place_search);
@@ -480,7 +480,7 @@ net(std::istream& in)
                                                     , places_encountered));
     }
     std::vector<std::string> invalid;
-    std::for_each( begin(net_ptr->places_by_id()), end(net_ptr->places_by_id())
+    std::for_each( begin(net_ptr->places()), end(net_ptr->places())
                  , [&](const auto& p)
                       {
                         if (not places_encountered.count(p.id)) {invalid.push_back(p.id);}

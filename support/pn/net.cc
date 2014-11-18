@@ -15,8 +15,8 @@ net::net()
 const place&
 net::add_place(const std::string& pid, valuation_type marking)
 {
-  const auto cit = places_by_id().find(pid);
-  if (cit == places_by_id().cend())
+  const auto cit = places().find(pid);
+  if (cit == end(places()))
   {
     return *places_set.get<insertion_index>().emplace_back(pid, marking).first;
   }
@@ -82,11 +82,11 @@ net::add_post_place( const std::string& tid, const std::string& post
 
   }
 
-  if (places_by_id().find(post) == end(places_by_id()))
+  if (places().find(post) == end(places()))
   {
     add_place(post, 0);
   }
-  places_set.get<id_index>().modify( places_by_id().find(post)
+  places_set.get<id_index>().modify( places().find(post)
                                    , [&](place& p)
                                         {
                                           p.pre.emplace_hint(end(p.pre), tid, pn::arc{weight, ty});
@@ -131,11 +131,11 @@ net::add_pre_place( const std::string& tid, const std::string& pre
 
   }
 
-  if (places_by_id().find(pre) == end(places_by_id()))
+  if (places().find(pre) == end(places()))
   {
     add_place(pre, 0);
   }
-  places_set.get<id_index>().modify( places_by_id().find(pre)
+  places_set.get<id_index>().modify( places().find(pre)
                                    , [&](place& p)
                                         {
                                           p.post.emplace_hint(end(p.post), tid, pn::arc{weight, ty});
@@ -145,7 +145,7 @@ net::add_pre_place( const std::string& tid, const std::string& pre
 /*------------------------------------------------------------------------------------------------*/
 
 const net::places_type::index<net::insertion_index>::type&
-net::places()
+net::places_by_insertion()
 const noexcept
 {
   return places_set.get<insertion_index>();
@@ -154,7 +154,7 @@ const noexcept
 /*------------------------------------------------------------------------------------------------*/
 
 const net::places_type::index<net::id_index>::type&
-net::places_by_id()
+net::places()
 const noexcept
 {
   return places_set.get<id_index>();
@@ -212,8 +212,8 @@ const
 
   for (const auto& arc : t.pre)
   {
-    const auto place_cit = places_by_id().find(arc.first);
-    if (place_cit == places_by_id().cend())
+    const auto place_cit = places().find(arc.first);
+    if (place_cit == end(places()))
     {
       throw std::runtime_error("Place " + arc.first + " doesn't exist");
     }

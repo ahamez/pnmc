@@ -332,7 +332,7 @@ edge(parse_cxt& cxt, pn::net& n)
   const auto valuation = weight(cxt);
   anchor(cxt);
 
-  if (n.places_by_id().count(src))
+  if (n.places().count(src))
   {
     if (not n.transitions().count(dst))
     {
@@ -346,7 +346,7 @@ edge(parse_cxt& cxt, pn::net& n)
     {
       throw parse_error("Transition "s + src + " not found"s);
     }
-    if (not n.places_by_id().count(dst))
+    if (not n.places().count(dst))
     {
       if (n.transitions().count(dst))
       {

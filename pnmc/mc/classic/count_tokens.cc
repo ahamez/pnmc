@@ -4,6 +4,8 @@
 #include <utility>   // pair
 #include <tuple>
 
+#include <boost/range/algorithm/for_each.hpp>
+
 #include "mc/classic/count_tokens.hh"
 
 namespace pnmc { namespace mc { namespace classic {
@@ -105,13 +107,13 @@ count_tokens(results& res, const SDD& states, const pn::net& net)
   std::tie(*res.max_token_markings, *res.max_token_places) = visit(count_tokens_visitor(), states);
 
   // Add markings of (useless) places that are connected.
-  for (const auto& place : net.places())
-  {
-    if (not place.connected())
-    {
-      *res.max_token_markings += place.marking;
-    }
-  }
+  boost::range::for_each(net.places(), [&](const auto& place)
+                                          {
+                                            if (not place.connected())
+                                            {
+                                              *res.max_token_markings += place.marking;
+                                            }
+                                          });
 }
 
 /*------------------------------------------------------------------------------------------------*/

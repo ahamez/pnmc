@@ -71,7 +71,7 @@ make_hierarchical_order(const std::vector<pn::module>& modules)
 order
 make_order(const conf::configuration& conf, statistics& stats, const pn::net& net)
 {
-  for (const auto& place : net.places())
+  for (const auto& place : net.places_by_insertion())
   {
     if (not place.connected())
     {
@@ -103,7 +103,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       o.flat(std::inserter(order_identifiers, order_identifiers.end()));
 
       boost::container::flat_set<std::string> pn_identifiers;
-      std::transform( net.places_by_id().cbegin(), net.places_by_id().cend()
+      std::transform( begin(net.places()), end(net.places())
                     , std::inserter(pn_identifiers, pn_identifiers.end())
                     , [](const pn::place& p){return p.id;});
 
@@ -171,8 +171,8 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     std::vector<identifier_type> identifiers;
 
     // Collect identifiers.
-    identifiers.reserve(net.places().size());
-    for (const auto& place : net.places())
+    identifiers.reserve(net.places_by_insertion().size());
+    for (const auto& place : net.places_by_insertion())
     {
       if (place.connected())
       {
@@ -238,7 +238,8 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   // Flat reversed order.
   else if (conf.order_reverse)
   {
-    for (auto rcit = net.places().rbegin(); rcit != net.places().rend(); ++rcit)
+    for ( auto rcit = net.places_by_insertion().rbegin(); rcit != net.places_by_insertion().rend()
+        ; ++rcit)
     {
       if (rcit->connected())
       {
@@ -260,7 +261,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   // Flat order.
   else
   {
-    for (const auto& place : net.places())
+    for (const auto& place : net.places_by_insertion())
     {
       if (place.connected())
       {
