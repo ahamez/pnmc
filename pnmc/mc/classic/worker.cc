@@ -166,6 +166,10 @@ const
     {
       shared::export_json(conf, filename::json_stats, stats);
       shared::export_dot(conf, filename::dot_h, h, filename::dot_h_opt, h_opt);
+      if (conf.fast_exit)
+      {
+        manager_ptr.release(); // manager's destructor won't be called
+      }
       return;
     }
   }
