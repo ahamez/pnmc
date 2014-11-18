@@ -2,7 +2,6 @@
 #include <cassert>
 #include <deque>
 #include <chrono>
-#include <random>
 #include <set>
 #include <sstream>
 
@@ -235,41 +234,6 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       throw std::runtime_error("Hierarchical order for timed PN is not supported yet");
     }
     ob = make_hierarchical_order(net.root_modules);
-  }
-  // Random order, mostly used for developpement purposes.
-  else if (conf.order_random)
-  {
-    if (net.timed())
-    {
-      throw std::runtime_error("Random order for timed PN is not supported yet");
-    }
-
-    std::vector<std::string> tmp;
-    tmp.reserve(net.places().size());
-    for (const auto& place : net.places())
-    {
-      if (place.connected())
-      {
-          tmp.emplace_back(place.id);
-      }
-    }
-
-    // Add clocks of timed transitions.
-    for (const auto& transition : net.transitions())
-    {
-      if (transition.timed())
-      {
-        tmp.emplace_back(transition.id);
-      }
-    }
-
-    std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(tmp.begin(), tmp.end(), g);
-    for (const auto& id : tmp)
-    {
-      ob.push(id);
-    }
   }
   // Flat reversed order.
   else if (conf.order_reverse)

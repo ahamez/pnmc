@@ -40,7 +40,6 @@ const auto output_dir_str = "output-dir";
 
 // Order options
 const auto order_show_str = "order-show";
-const auto order_random_str = "order-random";
 const auto order_flat_str = "order-flat";
 const auto order_force_str = "order-force";
 const auto order_force_iterations_str = "order-force-iterations";
@@ -201,7 +200,6 @@ fill_configuration(int argc, const char** argv)
 
   po::options_description hidden_exp_options("Hidden dev/experimental options");
   hidden_exp_options.add_options()
-    (order_random_str           , "Random order")
     (order_force_iterations_str , po::value<unsigned int>()->default_value(100)
                                 , "Number of FORCE iterations")
     (order_reverse_str          , "Reverse order (depends on on strategy)")
@@ -305,7 +303,6 @@ fill_configuration(int argc, const char** argv)
   conf.input = configure_parser(vm);
 
   // Order options
-  conf.order_random = vm.count(order_random_str);
   conf.order_flat = vm.count(order_flat_str);
   conf.order_ordering_force = vm.count(order_force_str);
   conf.order_force_iterations = vm[order_force_iterations_str].as<unsigned int>();

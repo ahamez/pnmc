@@ -22,9 +22,6 @@ struct configuration
   /// @brief Describe how to read input.
   parsers::configuration input;
 
-  /// @brief A random order is computed.
-  bool order_random;
-
   /// @brief Remove all hierarchy from order.
   bool order_flat;
 
