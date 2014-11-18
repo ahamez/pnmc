@@ -144,7 +144,6 @@ const
   }();
 
   // Compute the state space.
-  auto m = sdd::zero<sdd_conf>();
   {
     shared::step s{"state space", &stats.state_space_duration};
     threads _{conf, stats, stop_flag, manager, s.timer}; // threads will be stopped at scope exit
@@ -209,8 +208,8 @@ const
   std::cout << res;
 
   shared::export_dot(conf, filename::dot_hclassic, h_classic, filename::dot_hrewritten, h);
-  shared::export_dot(conf, filename::dot_m0, dot_sdd{*res.states, *res.order});
-  shared::export_dot(conf, filename::dot_final, dot_sdd{m, *res.order});
+  shared::export_dot(conf, filename::dot_m0, dot_sdd{*res.m0, *res.order});
+  shared::export_dot(conf, filename::dot_final, dot_sdd{*res.states, *res.order});
   shared::export_json(conf, filename::json_stats, stats);
   shared::export_json(conf, filename::json_results, res);
   shared::export_json(conf, filename::json_hclassic, h_classic, filename::json_hrewritten, h);
