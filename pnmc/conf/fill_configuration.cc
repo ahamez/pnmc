@@ -337,7 +337,7 @@ fill_configuration(int argc, const char** argv)
 
   if (vm.count(output_dir_str))
   {
-    conf.output_dir = util::file(vm[output_dir_str].as<std::string>());
+    conf.output_dir = util::directory(vm[output_dir_str].as<std::string>());
   }
   else
   {
