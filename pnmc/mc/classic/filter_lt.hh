@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>  // copy
 #include <functional> // hash
 #include <ostream>
 
@@ -22,10 +23,8 @@ struct filter_lt
   {
     flat_set_builder builder;
     builder.reserve(val.size());
-    for (auto cit = val.cbegin(); cit != val.lower_bound(value); ++cit)
-    {
-      builder.insert(builder.end(), *cit);
-    }
+    // Only keep values that are less than the requested valuation.
+    std::copy(val.cbegin(), val.lower_bound(value), std::inserter(builder, builder.end()));
     return std::move(builder);
   }
 
