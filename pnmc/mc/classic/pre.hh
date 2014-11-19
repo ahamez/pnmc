@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>  // transform
 #include <functional> // hash
 #include <ostream>
 
@@ -22,13 +23,9 @@ struct pre
   {
     flat_set_builder builder;
     builder.reserve(val.size());
-
-    // Find the first entry in val that is greater or equal than valuation.
-    // Will cut the path if cit == end.
-    for (auto cit = val.lower_bound(valuation); cit != val.cend(); ++cit)
-    {
-      builder.insert(builder.end(), *cit - valuation);
-    }
+    // Start from first entry in val that is greater or equal than valuation.
+    std::transform( val.lower_bound(valuation), val.cend(), std::inserter(builder, builder.end())
+                  , [this](unsigned int v){return v - valuation;});
     return std::move(builder);
   }
 
