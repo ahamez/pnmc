@@ -44,9 +44,6 @@ struct configuration
   /// @brief Stop state space generation if a place's marking reaches this limit.
   unsigned int marking_bound;
 
-  /// @brief Don't cleanup memory on exit.
-  bool fast_exit;
-
   /// @brief Compute the maximal markings.
   bool count_tokens;
 

@@ -1,7 +1,6 @@
 #include <cassert>
 #include <chrono>
 #include <iostream>
-#include <memory>
 #include <set>
 
 #include <boost/range/algorithm/for_each.hpp>
@@ -101,8 +100,9 @@ const
   sconf.hom_unique_table_size = conf.ut_sizes.at("hom");
   sconf.hom_cache_size = conf.cache_sizes.at("hom");
 
-  // Initialize libsdd.
-  auto manager_ptr = std::make_unique<sdd::manager<sdd_conf>>(sdd::init(sconf));
+  // This pointer WILL NOT be deleted to avoid a too long shutdown time due to big hash table
+  // cleanups.
+  auto manager_ptr = new sdd::manager<sdd_conf>{sdd::init(sconf)};
   auto& manager = *manager_ptr;
 
   auto stats = statistics{};
@@ -213,11 +213,6 @@ const
   shared::export_json(conf, filename::json_stats, stats);
   shared::export_json(conf, filename::json_results, res);
   shared::export_json(conf, filename::json_hclassic, h_classic, filename::json_hrewritten, h);
-
-  if (conf.fast_exit)
-  {
-    manager_ptr.release(); // manager's destructor won't be called
-  }
 }
 
 /*------------------------------------------------------------------------------------------------*/

@@ -64,7 +64,6 @@ const auto mc_count_tokens_str = "count-tokens";
 
 // Advanced options
 const auto time_limit_str = "time-limit";
-const auto fast_exit_str = "fast-exit";
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -191,7 +190,6 @@ fill_configuration(int argc, const char** argv)
   advanced_options.add_options()
     (time_limit_str             , po::value<unsigned int>()
                                 , "Limit the execution time (s)")
-    (fast_exit_str              , "Don't cleanup memory on exit")
     (cache_str                  , po::value<std::string>()
                                 , cache_values.c_str())
     (ut_str                     , po::value<std::string>()
@@ -317,9 +315,6 @@ fill_configuration(int argc, const char** argv)
   conf.compute_dead_states = vm.count(mc_dead_states_str);
   conf.compute_dead_transitions = vm.count(mc_dead_transitions_str);
   conf.count_tokens = vm.count(mc_count_tokens_str);
-
-  // Advanced options
-  conf.fast_exit = vm.count(fast_exit_str);
 
   if (conf.order_ordering_force)
   {
