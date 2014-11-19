@@ -3,11 +3,13 @@
 #include <deque>
 #include <iosfwd>
 #include <string>
+#include <utility>
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/optional.hpp>
 #include <boost/range/algorithm/copy.hpp>
 
+#include <sdd/sdd.hh>
 #include <sdd/tools/size.hh>
 
 #include "conf/default.hh"
@@ -27,6 +29,7 @@ struct results
   boost::optional<pn::valuation_type> max_token_places;
   boost::optional<std::deque<std::string>> dead_transitions;
   boost::optional<sdd::SDD<C>> dead_states;
+  boost::optional<std::deque<sdd::SDD<C>>> trace;
 
   friend
   std::ostream&
@@ -82,11 +85,16 @@ struct results
           auto id_cit = begin(identifiers);
           auto path_cit = begin(path);
           os << "  ";
-          for (; path_cit != std::prev(path.cend()); ++path_cit, ++id_cit)
+          for (; path_cit != path.cend(); ++path_cit, ++id_cit)
           {
-            os << id_cit->get() << " " << *path_cit << ", ";
+            auto copy = *path_cit;
+            copy.erase(0);
+            if (not copy.empty())
+            {
+              os << id_cit->get() << ':' << *path_cit << ' ';
+            }
           }
-          os << id_cit->get() << " " << *path_cit << '\n';
+          os << '\n';
         }
       }
     }

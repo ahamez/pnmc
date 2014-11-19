@@ -52,16 +52,15 @@ save(Archive& archive, const results<C>& r)
   {
     archive(cereal::make_nvp("dead transitions", *r.dead_transitions));
   }
+
+  // Get the identifier of each level (SDD::paths() doesn't give this information).
+  std::deque<std::reference_wrapper<const std::string>> identifiers;
+  r.order->flat(std::back_inserter(identifiers));
+
   if (r.dead_states)
   {
     std::deque<std::deque<place_values>> deads;
 
-    // Get the identifier of each level (SDD::paths() doesn't give this information).
-    std::deque<std::reference_wrapper<const std::string>> identifiers;
-    r.order->flat(std::back_inserter(identifiers));
-
-    // We can't use the range-based for loop as it produces an ambiguity with clang when
-    // using Boost 1.56.
     auto path_generator = r.dead_states->paths();
     while (path_generator)
     {
@@ -77,6 +76,10 @@ save(Archive& archive, const results<C>& r)
       }
     }
     archive(cereal::make_nvp("dead states", deads));
+  }
+  if (r.trace)
+  {
+    archive(cereal::make_nvp("trace", "TODO"));
   }
 }
 

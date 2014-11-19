@@ -59,7 +59,6 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 endif ()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fvisibility=hidden -fvisibility-inlines-hidden")
 
 ################################################################################
 
