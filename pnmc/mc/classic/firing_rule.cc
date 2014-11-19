@@ -1,6 +1,5 @@
 #include <algorithm>  // any_of
 #include <functional> // reference_wrapper
-#include <set>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -27,13 +26,13 @@ namespace pnmc { namespace mc { namespace classic {
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief Compute the transition relation corresponding to a petri net.
-std::set<homomorphism>
+std::multimap<homomorphism, std::string>
 untimed( const conf::configuration& conf, const order& o, const pn::net& net
        , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
   // Each transition will produce an operand.
-  std::set<homomorphism> operands;
-  operands.insert(sdd::id<sdd_conf>());
+  std::multimap<homomorphism, std::string> operands;
+  operands.emplace(sdd::id<sdd_conf>(), "id");
 
   using target_arc_type = pn::transition::arcs_type::value_type;
 
@@ -159,22 +158,21 @@ untimed( const conf::configuration& conf, const order& o, const pn::net& net
       h_t = composition(h_t, f);
     }
 
-    operands.insert(h_t);
+    operands.emplace(h_t, transition.id);
   }
-
   return operands;
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 /// @brief Compute the transition relation corresponding to a petri net.
-std::set<homomorphism>
+std::multimap<homomorphism, std::string>
 timed( const conf::configuration& conf, const order& o, const pn::net& net
      , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
   // Each transition will produce an operand.
-  std::set<homomorphism> operands;
-  operands.insert(sdd::id<sdd_conf>());
+  std::multimap<homomorphism, std::string> operands;
+  operands.emplace(sdd::id<sdd_conf>(), "id");
 
   using target_arc_type = pn::transition::arcs_type::value_type;
 
@@ -570,7 +568,7 @@ post_and_advance_time:
     h_t = composition(post_t, h_t);
 
     // The operation for transition t is ready.
-    operands.insert(h_t);
+    operands.emplace(h_t, t.id);
   } // for (const pn::transition& t : net.transitions())
 
   const auto advance_time = [&]
@@ -588,14 +586,14 @@ post_and_advance_time:
     }
     return res;
   }();
-  operands.insert(advance_time);
+  operands.emplace(advance_time, "___time___");
 
   return operands;
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
-std::set<homomorphism>
+std::multimap<homomorphism, std::string>
 firing_rule( const conf::configuration& conf, const order& o, const pn::net& net
            , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {

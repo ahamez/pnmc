@@ -1,22 +1,26 @@
 #include <algorithm>
 #include <vector>
 
-#include <iostream>
+#include <boost/iterator/transform_iterator.hpp>
 
+#include "mc/classic/filter_ge.hh"
+#include "mc/classic/filter_lt.hh"
 #include "mc/classic/path_to.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-std::deque<SDD>
-path_to( const order& o, const SDD& initial, const SDD& targets
-       , const std::set<homomorphism>& operands)
+std::deque<std::pair<std::string, SDD>>
+path_to( const order& o, const SDD& initial, const SDD& targets, const pn::net& net
+       , const std::multimap<homomorphism, std::string>& operands)
 {
   auto top_bottom = [&]
   {
-    using std::placeholders::_1;
-    const auto firing_rule = rewrite(o, sum(o, begin(operands), end(operands)));
+    const auto key = [](const auto& kv){return kv.first;};
+    const auto firing_rule = rewrite(o, sum( o
+                                           , boost::make_transform_iterator(begin(operands), key)
+                                           , boost::make_transform_iterator(end(operands), key)));
 
     SDD current_layer = initial;
     SDD acc = current_layer; // Keep all computed states to avoid to recompute states.
@@ -45,51 +49,68 @@ path_to( const order& o, const SDD& initial, const SDD& targets
     return res;
   }();
 
+  const auto enabled_operations = [&]
+  {
+    std::map<std::string, homomorphism> res;
+    for (const auto& transition : net.transitions())
+    {
+      auto h = sdd::id<sdd_conf>();
+      for (const auto& arc : transition.pre)
+      {
+        auto h_arc = sdd::id<sdd_conf>();
+        switch (arc.second.kind)
+        {
+          case pn::arc::type::normal:
+            h_arc = function(o, arc.first, filter_ge{arc.second.weight});
+            break;
+
+          case pn::arc::type::inhibitor:
+            h_arc = function(o, arc.first, filter_lt{arc.second.weight});
+            break;
+
+          case pn::arc::type::read:
+            h_arc = function(o, arc.first, filter_ge{arc.second.weight});
+            break;
+
+          default:
+            throw std::runtime_error(__PRETTY_FUNCTION__);
+        }
+        h = composition(h, h_arc);
+      }
+      res.emplace(transition.id, h);
+    }
+    return res;
+  }();
+
   // We now have the shortest paths to the targets that are the closest to the initial state, along
   // with some other possible paths which do not lead to the targets.
-  std::deque<SDD> trace;
+  std::deque<std::pair<std::string, SDD>> trace;
   for (auto rcit = std::next(rbegin(top_bottom)); rcit != rend(top_bottom); ++rcit)
   {
     const auto next_states = *std::prev(rcit);
-    for (const auto& transition : operands)
+    for (const auto& h_id : operands)
     {
-      const auto succ = transition(o, *rcit);
-      const auto inter = succ & next_states;
-      if (inter != zero())
+      const auto& transition = h_id.first;
+      const auto& tid = h_id.second;
+      if (tid == "id") continue; // ugly
+      const auto& enabled = enabled_operations.at(tid);
+      const auto current = enabled(o, *rcit);
+      if (current != zero())
       {
-        *std::prev(rcit) = inter;
-        trace.emplace_front(inter);
-        break;
+        const auto succ = transition(o, current);
+        const auto inter = succ & next_states;
+        if (inter != zero())
+        {
+          *std::prev(rcit) = inter;
+          *rcit = current;
+          trace.emplace_front(tid, inter);
+          break;
+        }
       }
     }
   }
-  trace.emplace_front(initial);
+  trace.emplace_front("initial", initial);
 
-//  std::cout << '\n';
-//  for (const auto& xy : trace)
-//  {
-//    std::deque<std::reference_wrapper<const std::string>> identifiers;
-//    o.flat(std::back_inserter(identifiers));
-//    auto path_generator = xy.second.paths();
-//    while (path_generator)
-//    {
-//      const auto& path = path_generator.get();
-//      path_generator(); // advance generator
-//      auto id_cit = begin(identifiers);
-//      auto path_cit = begin(path);
-//      std::cout << xy.first << std::setw(int(20-xy.first.size())) << " -> ";
-//      for (; path_cit != path.cend(); ++path_cit, ++id_cit)
-//      {
-//        auto copy = *path_cit;
-//        copy.erase(0);
-//        if (not copy.empty())
-//        {
-//          std::cout << id_cit->get() << ':' << *path_cit << ' ';
-//        }
-//      }
-//      std::cout << '\n';
-//    }
-//  }
   return trace;
 }
 

@@ -29,7 +29,7 @@ struct results
   boost::optional<pn::valuation_type> max_token_places;
   boost::optional<std::deque<std::string>> dead_transitions;
   boost::optional<sdd::SDD<C>> dead_states;
-  boost::optional<std::deque<sdd::SDD<C>>> trace;
+  boost::optional<std::deque<std::pair<std::string, sdd::SDD<C>>>> trace;
 
   friend
   std::ostream&
@@ -57,45 +57,59 @@ struct results
         os << '\n';
       }
     }
+
+    // Get the identifier of each level (SDD::paths() doesn't give this information).
+    std::deque<std::reference_wrapper<const std::string>> identifiers;
+    r.order->flat(std::back_inserter(identifiers));
+
+    const auto display_states = [&](const auto& x, auto limit, const auto& prefix)
+    {
+      auto path_generator = x.paths();
+      while (path_generator and limit-- > 0)
+      {
+        const auto& path = path_generator.get();
+        path_generator(); // advance generator
+        auto id_cit = begin(identifiers);
+        auto path_cit = begin(path);
+        os << prefix;
+        for (; path_cit != path.cend(); ++path_cit, ++id_cit)
+        {
+          auto copy = *path_cit;
+          copy.erase(0);
+          if (not copy.empty())
+          {
+            os << id_cit->get() << ':' << *path_cit << ' ';
+          }
+        }
+        os << '\n';
+      }
+    };
+
     if (r.dead_states)
     {
       assert(r.order);
       const auto sz = r.dead_states->size().template convert_to<long double>();
-      os << sz << " dead state(s)\n";
       if (not r.dead_states->empty())
       {
         // Limit the number of displayed dead states.
         auto max = std::min(static_cast<long double>(conf::max_shown_states), sz);
         if (max < sz)
         {
-          os << "  " << max << " first dead state(s):\n";
+          os << max << " first dead state(s):\n";
         }
-
-        // Get the identifier of each level (SDD::paths() doesn't give this information).
-        std::deque<std::reference_wrapper<const std::string>> identifiers;
-        r.order->flat(std::back_inserter(identifiers));
-
-        // We can't use the range-based for loop as it produces an ambiguity with clang when
-        // using Boost 1.56.
-        auto path_generator = r.dead_states->paths();
-        while (path_generator and max-- > 0)
+        else
         {
-          const auto& path = path_generator.get();
-          path_generator(); // advance generator
-          auto id_cit = begin(identifiers);
-          auto path_cit = begin(path);
-          os << "  ";
-          for (; path_cit != path.cend(); ++path_cit, ++id_cit)
-          {
-            auto copy = *path_cit;
-            copy.erase(0);
-            if (not copy.empty())
-            {
-              os << id_cit->get() << ':' << *path_cit << ' ';
-            }
-          }
-          os << '\n';
+          os << sz << " dead state(s):\n";
         }
+        display_states(*r.dead_states, 10, "  ");
+      }
+    }
+    if (r.trace)
+    {
+      os << r.trace->size() << " step(s) to closest error:\n";
+      for (const auto& transition_state : *r.trace)
+      {
+        display_states(transition_state.second, 1, "  " + transition_state.first + "\n    ");
       }
     }
     return os;

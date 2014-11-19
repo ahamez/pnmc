@@ -6,16 +6,10 @@ namespace pnmc { namespace mc {
 
 /*------------------------------------------------------------------------------------------------*/
 
-class mc_impl
+struct mc_impl
 {
-public:
-
   virtual ~mc_impl() {}
-
-  virtual
-  void
-  operator()(const pn::net&)
-  const = 0;
+  virtual void operator()(const pn::net&) = 0;
 };
 
 /*------------------------------------------------------------------------------------------------*/

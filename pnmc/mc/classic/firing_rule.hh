@@ -1,6 +1,6 @@
 #pragma once
 
-#include <set>
+#include <map>
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -12,7 +12,7 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-std::set<homomorphism>
+std::multimap<homomorphism, std::string>
 firing_rule( const conf::configuration& conf, const order& o, const pn::net& net
            , boost::dynamic_bitset<>& transitions_bitset, const bool& stop);
 

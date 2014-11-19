@@ -11,14 +11,14 @@ namespace pnmc { namespace mc { namespace classic {
 struct worker
   : public mc_impl
 {
-  const conf::configuration& conf;
+  conf::configuration conf;
 
   worker(const conf::configuration& c)
-    : conf{c}
+    : conf(c)
   {}
 
   void
-  operator()(const pn::net& net) const;
+  operator()(const pn::net& net);
 };
 
 /*------------------------------------------------------------------------------------------------*/

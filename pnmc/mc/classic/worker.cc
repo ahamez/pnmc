@@ -3,6 +3,7 @@
 #include <iostream>
 #include <set>
 
+#include <boost/iterator/transform_iterator.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 
 #include "mc/classic/count_tokens.hh"
@@ -56,11 +57,16 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 
 void
 worker::operator()(const pn::net& net)
-const
 {
   if (conf.compute_dead_states and net.timed())
   {
     std::cerr << "Computation of dead states for Time Petri Nets is not supported yet.\n";
+    conf.compute_dead_states = false;
+  }
+  if (conf.trace and net.timed())
+  {
+    std::cerr << "Computation of a trace for Time Petri Nets is not supported yet.\n";
+    conf.trace = false;
   }
 
   using conf::filename;
@@ -97,7 +103,10 @@ const
 
   // Build the order.
   res.order = make_order(conf, stats, net);
-  assert(not res.order->empty() && "Empty order");
+  if (res.order->empty())
+  {
+    throw std::runtime_error("Empty order");
+  }
   shared::export_json(conf, filename::json_order, *res.order);
 
   // Get the initial state.
@@ -109,22 +118,25 @@ const
   // Compute the transition relation.
   const auto h_operands = [&]
   {
-    shared::step("firing rule", &stats.relation_duration);
+    shared::step step("firing rule", &stats.relation_duration);
     return firing_rule(conf, *res.order, net, live_transitions, stop_flag);
   }();
-  const auto h = fixpoint(sum(*res.order, begin(h_operands), end(h_operands)));
+  const auto key = [](const auto& kv){return kv.first;};
+  const auto h = fixpoint(sum( *res.order
+                             , boost::make_transform_iterator(begin(h_operands), key)
+                             , boost::make_transform_iterator(end(h_operands), key)));
 
   // Rewrite the transition relation.
   const auto h_opt = [&]
   {
-    shared::step("rewrite", &stats.rewrite_duration);
+    shared::step step("rewrite", &stats.rewrite_duration);
     return sdd::rewrite(*res.order, h);
   }();
 
   // Compute the state space.
   {
-    shared::step s{"state space", &stats.state_space_duration};
-    threads _{conf, stats, stop_flag, manager, s.timer}; // threads will be stopped at scope exit
+    shared::step step{"state space", &stats.state_space_duration};
+    threads _{conf, stats, stop_flag, manager, step.timer}; // threads will be stopped at scope exit
     try
     {
       res.states = h_opt(*res.order, *res.m0);
@@ -137,7 +149,7 @@ const
     catch (const shared::interrupted&)
     {
       stats.interrupted = true;
-      std::cout << "Computation interrupted after " << s.timer.duration().count() << "s\n";
+      std::cout << "Computation interrupted after " << step.timer.duration().count() << "s\n";
     }
     if (stats.interrupted)
     {
@@ -150,13 +162,13 @@ const
   if (conf.count_tokens)
   {
     stats.tokens_duration.emplace();
-    shared::step s{"count tokens", &*stats.tokens_duration};
+    shared::step step{"count tokens", &*stats.tokens_duration};
     count_tokens(res, *res.states, net);
   }
 
   if (conf.compute_dead_transitions)
   {
-    shared::step{"dead transitions"};
+    shared::step step{"dead transitions"};
     res.dead_transitions.emplace();
     for (std::size_t i = 0; i < net.transitions().size(); ++i)
     {
@@ -171,14 +183,14 @@ const
   {
     {
       stats.dead_states_duration.emplace();
-      shared::step s{"dead states", &*stats.dead_states_duration};
+      shared::step step{"dead states", &*stats.dead_states_duration};
       res.dead_states = dead_states(*res.order, net, *res.states);
     }
     if (conf.trace)
     {
       stats.trace_duration.emplace();
-      shared::step s{"trace", &*stats.trace_duration};
-      res.trace = path_to(*res.order, *res.m0, *res.dead_states, h_operands);
+      shared::step step{"trace", &*stats.trace_duration};
+      res.trace = path_to(*res.order, *res.m0, *res.dead_states, net, h_operands);
     }
   }
 

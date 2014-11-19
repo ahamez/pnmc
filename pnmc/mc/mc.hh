@@ -21,14 +21,7 @@ public:
   mc(const conf::configuration&);
 
   void
-  operator()(const pn::net&)
-  const;
-
-private:
-
-  static
-  std::unique_ptr<mc_impl>
-  mk_impl(const conf::configuration&);
+  operator()(const pn::net&);
 };
 
 /*------------------------------------------------------------------------------------------------*/
