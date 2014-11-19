@@ -13,7 +13,6 @@
 #include "mc/classic/filter_ge.hh"
 #include "mc/classic/filter_lt.hh"
 #include "mc/classic/firing_rule.hh"
-#include "mc/classic/inhibitor.hh"
 #include "mc/classic/post.hh"
 #include "mc/classic/pre.hh"
 #include "mc/classic/pre_clock.hh"
@@ -130,7 +129,7 @@ untimed( const conf::configuration& conf, const order& o, const pn::net& net
               return function(o, id, shared::interruptible<sdd_conf, pre>(stop, weight));
 
             case pn::arc::type::inhibitor:
-              return function(o, id, shared::interruptible<sdd_conf, inhibitor>(stop, weight));
+              return function(o, id, shared::interruptible<sdd_conf, filter_lt>(stop, weight));
 
             case pn::arc::type::read:
               return function(o, id, shared::interruptible<sdd_conf, filter_ge>(stop, weight));
@@ -147,7 +146,7 @@ untimed( const conf::configuration& conf, const order& o, const pn::net& net
               return function(o, id, pre{weight});
 
             case pn::arc::type::inhibitor:
-              return function(o, id, inhibitor{weight});
+              return function(o, id, filter_lt{weight});
 
             case pn::arc::type::read:
               return function(o, id, filter_ge{weight});
@@ -226,7 +225,7 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
               return function(o, id, shared::interruptible<sdd_conf, pre>(stop, weight));
 
             case pn::arc::type::inhibitor:
-              return function(o, id, shared::interruptible<sdd_conf, inhibitor>(stop, weight));
+              return function(o, id, shared::interruptible<sdd_conf, filter_lt>(stop, weight));
 
             case pn::arc::type::read:
               return function(o, id, shared::interruptible<sdd_conf, filter_ge>(stop, weight));
@@ -243,7 +242,7 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
               return function(o, id, pre{weight});
 
             case pn::arc::type::inhibitor:
-              return function(o, id, inhibitor{weight});
+              return function(o, id, filter_lt{weight});
 
             case pn::arc::type::read:
               return function(o, id, filter_ge{weight});

@@ -1,13 +1,11 @@
 #include <cassert>
 #include <chrono>
 #include <iostream>
-#include <memory>
 #include <set>
 
 #include <boost/range/algorithm/for_each.hpp>
 
 #include "mc/classic/count_tokens.hh"
-#include "mc/classic/dead.hh"
 #include "mc/classic/dead_states.hh"
 #include "mc/classic/firing_rule.hh"
 #include "mc/classic/make_order.hh"
@@ -79,8 +77,9 @@ const
   sconf.hom_unique_table_size = conf.ut_sizes.at("hom");
   sconf.hom_cache_size = conf.cache_sizes.at("hom");
 
-  // Initialize libsdd.
-  auto manager_ptr = std::make_unique<sdd::manager<sdd_conf>>(sdd::init(sconf));
+  // This pointer WILL NOT be deleted to avoid a too long shutdown time due to big hash table
+  // cleanups.
+  auto manager_ptr = new sdd::manager<sdd_conf>{sdd::init(sconf)};
   auto& manager = *manager_ptr;
 
   auto stats = statistics{};
@@ -144,10 +143,6 @@ const
     {
       shared::export_json(conf, filename::json_stats, stats);
       shared::export_dot(conf, filename::dot_h, h, filename::dot_h_opt, h_opt);
-      if (conf.fast_exit)
-      {
-        manager_ptr.release(); // manager's destructor won't be called
-      }
       return;
     }
   }
@@ -204,11 +199,6 @@ const
   shared::export_json(conf, filename::json_stats, stats);
   shared::export_json(conf, filename::json_results, res);
   shared::export_json(conf, filename::json_h, h, filename::json_h_opt, h_opt);
-
-  if (conf.fast_exit)
-  {
-    manager_ptr.release(); // manager's destructor won't be called
-  }
 }
 
 /*------------------------------------------------------------------------------------------------*/

@@ -22,10 +22,8 @@ struct filter_ge
   {
     flat_set_builder builder;
     builder.reserve(val.size());
-    for (auto cit = val.lower_bound(value); cit != val.cend(); ++cit)
-    {
-      builder.insert(builder.end(), *cit);
-    }
+    // Only keep values that are greater or equal than the requested valuation.
+    std::copy(val.lower_bound(value), val.cend(), std::inserter(builder, builder.end()));
     return std::move(builder);
   }
 
