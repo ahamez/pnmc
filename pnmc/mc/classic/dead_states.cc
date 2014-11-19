@@ -1,7 +1,7 @@
 #include <set>
 
-#include "mc/classic/dead.hh"
 #include "mc/classic/dead_states.hh"
+#include "mc/classic/filter_lt.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
@@ -18,7 +18,7 @@ dead_states(const order& o, const pn::net& net, const SDD& state_space)
     // We are only interested in pre actions.
     for (const auto& arc : transition.pre)
     {
-      or_operands.insert(function(o, arc.first, dead{arc.second.weight}));
+      or_operands.insert(function(o, arc.first, filter_lt{arc.second.weight}));
     }
 
     and_operands.insert(sum(o, or_operands.cbegin(), or_operands.cend()));
