@@ -12,8 +12,8 @@ namespace pnmc { namespace mc { namespace classic {
 /*------------------------------------------------------------------------------------------------*/
 
 std::deque<std::pair<std::string, SDD>>
-path_to( const order& , const SDD&, const SDD&, const pn::net&
-       , const std::multimap<homomorphism, std::string>&);
+shortest_path( const order& , const SDD&, const SDD&, const pn::net&
+             , const std::multimap<homomorphism, std::string>&);
 
 /*------------------------------------------------------------------------------------------------*/
 

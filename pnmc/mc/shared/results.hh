@@ -78,7 +78,7 @@ struct results
           copy.erase(0);
           if (not copy.empty())
           {
-            os << id_cit->get() << ':' << *path_cit << ' ';
+            os << id_cit->get() << '*' << copy << ' ';
           }
         }
         os << '\n';
@@ -101,15 +101,15 @@ struct results
         {
           os << sz << " dead state(s):\n";
         }
-        display_states(*r.dead_states, 10, "  ");
+        display_states(*r.dead_states, max, "  ");
       }
     }
     if (r.trace)
     {
-      os << r.trace->size() << " step(s) to closest error:\n";
-      for (const auto& transition_state : *r.trace)
+      os << r.trace->size() << " step(s) to error:\n";
+      for (auto cit = std::next(cbegin(*r.trace)); cit != end(*r.trace); ++cit)
       {
-        display_states(transition_state.second, 1, "  " + transition_state.first + "\n    ");
+        os << "  " << cit->first << '\n';
       }
     }
     return os;

@@ -184,7 +184,6 @@ fill_configuration(int argc, const char** argv)
   mc_options.add_options()
     (mc_dead_transitions_str   , "Compute dead transitions")
     (mc_dead_states_str        , "Compute dead states")
-    (mc_trace_str              , "Compute the shortest trace")
     (mc_count_tokens_str       , "Compute maximal markings")
   ;
 
@@ -207,6 +206,7 @@ fill_configuration(int argc, const char** argv)
                                 , "Number of identifiers per hierarchy")
     (order_load_str             , po::value<std::string>()
                                 , "Load order from a JSON file")
+    (mc_trace_str               , "Compute the shortest trace")
   ;
 
   po::positional_options_description p;
@@ -248,7 +248,12 @@ fill_configuration(int argc, const char** argv)
   std::vector<std::string> unrecognized
     = po::collect_unrecognized(parsed.options, po::exclude_positional);
 
-  if (vm.count(help_str) or not unrecognized.empty() or not vm.count("input-file"))
+  if (vm.count(help_exp_str))
+  {
+    std::cout << hidden_exp_options << std::endl;
+    return boost::optional<configuration>();
+  }
+  else if (vm.count(help_str) or not unrecognized.empty() or not vm.count("input-file"))
   {
     if (not unrecognized.empty())
     {
@@ -270,11 +275,6 @@ fill_configuration(int argc, const char** argv)
     std::cout << stats_options << std::endl;
     std::cout << advanced_options << std::endl;
 
-    return boost::optional<configuration>();
-  }
-  else if (vm.count(help_exp_str))
-  {
-    std::cout << hidden_exp_options << std::endl;
     return boost::optional<configuration>();
   }
 
