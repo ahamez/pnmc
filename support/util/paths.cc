@@ -1,4 +1,7 @@
+#include <cstdlib>
 #include <stdexcept>
+
+#include <boost/algorithm/string.hpp>
 
 #include "support/util/paths.hh"
 
@@ -7,8 +10,13 @@ namespace pnmc { namespace util {
 /*------------------------------------------------------------------------------------------------*/
 
 boost::filesystem::path
-file(const std::string& p)
+file(std::string p)
 {
+  boost::algorithm::trim(p);
+  if (p.size() > 0 and p[0] == '~')
+  {
+    p.replace(0, 1, std::getenv("HOME"));
+  }
   return boost::filesystem::absolute(boost::filesystem::path(p));
 }
 
