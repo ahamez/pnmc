@@ -4,11 +4,13 @@
 #include <memory>
 #include <random>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <iosfwd>
 
 #include <boost/iterator/transform_iterator.hpp>
+#include <boost/optional.hpp>
 
 #include "mc/classic/filter_ge.hh"
 #include "mc/classic/filter_lt.hh"
@@ -135,6 +137,8 @@ struct visitor
 {
   const std::string& transition;
 
+  // Cache???
+
   SDD
   operator()( const sdd::hierarchical_node<sdd_conf>&, state_type::const_iterator
             , functions_type::const_iterator)
@@ -158,10 +162,10 @@ struct visitor
           continue; // to next arc
         }
         const auto rec = visit( *this, arc.successor(), std::next(state_it)
-                               , std::next(functions_it));
+                              , std::next(functions_it));
         if (rec != zero())
         {
-          return {n.variable(), arc.valuation(), rec}; // Hit!
+          return {n.variable(), {*state_it}, rec}; // Hit!
         }
         else
         {
@@ -193,7 +197,7 @@ struct visitor
                                     , std::next(functions_it));
               if (rec != zero())
               {
-                return {n.variable(), arc.valuation(), rec}; // Hit!
+                return {n.variable(), {v}, rec}; // Hit!
               }
             }
           }
@@ -302,150 +306,103 @@ shortest_path( const order& o, const SDD& initial, const SDD& targets, const pn:
 
 /*------------------------------------------------------------------------------------------------*/
 
-//std::deque<std::pair<std::string, SDD>>
-//path_to( const order& o, const SDD& initial, const SDD& all, const SDD& targets, const pn::net& net
-//       , const std::multimap<homomorphism, std::string>&)
-//{
-//  std::deque<std::string> identifiers;
-//  o.flat(std::back_inserter(identifiers));
-//
-//  const auto display_states = [&](const auto& x, auto limit, const auto& prefix)
-//  {
-//    auto path_generator = x.paths();
-//    while (path_generator and limit-- > 0)
-//    {
-//      const auto& path = path_generator.get();
-//      path_generator(); // advance generator
-//      auto id_cit = begin(identifiers);
-//      auto path_cit = begin(path);
-//      std::cout << prefix;
-//      for (; path_cit != path.cend(); ++path_cit, ++id_cit)
-//      {
-//        auto copy = *path_cit;
-//        copy.erase(0);
-//        if (not copy.empty())
-//        {
-//          std::cout << *id_cit << ':' << copy << ' ';
-//        }
-////        std::cout << *path_cit << ' ';
-//      }
-//      std::cout << '\n';
-//    }
-//  };
-//
-//  std::random_device rd;
-//  std::mt19937 g(rd());
-//
-//  const auto id = [](const auto& transition){return transition.id;};
-//  auto transitions = std::vector<std::string>{ make_transform_iterator(begin(net.transitions()), id)
-//                                             , make_transform_iterator(end(net.transitions()), id)};
-//
-//  const auto functions = mk_functions(identifiers, net);
-//  std::deque<std::pair<std::string, SDD>> trace;
-//  trace.emplace_front("", targets);
-//
-//  auto next_states = targets;
-//  auto current = all - targets;
-//
-////  const auto apply = [&](const auto& tid, const auto& next, const auto& cur)
-////  {
-////    const auto a_state = one_state_of(next);
-////    const auto res = visit( visitor{tid}
-////                          , cur             // current states to filter
-////                          , cbegin(a_state) // next state target
-////                          , o
-////                          , cbegin(functions)
-////                          , 0);
-////    if (res != zero())
-////    {
-//////      trace.front().first = transition.id;
-//////      trace.emplace_front("", res);
-//////      current -= res;
-//////      next_states = res;
-//////      no_more_transitions = false;
-////      return res;
-////    }
-////    return zero();
-////  };
-//
-////  std::cout << '\n';
-////
-////  auto r = apply("Lose_Request_3", targets, current);
-////  display_states(r, 100, "Lose_Request_3 ");
-////  current -= r;
-////  std::cout << (r & initial) << '\n';
-////
-////  r = apply("Prepare_Request_2", r, current);
-////  display_states(r, 100, "Prepare_Request_2 ");
-////  current -= r;
-////  std::cout << (r & initial) << '\n';
-////
-////  r = apply("Send_Request_3", r, current);
-////  display_states(r, 100, "Send_Request_3 ");
-////  current -= r;
-////  std::cout << (r & initial) << '\n';
-////
-////  r = apply("Lose_Request_4", r, current);
-////  display_states(r, 100, "Lose_Request_4 ");
-////  current -= r;
-////  std::cout << (r & initial) << '\n';
-////
-////  r = apply("Send_Request_4", r, current);
-////  display_states(r, 100, "Send_Request_4 ");
-////  current -= r;
-////  std::cout << (r & initial) << '\n';
-////
-////  r = apply("Prepare_Request_1", r, current);
-////  display_states(r, 100, "Prepare_Request_1 ");
-////  current -= r;
-////  std::cout << (r & initial) << '\n';
-////
-////  r = apply("Prepare_Request_3", r, current);
-////  display_states(r, 100, "Prepare_Request_3 ");
-////  current -= r;
-////  std::cout << (r & initial) << '\n';
-////
-////  r = apply("Prepare_Request_4", r, current);
-////  display_states(r, 100, "Prepare_Request_4 ");
-////  current -= r;
-////  std::cout << (r & initial) << '\n';
-//
-//  while (true)
-//  {
-//    std::cout << "\nwhile true\n";
-//    std::shuffle(begin(transitions), end(transitions), g);
-//
-//    display_states(next_states, 100, "next : ");
-//
-//    const auto a_state = one_state_of(next_states);
-//    bool no_more_transitions = true;
-//
-////    for (const auto transition : transitions)
-//    for (const auto& transition : net.transitions())
-//    {
-//      const auto res = visit( visitor{transition.id}
-//                            , current          // current states to filter
-//                            , cbegin(a_state)  // next state target
-//                            , cbegin(functions));
-//      if (res != zero())
-//      {
-//        std::cout << "transition " << transition.id << " OK\n";
-//        trace.front().first = transition.id;
-//        trace.emplace_front("", res);
-//        current -= res;
-//        next_states = res;
-//        no_more_transitions = false;
-//        break;
-//      }
-//    }
-//
-//    if (no_more_transitions)
-//    {
-//      break;
-//    }
-//  }
-//  return trace;
-//}
+void
+display_states(const order& o, const SDD& x, unsigned int limit, const std::string& prefix)
+{
+  std::deque<std::string> identifiers;
+  o.flat(std::back_inserter(identifiers));
+
+  auto path_generator = x.paths();
+  while (path_generator and limit-- > 0)
+  {
+    const auto& path = path_generator.get();
+    path_generator(); // advance generator
+    auto id_cit = begin(identifiers);
+    auto path_cit = begin(path);
+    std::cout << prefix;
+    for (; path_cit != path.cend(); ++path_cit, ++id_cit)
+    {
+      auto copy = *path_cit;
+      copy.erase(0);
+      if (not copy.empty())
+      {
+        std::cout << *id_cit << ':' << copy << ' ';
+      }
+    }
+    std::cout << '\n';
+  }
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+struct recurse
+{
+  const SDD initial;
+  std::unordered_set<SDD> visited;
+  std::vector<std::string> transitions;
+  const functions_type& functions;
+  std::mt19937 g;
+
+  recurse(const SDD& init, const std::vector<std::string>& ts, const functions_type& fns)
+    : initial{init}, visited{}, transitions{ts}, functions{fns}, g{std::random_device{}()}
+  {}
+
+  boost::optional<std::deque<std::pair<std::string, SDD>>>
+  operator()(const SDD& next_states, SDD all)
+  {
+    if (next_states & initial)
+    {
+      return std::deque<std::pair<std::string, SDD>>{std::make_pair("initial", initial)};
+    }
+
+    all -= next_states;
+
+    const auto a_state = one_state_of(next_states);
+    std::shuffle(begin(transitions), end(transitions), g);
+    for (const auto transition : transitions)
+    {
+      const auto pred = visit( visitor{transition}
+                             , all
+                             , cbegin(a_state)
+                             , cbegin(functions));
+
+      if (pred)
+      {
+        const auto search = visited.find(pred);
+        if (search == end(visited))
+        {
+          visited.emplace_hint(end(visited), pred);
+          if (auto rec = (*this)(pred, all - pred))
+          {
+            rec->emplace_back(transition, pred);
+            return rec;
+          }
+        }
+        else
+        {
+          return {};
+        }
+      }
+    }
+    return {};
+  }
+};
+
+/*------------------------------------------------------------------------------------------------*/
+
+std::deque<std::pair<std::string, SDD>>
+path_to(const order& o, const SDD& initial, SDD all, const SDD& targets, const pn::net& net)
+{
+  const auto id = [](const auto& transition){return transition.id;};
+  auto transitions = std::vector<std::string>{ make_transform_iterator(begin(net.transitions()), id)
+                                             , make_transform_iterator(end(net.transitions()), id)};
+
+  std::deque<std::string> identifiers;
+  o.flat(std::back_inserter(identifiers));
+  const auto functions = mk_functions(identifiers, net);
+
+  return *recurse{initial, transitions, functions}(targets, all - targets);
+}
 
 /*------------------------------------------------------------------------------------------------*/
 

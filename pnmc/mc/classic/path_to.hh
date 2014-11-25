@@ -17,4 +17,9 @@ shortest_path( const order& , const SDD&, const SDD&, const pn::net&
 
 /*------------------------------------------------------------------------------------------------*/
 
+std::deque<std::pair<std::string, SDD>>
+path_to(const order& o, const SDD& initial, SDD all, const SDD& targets, const pn::net& net);
+
+/*------------------------------------------------------------------------------------------------*/
+
 }}} // namespace pnmc::mc::classic

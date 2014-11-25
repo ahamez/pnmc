@@ -190,7 +190,8 @@ worker::operator()(const pn::net& net)
     {
       stats.trace_duration.emplace();
       shared::step step{"trace", &*stats.trace_duration};
-      res.trace = shortest_path(*res.order, *res.m0, *res.dead_states, net, h_operands);
+//      res.trace = shortest_path(*res.order, *res.m0, *res.dead_states, net, h_operands);
+      res.trace = path_to(*res.order, *res.m0, *res.states, *res.dead_states, net);
     }
   }
 

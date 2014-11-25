@@ -106,11 +106,17 @@ struct results
     }
     if (r.trace)
     {
-      os << (r.trace->size() - 1) << " step(s) to error:\n";
-      for (auto cit = std::next(cbegin(*r.trace)); cit != end(*r.trace); ++cit)
+//      os << (r.trace->size() - 1) << " step(s) to error:\n";
+//      for (auto cit = std::next(cbegin(*r.trace)); cit != end(*r.trace); ++cit)
+//      {
+//        os << "  " << cit->first << '\n';
+//      }
+      os << (r.trace->size()) << " step(s) to error:\n";
+      for (auto cit = cbegin(*r.trace); cit != end(*r.trace); ++cit)
       {
         os << "  " << cit->first << '\n';
       }
+
     }
     return os;
   }
