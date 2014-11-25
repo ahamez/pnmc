@@ -32,6 +32,22 @@ save(Archive& archive, const place_values& p)
 
 /*------------------------------------------------------------------------------------------------*/
 
+struct transition_state
+{
+  std::string transition;
+  std::deque<place_values> state;
+};
+
+template <typename Archive>
+void
+save(Archive& archive, const transition_state& t)
+{
+  archive( cereal::make_nvp("transition", t.transition)
+         , cereal::make_nvp("state", t.state));
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 template <typename Archive, typename C>
 void
 save(Archive& archive, const results<C>& r)
@@ -79,7 +95,22 @@ save(Archive& archive, const results<C>& r)
   }
   if (r.trace)
   {
-    archive(cereal::make_nvp("trace", "TODO"));
+    std::deque<transition_state> trace;
+    for (const auto& transition_sdd : *r.trace)
+    {
+      auto id_cit = begin(identifiers);
+      auto path_generator = transition_sdd.second.paths();
+      const auto& path = path_generator.get(); // get only first path
+
+      trace.emplace_back();
+      trace.back().transition = transition_sdd.first;
+      for (const auto& values : path)
+      {
+        auto vec = std::vector<pn::valuation_type>(values.cbegin(), values.cend());
+        trace.back().state.emplace_back(*id_cit++, std::move(vec));
+      }
+    }
+    archive(cereal::make_nvp("trace", trace));
   }
 }
 
