@@ -3,18 +3,15 @@
 #include <boost/filesystem.hpp>
 #include <boost/optional.hpp>
 
-#include "support/parsers/pn_configuration.hh"
+namespace pnmc { namespace parsers {
 
-namespace pnmc { namespace conf {
-  
 /*------------------------------------------------------------------------------------------------*/
 
-struct configuration
+struct properties_configuration
 {
-  parsers::pn_configuration input;
-  boost::filesystem::path tina_output_file;
+  boost::optional<boost::filesystem::path> file;
 };
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::configuration
+}} // namespace pnmc::parsers

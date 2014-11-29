@@ -26,4 +26,24 @@ public:
 
 /*------------------------------------------------------------------------------------------------*/
 
+struct unsupported_error final
+  : public std::exception
+{
+private:
+
+  const std::string message_;
+
+public:
+
+  unsupported_error(const std::string& message);
+  unsupported_error();
+
+  ~unsupported_error() noexcept;
+
+  const char* what() const noexcept;
+};
+
+
+/*------------------------------------------------------------------------------------------------*/
+
 }} // namespace pnmc::parsers

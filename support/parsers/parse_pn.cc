@@ -1,14 +1,14 @@
 #include <iostream>
 #include <istream>
-#include <memory>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include "support/parsers/mcc.hh"
 #include "support/parsers/ndr.hh"
 #include "support/parsers/net.hh"
 #include "support/parsers/nupn.hh"
-#include "support/parsers/parse.hh"
+#include "support/parsers/parse_pn.hh"
 #include "support/parsers/pnml.hh"
 
 namespace pnmc { namespace parsers {
@@ -16,7 +16,7 @@ namespace pnmc { namespace parsers {
 /*------------------------------------------------------------------------------------------------*/
 
 std::shared_ptr<pn::net>
-parse(const configuration& conf)
+parse(const pn_configuration& conf)
 {
   boost::filesystem::ifstream file_stream;
   std::istream* in = conf.file

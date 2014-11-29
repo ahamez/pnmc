@@ -30,6 +30,7 @@ struct statistics
   boost::optional<std::chrono::duration<double>> force_duration;
   boost::optional<std::chrono::duration<double>> dead_states_duration;
   boost::optional<std::chrono::duration<double>> trace_duration;
+  boost::optional<std::chrono::duration<double>> reachability_duration;
 
   boost::optional<std::deque<unsigned int>> sdd_ut_size;
   boost::optional<std::deque<double>> force_spans;

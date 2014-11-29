@@ -51,7 +51,7 @@ fill_configuration(int argc, const char** argv)
   po::options_description cmdline_options;
   cmdline_options.add(general_options)
                  .add(hidden_options)
-                 .add(input_options());
+                 .add(pn_input_options());
 
   po::variables_map vm;
   auto parsed = po::command_line_parser(argc, argv).options(cmdline_options)
@@ -75,7 +75,7 @@ fill_configuration(int argc, const char** argv)
     }
 
     std::cout << "Usage: " << argv[0] << " [options] infile outfile" << std::endl << std::endl;
-    std::cout << input_options() << std::endl;
+    std::cout << pn_input_options() << std::endl;
     return boost::optional<configuration>();
   }
 
@@ -89,7 +89,7 @@ fill_configuration(int argc, const char** argv)
     throw po::error("No output file specified.");
   }
 
-  conf.input = configure_parser(vm);
+  conf.input = configure_pn_parser(vm);
   conf.tina_output_file = util::file(vm["output-file"].as<std::string>());
 
   return conf;

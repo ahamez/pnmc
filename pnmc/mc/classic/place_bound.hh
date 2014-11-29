@@ -1,24 +1,16 @@
 #pragma once
 
-#include "conf/configuration.hh"
-#include "mc/mc_impl.hh"
+#include <set>
+#include <unordered_map>
+
+#include "mc/classic/sdd.hh"
 
 namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-struct worker
-  : public mc_impl
-{
-  conf::configuration conf;
-
-  worker(const conf::configuration& c)
-    : conf(c)
-  {}
-
-  void
-  operator()(const pn::net& net, const properties::formulae&);
-};
+std::unordered_map<std::string /* place id */, pn::valuation_type>
+place_bound(const order&, const SDD&, const std::set<std::string>&);
 
 /*------------------------------------------------------------------------------------------------*/
 

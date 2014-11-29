@@ -26,16 +26,15 @@ static const auto format_map = std::map<std::string, pn_format>
 static const auto possible_format_values = [&]
 {
   using namespace boost::adaptors;
-  using namespace std::string_literals;
-  return "Petri net format ["s + boost::algorithm::join(format_map | map_keys, "|") + "]"s;
+  return "Petri net format [" + boost::algorithm::join(format_map | map_keys, "|") + "]";
 }();
 
 /*------------------------------------------------------------------------------------------------*/
 
 po::options_description
-input_options()
+pn_input_options()
 {
-  po::options_description options("Input file format options");
+  po::options_description options{"Petri net file format options"};
   options.add_options()
     (pn_input_str, po::value<std::string>()->default_value("net"), possible_format_values.c_str());
   return options;
@@ -61,15 +60,42 @@ pn_format_from_options(const po::variables_map& vm)
 
 /*------------------------------------------------------------------------------------------------*/
 
-parsers::configuration
-configure_parser(const boost::program_options::variables_map& vm)
+parsers::pn_configuration
+configure_pn_parser(const boost::program_options::variables_map& vm)
 {
-  parsers::configuration conf;
+  parsers::pn_configuration conf;
   if (vm["input-file"].as<std::string>() != "-")
   {
     conf.file = util::in_file(vm["input-file"].as<std::string>());
   }
   conf.file_type = pn_format_from_options(vm);
+  return conf;
+}
+
+/*------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------*/
+
+static const auto properties_input_str = "properties-file";
+
+po::options_description
+properties_input_options()
+{
+  po::options_description options{"Properties file format options"};
+  options.add_options()
+    (properties_input_str, po::value<std::string>(), "Path to properties file");
+  return options;
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+parsers::properties_configuration
+configure_properties_parser(const boost::program_options::variables_map& vm)
+{
+  parsers::properties_configuration conf;
+  if (vm.count(properties_input_str))
+  {
+    conf.file = util::in_file(vm[properties_input_str].as<std::string>());
+  }
   return conf;
 }
 

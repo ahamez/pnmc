@@ -7,7 +7,8 @@
 
 #include "conf/fill_configuration.hh"
 #include "mc/mc.hh"
-#include "support/parsers/parse.hh"
+#include "support/parsers/parse_pn.hh"
+#include "support/parsers/parse_properties.hh"
 #include "support/parsers/parse_error.hh"
 #include "support/util/paths.hh"
 
@@ -20,49 +21,46 @@ main(int argc, const char** argv)
 
   try
   {
-    const auto conf_opt = conf::fill_configuration(argc, argv);
-    if (conf_opt)
+    if (const auto conf = conf::fill_configuration(argc, argv))
     {
-      const auto& conf = *conf_opt;
-      const auto net_ptr = parsers::parse(conf.input);
-      mc::mc worker{conf};
-      worker(*net_ptr);
+      const auto net_ptr = parsers::parse(conf->pn_input);
+      const auto properties = parsers::parse(conf->properties_input);
+      mc::mc{*conf}(*net_ptr, properties);
     }
     return EX_OK;
   }
   catch (const boost::program_options::error& e)
   {
-    std::cerr << e.what() << std::endl;
+    std::cerr << e.what() << '\n';
     return EX_USAGE;
   }
   catch (const parsers::parse_error& e)
   {
-    std::cerr << "Error when parsing input:" << std::endl;
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error when parsing input:\n";
+    std::cerr << e.what() << '\n';
     return EX_DATAERR;
   }
   catch (const sdd::order_error& e)
   {
-    std::cerr << "Order error:" << std::endl;
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Order error:\n";
+    std::cerr << e.what() << '\n';
     return EX_DATAERR;
   }
   catch (const std::runtime_error& e)
   {
-    std::cerr << "Error:" << std::endl;
-    std::cerr << e.what() << std::endl;
+    std::cerr << "Error:\n";
+    std::cerr << e.what() << '\n';
     return EX_DATAERR;
   }
   catch (const std::bad_alloc&)
   {
-    std::cerr << "Can't allocate more memory" << std::endl;
+    std::cerr << "Can't allocate memory\n";
     return EX_OSERR;
   }
   catch (std::exception& e)
   {
-    std::cerr << "Error unknown. Please report the following to a.hamez@isae.fr." << std::endl;
-    std::cerr << e.what() << std::endl;
-    std::cerr << "Exiting." << std::endl;
+    std::cerr << "Error unknown. Please report the following to a.hamez@isae.fr.\n";
+    std::cerr << e.what() << '\n';
     return EX_SOFTWARE;
   }
 }

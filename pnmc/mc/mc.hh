@@ -4,7 +4,6 @@
 
 #include "conf/configuration.hh"
 #include "mc/mc_impl.hh"
-#include "support/pn/net.hh"
 
 namespace pnmc { namespace mc {
 
@@ -21,7 +20,7 @@ public:
   mc(const conf::configuration&);
 
   void
-  operator()(const pn::net&);
+  operator()(const pn::net&, const properties::formulae&);
 };
 
 /*------------------------------------------------------------------------------------------------*/

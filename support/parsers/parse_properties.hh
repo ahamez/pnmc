@@ -1,20 +1,18 @@
 #pragma once
 
+#include <iosfwd>
 #include <vector>
 
-#include "support/pn/net.hh"
+#include "support/parsers/properties_configuration.hh"
 #include "support/properties/formulae.hh"
 
-namespace pnmc { namespace mc {
+namespace pnmc { namespace parsers {
 
 /*------------------------------------------------------------------------------------------------*/
 
-struct mc_impl
-{
-  virtual ~mc_impl() {}
-  virtual void operator()(const pn::net&, const properties::formulae&) = 0;
-};
+properties::formulae
+parse(const properties_configuration&);
 
 /*------------------------------------------------------------------------------------------------*/
 
-}} // namespace pnmc::mc
+}} // namespace pnmc::parsers

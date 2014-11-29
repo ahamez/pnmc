@@ -11,6 +11,7 @@
 #include "mc/classic/firing_rule.hh"
 #include "mc/classic/make_order.hh"
 #include "mc/classic/path_to.hh"
+#include "mc/classic/reachability.hh"
 #include "mc/classic/sdd.hh"
 #include "mc/classic/sharp_output.hh"
 #include "mc/classic/threads.hh"
@@ -56,8 +57,16 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 /*------------------------------------------------------------------------------------------------*/
 
 void
-worker::operator()(const pn::net& net)
+worker::operator()(const pn::net& net, const properties::formulae& formulae)
 {
+  if (not formulae.fireable_transitions.empty())
+  {
+    conf.compute_dead_transitions = true;
+  }
+  if (formulae.compute_deadlock)
+  {
+    conf.compute_dead_states = true;
+  }
   if (conf.compute_dead_states and net.timed())
   {
     std::cerr << "Computation of dead states for Time Petri Nets is not supported yet.\n";
@@ -174,12 +183,12 @@ worker::operator()(const pn::net& net)
     {
       if (not live_transitions[i])
       {
-        res.dead_transitions->push_back(net.get_transition_by_index(i).id);
+        res.dead_transitions->emplace(net.get_transition_by_index(i).id);
       }
     }
   }
 
-  if (conf.compute_dead_states and not net.timed())
+  if (conf.compute_dead_states)
   {
     {
       stats.dead_states_duration.emplace();
@@ -192,6 +201,13 @@ worker::operator()(const pn::net& net)
       shared::step step{"trace", &*stats.trace_duration};
       res.trace = shortest_path(*res.order, *res.m0, *res.dead_states, net, h_operands);
     }
+  }
+
+  if (not formulae.booleans.empty() or not formulae.integers.empty())
+  {
+    stats.reachability_duration.emplace();
+    shared::step step{"reachability", &*stats.reachability_duration};
+    reachability(*res.order, formulae, res);
   }
 
   if (conf.stats_conf.count(shared::stats::final_sdd))

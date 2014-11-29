@@ -10,7 +10,8 @@
 
 #include "mc/shared/export_configuration.hh"
 #include "mc/shared/statistics_configuration.hh"
-#include "support/parsers/configuration.hh"
+#include "support/parsers/pn_configuration.hh"
+#include "support/parsers/properties_configuration.hh"
 
 namespace pnmc { namespace conf {
 
@@ -19,8 +20,11 @@ namespace pnmc { namespace conf {
 /// @brief The configuration of pnmc at runtime.
 struct configuration
 {
-  /// @brief Describe how to read input.
-  parsers::configuration input;
+  /// @brief Describe how to read the Petri net file.
+  parsers::pn_configuration pn_input;
+
+  /// @brief Describe how to read the properties file.
+  parsers::properties_configuration properties_input;
 
   /// @brief Remove all hierarchy from order.
   bool order_flat;

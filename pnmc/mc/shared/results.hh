@@ -2,6 +2,7 @@
 
 #include <deque>
 #include <iosfwd>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -27,9 +28,11 @@ struct results
   boost::optional<sdd::SDD<C>> states;
   boost::optional<pn::valuation_type> max_token_markings;
   boost::optional<pn::valuation_type> max_token_places;
-  boost::optional<std::deque<std::string>> dead_transitions;
+  boost::optional<std::set<std::string>> dead_transitions;
   boost::optional<sdd::SDD<C>> dead_states;
   boost::optional<std::deque<std::pair<std::string, sdd::SDD<C>>>> trace;
+  boost::optional<std::deque<std::pair<std::string, bool>>> reachability;
+  boost::optional<std::deque<std::pair<std::string, int>>> evaluations;
 
   friend
   std::ostream&
@@ -104,6 +107,7 @@ struct results
         display_states(*r.dead_states, max, "  ");
       }
     }
+
     if (r.trace)
     {
       os << (r.trace->size() - 1) << " step(s) to error:\n";
@@ -112,6 +116,25 @@ struct results
         os << "  " << cit->first << '\n';
       }
     }
+
+    if (r.reachability)
+    {
+      os << "Properties:\n";
+      for (const auto& id_status : *r.reachability)
+      {
+        os << "  " << id_status.first << " : " << std::boolalpha << id_status.second << '\n';
+      }
+    }
+
+    if (r.evaluations)
+    {
+      os << "Evaluations:\n";
+      for (const auto& id_value : *r.evaluations)
+      {
+        os << "  " << id_value.first << " : " << id_value.second << '\n';
+      }
+    }
+
     return os;
   }
 };

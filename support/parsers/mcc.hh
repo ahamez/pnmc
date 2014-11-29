@@ -1,21 +1,16 @@
 #pragma once
 
-#include <string>
+#include <iosfwd>
+#include <vector>
 
-#include <boost/filesystem.hpp>
-#include <boost/optional.hpp>
-
-#include "support/conf/pn_format.hh"
+#include "support/properties/formulae.hh"
 
 namespace pnmc { namespace parsers {
 
 /*------------------------------------------------------------------------------------------------*/
 
-struct configuration
-{
-  boost::optional<boost::filesystem::path> file;
-  conf::pn_format file_type;
-};
+properties::formulae
+mcc(std::istream&);
 
 /*------------------------------------------------------------------------------------------------*/
 

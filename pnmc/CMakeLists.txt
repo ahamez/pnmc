@@ -8,6 +8,10 @@ set(SOURCES
     mc/classic/firing_rule.cc
     mc/classic/make_order.cc
     mc/classic/path_to.cc
+    mc/classic/place_bound.cc
+    mc/classic/reachability.cc
+    mc/classic/reachability_ast.cc
+    mc/classic/reachability_eval.cc
     mc/classic/threads.cc
     mc/classic/worker.cc
     mc/mc.cc

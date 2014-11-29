@@ -3,6 +3,7 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/types/deque.hpp>
 #include <cereal/types/vector.hpp>
+#include <cereal/types/set.hpp>
 
 #include "conf/configuration.hh"
 #include "mc/shared/results.hh"
@@ -44,6 +45,38 @@ save(Archive& archive, const transition_state& t)
 {
   archive( cereal::make_nvp("transition", t.transition)
          , cereal::make_nvp("state", t.state));
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+struct property_result
+{
+  std::string id;
+  bool result;
+};
+
+template <typename Archive>
+void
+save(Archive& archive, const property_result& p)
+{
+  archive( cereal::make_nvp("property", p.id)
+         , cereal::make_nvp("result", p.result));
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
+struct evaluation_result
+{
+  std::string id;
+  int result;
+};
+
+template <typename Archive>
+void
+save(Archive& archive, const evaluation_result& e)
+{
+  archive( cereal::make_nvp("evaluation", e.id)
+         , cereal::make_nvp("result", e.result));
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -93,6 +126,7 @@ save(Archive& archive, const results<C>& r)
     }
     archive(cereal::make_nvp("dead states", deads));
   }
+
   if (r.trace)
   {
     std::deque<transition_state> trace;
@@ -111,6 +145,27 @@ save(Archive& archive, const results<C>& r)
       }
     }
     archive(cereal::make_nvp("trace", trace));
+  }
+
+  if (r.reachability)
+  {
+    std::deque<property_result> results;
+    for (const auto& kv : *r.reachability)
+    {
+      results.emplace_back(property_result{kv.first, kv.second});
+    }
+    archive(cereal::make_nvp("properties", results));
+  }
+
+  if (r.evaluations)
+  {
+    std::deque<evaluation_result> results;
+    for (const auto& kv : *r.evaluations)
+    {
+      results.emplace_back(evaluation_result{kv.first, kv.second});
+    }
+    archive(cereal::make_nvp("evaluations", results));
+
   }
 }
 

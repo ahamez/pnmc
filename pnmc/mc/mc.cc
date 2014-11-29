@@ -12,9 +12,9 @@ mc::mc(const conf::configuration& conf)
 /*------------------------------------------------------------------------------------------------*/
 
 void
-mc::operator()(const pn::net& net)
+mc::operator()(const pn::net& net, const properties::formulae& formulae)
 {
-  impl_->operator()(net);
+  impl_->operator()(net, formulae);
 }
 
 /*------------------------------------------------------------------------------------------------*/

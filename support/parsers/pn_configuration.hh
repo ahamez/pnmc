@@ -1,17 +1,19 @@
 #pragma once
 
-#include <iosfwd>
-#include <memory>
+#include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 
-#include "support/parsers/configuration.hh"
-#include "support/pn/net.hh"
+#include "support/conf/pn_format.hh"
 
 namespace pnmc { namespace parsers {
-  
+
 /*------------------------------------------------------------------------------------------------*/
 
-std::shared_ptr<pn::net>
-parse(const configuration&);
+struct pn_configuration
+{
+  boost::optional<boost::filesystem::path> file;
+  conf::pn_format file_type;
+};
 
 /*------------------------------------------------------------------------------------------------*/
 

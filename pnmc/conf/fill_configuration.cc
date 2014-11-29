@@ -20,7 +20,7 @@ namespace pnmc { namespace conf {
 /*------------------------------------------------------------------------------------------------*/
 
 namespace po = boost::program_options;
-using namespace std::string_literals;
+using namespace boost::adaptors;
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -72,8 +72,7 @@ const auto time_limit_str = "time-limit";
 const auto cache_str = "cache-size";
 static const auto cache_values = [&]
 {
-  using namespace boost::adaptors;
-  return "(["s + boost::algorithm::join(default_cache_sizes | map_keys, "|") + "]:value)+"s;
+  return "([" + boost::algorithm::join(default_cache_sizes | map_keys, "|") + "]:value)+";
 }();
 
 /*------------------------------------------------------------------------------------------------*/
@@ -82,8 +81,7 @@ static const auto cache_values = [&]
 const auto ut_str = "ut-size";
 static const auto ut_values = [&]
 {
-  using namespace boost::adaptors;
-  return "(["s + boost::algorithm::join(default_ut_sizes | map_keys, "|") + "]:value)+"s;
+  return "([" + boost::algorithm::join(default_ut_sizes | map_keys, "|") + "]:value)+";
 }();
 
 /*------------------------------------------------------------------------------------------------*/
@@ -96,8 +94,7 @@ static const auto dot_export_values_map = std::map<std::string, mc::shared::dot_
   , {"sdd"   , mc::shared::dot_export::sdd}};
 static const auto dot_export_values_str = [&]
 {
-  using namespace boost::adaptors;
-  return "["s + boost::algorithm::join(dot_export_values_map | map_keys, "|") + "]+"s;
+  return "[" + boost::algorithm::join(dot_export_values_map | map_keys, "|") + "]+";
 }();
 
 /*------------------------------------------------------------------------------------------------*/
@@ -110,8 +107,7 @@ static const auto json_export_values_map = std::map<std::string, mc::shared::jso
   , {"order"   , mc::shared::json_export::order}};
 static const auto json_export_values_str = [&]
 {
-  using namespace boost::adaptors;
-  return "["s + boost::algorithm::join(json_export_values_map | map_keys, "|") + "]+"s;
+  return "[" + boost::algorithm::join(json_export_values_map | map_keys, "|") + "]+";
 }();
 
 /*------------------------------------------------------------------------------------------------*/
@@ -124,8 +120,7 @@ static const auto stats_values_map = std::map<std::string, mc::shared::stats>
   , {"nb-sdd"    , mc::shared::stats::nb_sdd}};
 static const auto stats_values_str = [&]
 {
-  using namespace boost::adaptors;
-  return "["s + boost::algorithm::join(stats_values_map | map_keys, "|") + "]+"s;
+  return "[" + boost::algorithm::join(stats_values_map | map_keys, "|") + "]+";
 }();
 
 /*------------------------------------------------------------------------------------------------*/
@@ -215,7 +210,8 @@ fill_configuration(int argc, const char** argv)
   po::options_description cmdline_options;
   cmdline_options
   	.add(general_options)
-    .add(input_options())
+    .add(pn_input_options())
+    .add(properties_input_options())
     .add(export_options)
     .add(order_options)
     .add(petri_options)
@@ -250,7 +246,7 @@ fill_configuration(int argc, const char** argv)
 
   if (vm.count(help_exp_str))
   {
-    std::cout << hidden_exp_options << std::endl;
+    std::cout << hidden_exp_options << '\n';
     return boost::optional<configuration>();
   }
   else if (vm.count(help_str) or not unrecognized.empty() or not vm.count("input-file"))
@@ -264,23 +260,24 @@ fill_configuration(int argc, const char** argv)
       std::cerr << "No file specified\n\n";
     }
 
-    std::cout << version << std::endl;
-    std::cout << "Usage: " << argv[0] << " [options] file " << std::endl << std::endl;
-    std::cout << general_options << std::endl;
-    std::cout << input_options() << std::endl;
-    std::cout << export_options << std::endl;
-    std::cout << order_options << std::endl;
-    std::cout << petri_options << std::endl;
-    std::cout << mc_options << std::endl;
-    std::cout << stats_options << std::endl;
-    std::cout << advanced_options << std::endl;
+    std::cout << version << '\n'
+              << "Usage: " << argv[0] << " [options] file\n\n"
+              << general_options << '\n'
+              << pn_input_options() << '\n'
+              << properties_input_options() << '\n'
+              << export_options << '\n'
+              << order_options << '\n'
+              << petri_options << '\n'
+              << mc_options << '\n'
+              << stats_options << '\n'
+              << advanced_options << '\n';
 
     return boost::optional<configuration>();
   }
 
   if (vm.count(version_str))
   {
-    std::cout << version << std::endl;
+    std::cout << version << '\n';
     return boost::optional<configuration>();
   }
 
@@ -300,7 +297,8 @@ fill_configuration(int argc, const char** argv)
   }
 
   // Input options
-  conf.input = configure_parser(vm);
+  conf.pn_input = configure_pn_parser(vm);
+  conf.properties_input = configure_properties_parser(vm);
 
   // Order options
   conf.order_flat = vm.count(order_flat_str);
@@ -354,7 +352,7 @@ fill_configuration(int argc, const char** argv)
                       const auto search = values_map.find(s);
                       if (search == end(values_map))
                       {
-                        throw po::error("Invalid "s + option + " option value: "s + s);
+                        throw po::error("Invalid " + option + " option value: " + s);
                       }
                       return search->second;
                     });
@@ -388,12 +386,12 @@ fill_configuration(int argc, const char** argv)
       std::copy(begin(subtks), end(subtks), std::back_inserter(tmp));
       if (tmp.size() != 2)
       {
-        throw po::error("Invalid "s + option + " option value: "s + tk);
+        throw po::error("Invalid " + option + " option value: " + tk);
       }
       const auto search = map.find(tmp[0]);
       if (search == end(conf.cache_sizes))
       {
-        throw po::error("Invalid "s + option + " option value: "s + tk);
+        throw po::error("Invalid " + option + " option value: " + tk);
       }
       try
       {
@@ -401,7 +399,7 @@ fill_configuration(int argc, const char** argv)
       }
       catch (std::invalid_argument&)
       {
-        throw po::error("Invalid "s + option + " option value: "s + tk);
+        throw po::error("Invalid " + option + " option value: " + tk);
       }
     }
   };
@@ -417,7 +415,6 @@ fill_configuration(int argc, const char** argv)
   {
     parse_sizes(ut_str, conf.ut_sizes);
   }
-
 
   return conf;
 }
