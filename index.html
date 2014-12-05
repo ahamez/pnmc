@@ -1,53 +1,69 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>pnmc by ahamez</title>
+    <meta name="description" content="pnmc : ">
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>pnmc</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>pnmc</h1>
-        <p></p>
 
-        <p class="view"><a href="https://github.com/ahamez/pnmc">View the Project on GitHub <small>ahamez/pnmc</small></a></p>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/ahamez/pnmc">View on GitHub</a>
 
+          <h1 id="project_title">pnmc</h1>
+          <h2 id="project_tagline"></h2>
 
-        <ul>
-          <li><a href="https://github.com/ahamez/pnmc/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/ahamez/pnmc/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/ahamez/pnmc">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/ahamez/pnmc/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/ahamez/pnmc/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
         <h1>
-<a name="presentation" class="anchor" href="#presentation"><span class="octicon octicon-link"></span></a>Presentation</h1>
+<a id="presentation" class="anchor" href="#presentation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Presentation</h1>
 
-<p>Pnmc is a small prototype of a symbolic model checker for Petri nets written in C++. It uses the <a href="https://github.com/ahamez/libsdd">libsdd library</a> which implements Hierarchical Set Decision Diagrams.</p>
-
-<p>The goal of pnmc is mainly to assess the performances of the libsdd, both in term of algorithms and efficient memory
-usage. As such, it mainly focus on state space generation and can only computes the dead states of a Petri nets. 
-Reachabilty properties are planned in the future</p>
+<p>Pnmc is a small symbolic model checker for <a href="https://en.wikipedia.org/wiki/Petri_net">Petri nets</a> written in C++14. It uses the <a href="https://github.com/ahamez/libsdd">libsdd library</a> which implements Hierarchical Set Decision Diagrams.</p>
 
 <h1>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h1>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span class="octicon octicon-link"></span></a>Features</h1>
+
+<ul>
+<li>Symbolic generation of state spaces</li>
+<li>Verification of dead states (deadlocks)</li>
+<li>Verification of dead transitions</li>
+<li>Verification of a subset of the reachability properties of the <a href="http://mcc.lip6.fr">Model Checking Contest</a>
+</li>
+</ul>
+
+<p>Additionally, it can generate the state space of a Timed Petri nets using discrete time semantics.</p>
+
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h1>
 
 <p>Instructions to compile and install pnmc are given in the INSTALL file.</p>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/ahamez">ahamez</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">pnmc maintained by <a href="https://github.com/ahamez">ahamez</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+
               <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
@@ -58,6 +74,7 @@ Reachabilty properties are planned in the future</p>
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
+
 
   </body>
 </html>
