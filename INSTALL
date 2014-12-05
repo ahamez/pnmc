@@ -2,14 +2,14 @@ PNMC INSTALLATION
 
 # Requirements
 
-  * C++11 compiler
+  * C++14 compiler
     - clang >= 3.4
-    - gcc >= 4.9.1
-    - Other compilers might work, as long as they implement the C++11 standard
+    - gcc >= 4.9.2
+    - Other compilers might work, as long as they implement the C++14 standard
 
   * Libraries
     - libsdd (https://github.com/ahamez/libsdd)
-    - Boost >= 1.55 (http://www.boost.org)
+    - Boost >= 1.56 (http://www.boost.org)
     - cereal >= 1.0.0 (http://uscilab.github.io/cereal)
 
   * Tools
