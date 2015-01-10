@@ -17,7 +17,7 @@ struct worker
   {}
 
   void
-  operator()(const pn::net& net, const properties::formulae&);
+  operator()(const pn::net& net, const properties::formulae&) override;
 };
 
 /*------------------------------------------------------------------------------------------------*/
