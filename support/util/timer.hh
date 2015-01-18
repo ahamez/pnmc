@@ -11,24 +11,24 @@ class timer
 {
 private:
 
-  std::chrono::time_point<std::chrono::system_clock> start_;
+  std::chrono::time_point<std::chrono::steady_clock> start_;
 
 public:
 
   timer()
-    : start_(std::chrono::system_clock::now())
+    : start_(std::chrono::steady_clock::now())
   {}
 
   void
   reset()
   {
-    start_ = std::chrono::system_clock::now();
+    start_ = std::chrono::steady_clock::now();
   }
 
   std::chrono::duration<double>
   duration()
   {
-    return std::chrono::system_clock::now() - start_;
+    return std::chrono::steady_clock::now() - start_;
   }
 };
 
