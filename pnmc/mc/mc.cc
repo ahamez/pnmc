@@ -1,4 +1,5 @@
 #include "mc/mc.hh"
+#include "mc/mc_impl.hh"
 #include "mc/classic/worker.hh"
 
 namespace pnmc { namespace mc {
@@ -6,7 +7,7 @@ namespace pnmc { namespace mc {
 /*------------------------------------------------------------------------------------------------*/
 
 mc::mc(const conf::configuration& conf)
-  : impl_(std::unique_ptr<mc_impl>(new classic::worker{conf}))
+  : impl_(std::shared_ptr<mc_impl>(new classic::worker{conf}))
 {}
 
 /*------------------------------------------------------------------------------------------------*/

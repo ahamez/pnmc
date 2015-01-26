@@ -3,17 +3,21 @@
 #include <memory>
 
 #include "conf/configuration.hh"
-#include "mc/mc_impl.hh"
+#include "support/pn/net.hh"
+#include "support/properties/formulae.hh"
 
 namespace pnmc { namespace mc {
 
 /*------------------------------------------------------------------------------------------------*/
 
+// Forward declaration of implementation.
+struct mc_impl;
+
 class mc
 {
 private:
 
-  const std::unique_ptr<mc_impl> impl_;
+  const std::shared_ptr<mc_impl> impl_;
 
 public:
 
