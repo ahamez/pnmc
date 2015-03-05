@@ -36,7 +36,6 @@ enum class tk { skip = 1u, newline, number, qname, name, colon, comma
 
 /*------------------------------------------------------------------------------------------------*/
 
-using namespace std::string_literals;
 using token = token_holder<tk>;
 using parse_cxt = parse_context<tk>;
 
