@@ -42,7 +42,7 @@ tokens(InputIterator&& begin, InputIterator&& end)
   static const std::regex regex
   {
     "([ \\t]+)|"                  // skip spaces and tabs
-    "(\\n)|"                      // newline (to keep track of line numbers)
+    "(\\r\\n|\\n|\\r)|"           // newline (to keep track of line numbers)
     "(\\d+\\.\\d+)|"              // float
     "(\\d+[KM]?)|"                // numbers can have a suffix
     "(\\{)|"                      // only search for opening brace for qualified names

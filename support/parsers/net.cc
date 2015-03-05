@@ -51,7 +51,7 @@ tokens(InputIterator&& begin, InputIterator&& end)
   static const std::regex regex
   {
     "([ \\t]+)|"                  // skip spaces and tabs
-    "(\\n)|"                      // newline (to keep track of line numbers)
+    "(\\r\\n|\\n|\\r)|"           // newline (to keep track of line numbers)
     "(\\d+[KM]?)|"                // numbers can have a suffix
     "(\\{)|"                      // only search for opening brace for qualified names
     "([a-zA-Z'_][a-zA-Z0-9'_]*)|" // don't begin by a number, we add it if necessary in the parser
@@ -391,15 +391,35 @@ std::string
 preprocess(std::istream& in)
 {
   std::stringstream ss;
-  std::for_each( std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}
-               , [&](char c)
-                 {
-                   static bool comment = false;
-                   if      (comment and c == '!')     {comment = false; ss << ' ';}
-                   else if (comment and c == '\n')    {comment = false; ss << c;}
-                   else if (not comment and c == '#') {comment = true;  ss << ' ';}
-                   else if (not comment)              {ss << c;}
-                 });
+  bool comment = false;
+  while (true)
+  {
+    const char c = in.get();
+    if (in.eof())
+    {
+      break;
+    }
+    if (comment)
+    {
+      if (c == '!')
+      {
+        comment = false; // a comment is terminated by a line
+        ss << ' '; // remove pragma '!' indicator, the parser will directly read the associated token
+      }
+      else if (c == '\n' or c == '\r')
+      {
+        comment = false; // a comment is terminated by a line
+        ss << c;
+        if (c == '\r' and in.peek() == '\n')
+        {
+          ss << static_cast<char>(in.get());
+        }
+      }
+      // else Comments are not copied
+    }
+    else if (not comment and c == '#') {comment = true;  ss << ' ';}
+    else if (not comment)              {ss << c;}
+  }
   return ss.str();
 }
 
