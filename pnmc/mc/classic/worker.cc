@@ -1,7 +1,5 @@
 #include <cassert>
-#include <chrono>
 #include <iostream>
-#include <set>
 
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/range/algorithm/for_each.hpp>
