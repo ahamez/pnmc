@@ -59,7 +59,7 @@ main(int argc, const char** argv)
   }
   catch (std::exception& e)
   {
-    std::cerr << "Error unknown. Please report the following to a.hamez@isae.fr.\n";
+    std::cerr << "Error unknown. Please report the following to alexandre.hamez+pnmc@gmail.com.\n";
     std::cerr << e.what() << '\n';
     return EX_SOFTWARE;
   }
