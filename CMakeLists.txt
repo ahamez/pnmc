@@ -51,8 +51,6 @@ add_definitions("-Wall")
 add_definitions("-std=c++1y")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  add_definitions("-stdlib=libc++")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -std=c++1y -stdlib=libc++")
   if (CMAKE_BUILD_TYPE STREQUAL "Release")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
   endif ()
