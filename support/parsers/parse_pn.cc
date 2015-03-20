@@ -35,6 +35,7 @@ parse(const pn_configuration& conf)
     case (conf::pn_format::nupn) : return parsers::nupn(*in);
     case (conf::pn_format::pnml) : return parsers::pnml(*in);
   }
+  __builtin_unreachable();
 }
 
 /*------------------------------------------------------------------------------------------------*/
