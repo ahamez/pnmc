@@ -83,7 +83,7 @@ place_bound(const order& o, const SDD& states, const std::set<std::string>& plac
 {
   if (places.empty())
   {
-    return {};
+    return std::unordered_map<std::string, pn::valuation_type>{};
   }
 
   const auto init = [&](const auto& place){return std::make_pair(o.node(place).position(), 0);};

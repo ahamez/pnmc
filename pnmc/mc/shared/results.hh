@@ -111,7 +111,7 @@ struct results
     if (r.trace)
     {
       os << (r.trace->size() - 1) << " step(s) to error:\n";
-      for (auto cit = std::next(cbegin(*r.trace)); cit != end(*r.trace); ++cit)
+      for (auto cit = std::next(r.trace->cbegin()); cit != r.trace->cend(); ++cit)
       {
         os << "  " << cit->first << '\n';
       }
