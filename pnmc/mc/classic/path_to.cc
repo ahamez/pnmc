@@ -75,9 +75,9 @@ mk_functions(const std::deque<std::string>& identifiers, const pn::net& net)
     assert(search != end(map));
     auto& identifier_map = search->second;
     const auto transition_search = identifier_map.find(tid);
-    if (transition_search == cend(identifier_map))
+    if (transition_search == end(identifier_map))
     {
-      identifier_map.emplace_hint(cend(identifier_map), tid, std::vector<fn_type>{fn});
+      identifier_map.emplace_hint(end(identifier_map), tid, std::vector<fn_type>{fn});
     }
     else
     {
@@ -149,7 +149,7 @@ struct visitor
   const
   {
     const auto& operations_search = functions_it->find(transition);
-    if (operations_search == cend(*functions_it))
+    if (operations_search == (*functions_it).cend())
     {
       for (const auto& arc : n)
       {
@@ -274,8 +274,8 @@ shortest_path( const order& o, const SDD& initial, const SDD& targets, const pn:
 
   const auto functions = mk_functions(identifiers, net);
   std::deque<std::pair<std::string, SDD>> trace;
-  trace.emplace_front("", *rbegin(top_bottom));
-  for (auto rcit = std::next(rbegin(top_bottom)); rcit != rend(top_bottom); ++rcit)
+  trace.emplace_front("", *top_bottom.rbegin());
+  for (auto rcit = std::next(top_bottom.rbegin()); rcit != top_bottom.rend(); ++rcit)
   {
     std::shuffle(begin(transitions), end(transitions), g);
 
