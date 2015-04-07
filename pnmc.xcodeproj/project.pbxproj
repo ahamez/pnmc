@@ -75,9 +75,6 @@
 
 /* Begin PBXFileReference section */
 		2B0169F11A18ED7D006DE1C0 /* export_configuration.hh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = export_configuration.hh; sourceTree = "<group>"; };
-		2B265AE31AAA37050063BEBF /* worker.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = worker.cc; sourceTree = "<group>"; };
-		2B265AE41AAA37050063BEBF /* worker.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = worker.hh; sourceTree = "<group>"; };
-		2B265AE61AAA38740063BEBF /* sdd.hh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sdd.hh; sourceTree = "<group>"; };
 		2B2AA91218AFC647007DEC65 /* pnmc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pnmc; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B354EE01A0B791D00F23302 /* translator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = translator; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B354EE21A0B791D00F23302 /* main.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cc; sourceTree = "<group>"; };
@@ -220,16 +217,6 @@
 				2B2AA91218AFC647007DEC65 /* pnmc */,
 			);
 			name = bin;
-			sourceTree = "<group>";
-		};
-		2B265AE21AAA36E90063BEBF /* nupn */ = {
-			isa = PBXGroup;
-			children = (
-				2B265AE61AAA38740063BEBF /* sdd.hh */,
-				2B265AE41AAA37050063BEBF /* worker.hh */,
-				2B265AE31AAA37050063BEBF /* worker.cc */,
-			);
-			path = nupn;
 			sourceTree = "<group>";
 		};
 		2B354EE11A0B791D00F23302 /* translator */ = {
@@ -392,7 +379,6 @@
 		2B71E34D17FAC42400F8298C /* mc */ = {
 			isa = PBXGroup;
 			children = (
-				2B265AE21AAA36E90063BEBF /* nupn */,
 				2B7B1D3D1A0A661F00EF3A31 /* shared */,
 				2B51467518D3A60100E4A467 /* classic */,
 				2B51469118D3A65C00E4A467 /* mc.hh */,
