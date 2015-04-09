@@ -275,7 +275,7 @@ const std::unordered_map<std::string, fn_type> map =
   , {"before"                , unsupported}
   , {"reach"                 , unsupported}
   , {"strength"              , unsupported}
-  , {"deadlock"              , [&](auto& cxt, const auto& n)
+  , {"deadlock"              , [](auto& cxt, const auto& n)
                                   {
                                     cxt.deadlock = true;
                                     return element<properties::deadlock>(cxt, n);
