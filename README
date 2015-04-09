@@ -10,7 +10,7 @@ Features
 - Verification of dead states (deadlocks)
 - Verification of dead transitions
 - Verification of a subset of the reachability properties of the Model Checking Contest
-- Additionally, it can generate the state space of a Timed Petri nets using discrete time semantics.
+- Additionally, it can generate the state space of a Time Petri nets using discrete time semantics.
 
 Installation
 ============
