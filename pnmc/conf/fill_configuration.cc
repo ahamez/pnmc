@@ -70,7 +70,7 @@ const auto time_limit_str = "time-limit";
 
 // Caches size
 const auto cache_str = "cache-size";
-static const auto cache_values = [&]
+static const auto cache_values = []
 {
   return "([" + boost::algorithm::join(default_cache_sizes | map_keys, "|") + "]:value)+";
 }();
@@ -79,7 +79,7 @@ static const auto cache_values = [&]
 
 // Unicity tables size
 const auto ut_str = "ut-size";
-static const auto ut_values = [&]
+static const auto ut_values = []
 {
   return "([" + boost::algorithm::join(default_ut_sizes | map_keys, "|") + "]:value)+";
 }();
@@ -92,7 +92,7 @@ static const auto dot_export_values_map = std::map<std::string, mc::shared::dot_
   { {"force" , mc::shared::dot_export::force}
   , {"hom"   , mc::shared::dot_export::hom}
   , {"sdd"   , mc::shared::dot_export::sdd}};
-static const auto dot_export_values_str = [&]
+static const auto dot_export_values_str = []
 {
   return "[" + boost::algorithm::join(dot_export_values_map | map_keys, "|") + "]+";
 }();
@@ -105,7 +105,7 @@ static const auto json_export_values_map = std::map<std::string, mc::shared::jso
   { {"hom"     , mc::shared::json_export::hom}
   , {"stats"   , mc::shared::json_export::stats}
   , {"order"   , mc::shared::json_export::order}};
-static const auto json_export_values_str = [&]
+static const auto json_export_values_str = []
 {
   return "[" + boost::algorithm::join(json_export_values_map | map_keys, "|") + "]+";
 }();
@@ -118,7 +118,7 @@ static const auto stats_values_map = std::map<std::string, mc::shared::stats>
   { {"pn"        , mc::shared::stats::pn}
   , {"final-sdd" , mc::shared::stats::final_sdd}
   , {"nb-sdd"    , mc::shared::stats::nb_sdd}};
-static const auto stats_values_str = [&]
+static const auto stats_values_str = []
 {
   return "[" + boost::algorithm::join(stats_values_map | map_keys, "|") + "]+";
 }();

@@ -23,7 +23,7 @@ static const auto format_map = std::map<std::string, pn_format>
   , std::make_pair("pnml", pn_format::pnml)
   };
 
-static const auto possible_format_values = [&]
+static const auto possible_format_values = []
 {
   using namespace boost::adaptors;
   return "Petri net format [" + boost::algorithm::join(format_map | map_keys, "|") + "]";
