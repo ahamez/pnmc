@@ -89,74 +89,72 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   if (conf.order_file)
   {
     boost::filesystem::ifstream file(*conf.order_file);
-    if (file.is_open())
-    {
-      const auto ob = sdd::tools::load_order<sdd_conf>(file);
-      if (not ob)
-      {
-        throw std::runtime_error("Empty JSON order file " + conf.order_file->string());
-      }
-      order o{*ob};
-
-      // Check if loaded order corresponds to the Petri net.
-      std::set<std::string> order_identifiers;
-      o.flat(std::inserter(order_identifiers, order_identifiers.end()));
-
-      boost::container::flat_set<std::string> pn_identifiers;
-      std::transform( begin(net.places()), end(net.places())
-                    , std::inserter(pn_identifiers, pn_identifiers.end())
-                    , [](const pn::place& p){return p.id;});
-
-      if (net.timed())
-      {
-        for (const auto& t : net.transitions())
-        {
-          if (t.timed())
-          {
-            pn_identifiers.insert(t.id);
-          }
-        }
-      }
-
-      std::vector<std::string> diff;
-      diff.reserve(order_identifiers.size());
-
-      std::set_difference( order_identifiers.cbegin(), order_identifiers.cend()
-                         , pn_identifiers.cbegin(), pn_identifiers.cend()
-                         , std::back_inserter(diff));
-
-      if (not diff.empty())
-      {
-        std::stringstream ss;
-        ss << "The following identifiers from " << conf.order_file->string()
-           << " don't exist in PN: ";
-        std::copy( diff.cbegin(), std::prev(diff.cend())
-                 , std::ostream_iterator<std::string>(ss, ", "));
-        ss << diff.back();
-        throw std::runtime_error(ss.str());
-      }
-
-      std::set_difference( pn_identifiers.cbegin(), pn_identifiers.cend()
-                         , order_identifiers.cbegin(), order_identifiers.cend()
-                         , std::back_inserter(diff));
-
-      if (not diff.empty())
-      {
-        std::stringstream ss;
-        ss << "The following identifiers from PN don't exist in " << conf.order_file->string()
-           << ": ";
-        std::copy( diff.cbegin(), std::prev(diff.cend())
-                  , std::ostream_iterator<std::string>(ss, ", "));
-        ss << diff.back();
-        throw std::runtime_error(ss.str());
-      }
-
-      return o;
-    }
-    else
+    if (not file.is_open())
     {
       throw std::runtime_error("Can't open JSON order file " + conf.order_file->string());
     }
+
+    const auto ob = sdd::tools::load_order<sdd_conf>(file);
+    if (not ob)
+    {
+      throw std::runtime_error("Empty JSON order file " + conf.order_file->string());
+    }
+    order o{*ob};
+
+    // Check if loaded order corresponds to the Petri net.
+    std::set<std::string> order_identifiers;
+    o.flat(std::inserter(order_identifiers, order_identifiers.end()));
+
+    boost::container::flat_set<std::string> pn_identifiers;
+    std::transform( begin(net.places()), end(net.places())
+                  , std::inserter(pn_identifiers, pn_identifiers.end())
+                  , [](const pn::place& p){return p.id;});
+
+    if (net.timed())
+    {
+      for (const auto& t : net.transitions())
+      {
+        if (t.timed())
+        {
+          pn_identifiers.insert(t.id);
+        }
+      }
+    }
+
+    std::vector<std::string> diff;
+    diff.reserve(order_identifiers.size());
+
+    std::set_difference( order_identifiers.cbegin(), order_identifiers.cend()
+                       , pn_identifiers.cbegin(), pn_identifiers.cend()
+                       , std::back_inserter(diff));
+
+    if (not diff.empty())
+    {
+      std::stringstream ss;
+      ss << "The following identifiers from " << conf.order_file->string()
+         << " don't exist in PN: ";
+      std::copy( diff.cbegin(), std::prev(diff.cend())
+               , std::ostream_iterator<std::string>(ss, ", "));
+      ss << diff.back();
+      throw std::runtime_error(ss.str());
+    }
+
+    std::set_difference( pn_identifiers.cbegin(), pn_identifiers.cend()
+                       , order_identifiers.cbegin(), order_identifiers.cend()
+                       , std::back_inserter(diff));
+
+    if (not diff.empty())
+    {
+      std::stringstream ss;
+      ss << "The following identifiers from PN don't exist in " << conf.order_file->string()
+         << ": ";
+      std::copy( diff.cbegin(), std::prev(diff.cend())
+                , std::ostream_iterator<std::string>(ss, ", "));
+      ss << diff.back();
+      throw std::runtime_error(ss.str());
+    }
+
+    return o;
   }
 
   // FORCE heuristic.
