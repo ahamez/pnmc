@@ -39,7 +39,6 @@ const auto output_dir_str = "output-dir";
 /*------------------------------------------------------------------------------------------------*/
 
 // Order options
-const auto order_show_str = "order-show";
 const auto order_flat_str = "order-flat";
 const auto order_force_str = "order-force";
 const auto order_force_iterations_str = "order-force-iterations";
@@ -143,8 +142,8 @@ fill_configuration(int argc, const char** argv)
 
   po::options_description hidden_input_options("Hidden input options");
   hidden_input_options.add_options()
-    ("input-file"               , po::value<std::string>()
-                                , "The Petri net file to analyse")
+    ("input-file"   , po::value<std::string>()
+                    , "The Petri net file to analyse")
   ;
 
   po::options_description export_options("Export options");
@@ -157,15 +156,14 @@ fill_configuration(int argc, const char** argv)
 
   po::options_description stats_options("Statistics options");
   stats_options.add_options()
-    (stats_str                  , po::value<std::string>()
-                                , stats_values_str.c_str())
+    (stats_str      , po::value<std::string>()
+                    , stats_values_str.c_str())
   ;
 
   po::options_description order_options("Order options");
   order_options.add_options()
-    (order_show_str             , "Show order")
-    (order_flat_str             , "Don't use hierarchy informations")
-    (order_force_str            , "Use FORCE ordering heuristic")
+    (order_flat_str    , "Don't use hierarchy informations")
+    (order_force_str   , "Use FORCE ordering heuristic")
   ;
 
   po::options_description petri_options("Petri net options");
