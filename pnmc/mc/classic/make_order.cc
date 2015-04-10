@@ -1,9 +1,10 @@
-#include <algorithm> // copy, shuffle, transform
+#include <algorithm> // copy, shuffle, sort, transform
 #include <cassert>
 #include <deque>
 #include <chrono>
 #include <set>
 #include <sstream>
+#include <vector>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -84,6 +85,8 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
   }
 
+  using identifier_type = sdd_conf::Identifier;
+
   // Load a pre-computed order from a JSON file and check if it matches the Petri net.
   // We don't try to apply any heuristic on this order.
   if (conf.order_file)
@@ -163,7 +166,6 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   {
     stats.force_duration.emplace();
     shared::step s{"force", &*stats.force_duration};
-    using identifier_type = sdd_conf::Identifier;
 
     // Temporary placeholder for identifiers.
     std::vector<identifier_type> identifiers;
@@ -223,6 +225,45 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
 
     // Dump the hypergraph to a DOT file if required by the configuration.
     shared::export_dot(conf, conf::filename::dot_force, graph);
+  }
+  // Lexical order
+  else if (conf.order_lexical)
+  {
+    std::vector<identifier_type> to_sort;
+
+    for (const auto& place : net.places())
+    {
+      to_sort.push_back(place.id);
+    }
+
+    if (net.timed())
+    {
+      for (const auto& transition : net.transitions())
+      {
+        if (transition.timed())
+        {
+          to_sort.push_back(transition.id);
+        }
+      }
+    }
+
+    if (conf.order_reverse)
+    {
+      std::sort(to_sort.begin(), to_sort.end());
+    }
+    else
+    {
+      std::sort( to_sort.begin(), to_sort.end()
+               , [](const auto& lhs, const auto& rhs)
+                   {
+                     return lhs > rhs;
+                   });
+    }
+
+    for (const auto& id : to_sort)
+    {
+      ob.push(id);
+    }
   }
   // Use model's hierarchy, if any.
   else if (not conf.order_flat and not net.modules.empty())

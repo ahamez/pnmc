@@ -41,6 +41,7 @@ const auto output_dir_str = "output-dir";
 // Order options
 const auto order_flat_str = "order-flat";
 const auto order_force_str = "order-force";
+const auto order_lexical_str = "order-lexical";
 const auto order_force_iterations_str = "order-force-iterations";
 const auto order_reverse_str = "order-reverse";
 const auto order_id_per_hier_str = "order-ids-per-hierarchy";
@@ -164,6 +165,7 @@ fill_configuration(int argc, const char** argv)
   order_options.add_options()
     (order_flat_str    , "Don't use hierarchy informations")
     (order_force_str   , "Use FORCE ordering heuristic")
+    (order_lexical_str , "Sort variables using a lexical order on the place names")
   ;
 
   po::options_description petri_options("Petri net options");
@@ -304,6 +306,12 @@ fill_configuration(int argc, const char** argv)
   conf.order_force_iterations = vm[order_force_iterations_str].as<unsigned int>();
   conf.order_reverse = vm.count(order_reverse_str);
   conf.order_id_per_hierarchy = vm[order_id_per_hier_str].as<unsigned int>();
+  conf.order_lexical = vm.count(order_lexical_str);
+
+  if (conf.order_ordering_force and conf.order_lexical)
+  {
+    throw po::error("Can't use both lexical and FORCE orders");
+  }
 
   // Petri net options
   conf.marking_bound = vm[pn_marking_bound_str].as<unsigned int>();
