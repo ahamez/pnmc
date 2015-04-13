@@ -1,9 +1,10 @@
-#include <algorithm> // copy, shuffle, transform
+#include <algorithm> // copy, shuffle, sort, transform
 #include <cassert>
 #include <deque>
 #include <chrono>
 #include <set>
 #include <sstream>
+#include <vector>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -84,79 +85,79 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
   }
 
+  using identifier_type = sdd_conf::Identifier;
+
   // Load a pre-computed order from a JSON file and check if it matches the Petri net.
   // We don't try to apply any heuristic on this order.
   if (conf.order_file)
   {
     boost::filesystem::ifstream file(*conf.order_file);
-    if (file.is_open())
-    {
-      const auto ob = sdd::tools::load_order<sdd_conf>(file);
-      if (not ob)
-      {
-        throw std::runtime_error("Empty JSON order file " + conf.order_file->string());
-      }
-      order o{*ob};
-
-      // Check if loaded order corresponds to the Petri net.
-      std::set<std::string> order_identifiers;
-      o.flat(std::inserter(order_identifiers, order_identifiers.end()));
-
-      boost::container::flat_set<std::string> pn_identifiers;
-      std::transform( begin(net.places()), end(net.places())
-                    , std::inserter(pn_identifiers, pn_identifiers.end())
-                    , [](const pn::place& p){return p.id;});
-
-      if (net.timed())
-      {
-        for (const auto& t : net.transitions())
-        {
-          if (t.timed())
-          {
-            pn_identifiers.insert(t.id);
-          }
-        }
-      }
-
-      std::vector<std::string> diff;
-      diff.reserve(order_identifiers.size());
-
-      std::set_difference( order_identifiers.cbegin(), order_identifiers.cend()
-                         , pn_identifiers.cbegin(), pn_identifiers.cend()
-                         , std::back_inserter(diff));
-
-      if (not diff.empty())
-      {
-        std::stringstream ss;
-        ss << "The following identifiers from " << conf.order_file->string()
-           << " don't exist in PN: ";
-        std::copy( diff.cbegin(), std::prev(diff.cend())
-                 , std::ostream_iterator<std::string>(ss, ", "));
-        ss << diff.back();
-        throw std::runtime_error(ss.str());
-      }
-
-      std::set_difference( pn_identifiers.cbegin(), pn_identifiers.cend()
-                         , order_identifiers.cbegin(), order_identifiers.cend()
-                         , std::back_inserter(diff));
-
-      if (not diff.empty())
-      {
-        std::stringstream ss;
-        ss << "The following identifiers from PN don't exist in " << conf.order_file->string()
-           << ": ";
-        std::copy( diff.cbegin(), std::prev(diff.cend())
-                  , std::ostream_iterator<std::string>(ss, ", "));
-        ss << diff.back();
-        throw std::runtime_error(ss.str());
-      }
-
-      return o;
-    }
-    else
+    if (not file.is_open())
     {
       throw std::runtime_error("Can't open JSON order file " + conf.order_file->string());
     }
+
+    const auto ob = sdd::tools::load_order<sdd_conf>(file);
+    if (not ob)
+    {
+      throw std::runtime_error("Empty JSON order file " + conf.order_file->string());
+    }
+    order o{*ob};
+
+    // Check if loaded order corresponds to the Petri net.
+    std::set<std::string> order_identifiers;
+    o.flat(std::inserter(order_identifiers, order_identifiers.end()));
+
+    boost::container::flat_set<std::string> pn_identifiers;
+    std::transform( begin(net.places()), end(net.places())
+                  , std::inserter(pn_identifiers, pn_identifiers.end())
+                  , [](const pn::place& p){return p.id;});
+
+    if (net.timed())
+    {
+      for (const auto& t : net.transitions())
+      {
+        if (t.timed())
+        {
+          pn_identifiers.insert(t.id);
+        }
+      }
+    }
+
+    std::vector<std::string> diff;
+    diff.reserve(order_identifiers.size());
+
+    std::set_difference( order_identifiers.cbegin(), order_identifiers.cend()
+                       , pn_identifiers.cbegin(), pn_identifiers.cend()
+                       , std::back_inserter(diff));
+
+    if (not diff.empty())
+    {
+      std::stringstream ss;
+      ss << "The following identifiers from " << conf.order_file->string()
+         << " don't exist in PN: ";
+      std::copy( diff.cbegin(), std::prev(diff.cend())
+               , std::ostream_iterator<std::string>(ss, ", "));
+      ss << diff.back();
+      throw std::runtime_error(ss.str());
+    }
+
+    std::set_difference( pn_identifiers.cbegin(), pn_identifiers.cend()
+                       , order_identifiers.cbegin(), order_identifiers.cend()
+                       , std::back_inserter(diff));
+
+    if (not diff.empty())
+    {
+      std::stringstream ss;
+      ss << "The following identifiers from PN don't exist in " << conf.order_file->string()
+         << ": ";
+      std::copy( diff.cbegin(), std::prev(diff.cend())
+                , std::ostream_iterator<std::string>(ss, ", "));
+      ss << diff.back();
+      throw std::runtime_error(ss.str());
+    }
+
+    return o;
   }
 
   // FORCE heuristic.
@@ -165,7 +166,6 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   {
     stats.force_duration.emplace();
     shared::step s{"force", &*stats.force_duration};
-    using identifier_type = sdd_conf::Identifier;
 
     // Temporary placeholder for identifiers.
     std::vector<identifier_type> identifiers;
@@ -225,6 +225,45 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
 
     // Dump the hypergraph to a DOT file if required by the configuration.
     shared::export_dot(conf, conf::filename::dot_force, graph);
+  }
+  // Lexical order
+  else if (conf.order_lexical)
+  {
+    std::vector<identifier_type> to_sort;
+
+    for (const auto& place : net.places())
+    {
+      to_sort.push_back(place.id);
+    }
+
+    if (net.timed())
+    {
+      for (const auto& transition : net.transitions())
+      {
+        if (transition.timed())
+        {
+          to_sort.push_back(transition.id);
+        }
+      }
+    }
+
+    if (conf.order_reverse)
+    {
+      std::sort(to_sort.begin(), to_sort.end());
+    }
+    else
+    {
+      std::sort( to_sort.begin(), to_sort.end()
+               , [](const auto& lhs, const auto& rhs)
+                   {
+                     return lhs > rhs;
+                   });
+    }
+
+    for (const auto& id : to_sort)
+    {
+      ob.push(id);
+    }
   }
   // Use model's hierarchy, if any.
   else if (not conf.order_flat and not net.modules.empty())

@@ -36,6 +36,9 @@ struct configuration
   bool order_ordering_force;
   unsigned int order_force_iterations;
 
+  /// @brief Sort variables using place names.
+  bool order_lexical;
+
   /// @brief Maximum number of identifiers per hierarchy.
   unsigned int order_id_per_hierarchy;
 
