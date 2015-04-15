@@ -249,6 +249,11 @@ fill_configuration(int argc, const char** argv)
     std::cout << hidden_exp_options << '\n';
     return boost::optional<configuration>();
   }
+  else if (vm.count(version_str))
+  {
+    std::cout << version << '\n';
+    return boost::optional<configuration>();
+  }
   else if (vm.count(help_str) or not unrecognized.empty() or not vm.count("input-file"))
   {
     if (not unrecognized.empty())
@@ -272,12 +277,6 @@ fill_configuration(int argc, const char** argv)
               << stats_options << '\n'
               << advanced_options << '\n';
 
-    return boost::optional<configuration>();
-  }
-
-  if (vm.count(version_str))
-  {
-    std::cout << version << '\n';
     return boost::optional<configuration>();
   }
 
