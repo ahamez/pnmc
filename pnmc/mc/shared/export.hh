@@ -12,7 +12,10 @@
 
 #include <boost/filesystem/fstream.hpp>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 #include <cereal/archives/json.hpp>
+#pragma GCC diagnostic pop
 
 #include "conf/configuration.hh"
 #include "mc/shared/results.hh"
