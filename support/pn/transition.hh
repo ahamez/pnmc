@@ -16,14 +16,11 @@ struct transition
 {
   using arcs_type = std::map<std::string, arc>;
 
-  /// @brief This transition's id.
-  const std::string id;
+  /// @brief This transition's unique identifier.
+  const std::size_t uid;
 
-  /// @brief This transition's index.
-  ///
-  /// Used to compute dead transitions: this index is used to get the position of this transition
-  /// into a bitset describing all transitions' status.
-  const std::size_t index;
+  /// @brief This transition's name.
+  const std::string name;
 
   /// @brief Pre-places
   arcs_type pre;
@@ -38,7 +35,7 @@ struct transition
   clock_type high;
 
   /// @brief Constructor.
-  transition(const std::string& id, std::size_t index);
+  transition(std::size_t, const std::string&);
 
   /// @brief Tell if the transition has a time interval.
   bool timed() const;
@@ -46,7 +43,7 @@ struct transition
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// @brief Compare two transitions using their ids.
+/// @brief Compare two transitions using their unique identifiers.
 bool
 operator<(const transition&, const transition&) noexcept;
 

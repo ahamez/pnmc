@@ -432,7 +432,7 @@ make_module( const std::string& id, std::unordered_map<std::string, std::vector<
   const auto place_search = net.places().find(id);
   if (place_search != end(net.places()))
   {
-    places.insert(place_search->id);
+    places.insert(place_search->name);
     return pn::make_module(*place_search);
   }
   else
@@ -502,7 +502,7 @@ net(std::istream& in)
     std::for_each( begin(net_ptr->places()), end(net_ptr->places())
                  , [&](const auto& p)
                       {
-                        if (not places_encountered.count(p.id)) {invalid.push_back(p.id);}
+                        if (not places_encountered.count(p.name)) {invalid.push_back(p.name);}
                       });
     std::for_each( begin(modules_id), end(modules_id)
                  , [&](const auto& kv)

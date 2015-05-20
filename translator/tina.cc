@@ -88,7 +88,7 @@ operator<<(std::ostream& os, const net_to_tina& manip)
 {
   for (const auto& t : manip.net.transitions())
   {
-    os << "tr " << tina(t.id);
+    os << "tr " << tina(t.name);
 
     if (t.timed() and t.low != 0 and t.high != 0)
     {
@@ -109,7 +109,7 @@ operator<<(std::ostream& os, const net_to_tina& manip)
 
   for (const auto& p : manip.net.places_by_insertion())
   {
-    os << "pl " << tina(p.id)<< " (" << p.marking << ")\n";
+    os << "pl " << tina(p.name)<< " (" << p.marking << ")\n";
   }
 
   return os << "net " << tina(manip.net.name) << '\n';

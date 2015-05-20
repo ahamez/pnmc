@@ -7,8 +7,8 @@ namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
-transition::transition(const std::string& i, std::size_t idx)
-  : id(i), index(idx), pre(), post(), low(0), high(infinity)
+transition::transition(std::size_t id, const std::string& n)
+  : uid(id), name(n), pre(), post(), low(0), high(infinity)
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -22,21 +22,19 @@ const
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// Compare two transitions using their ids.
 bool
 operator<(const transition& left, const transition& right)
 noexcept
 {
-  return left.index < right.index;
+  return left.uid < right.uid;
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
-/// Export a transition to an output stream.
 std::ostream&
 operator<<(std::ostream& os, const transition& t)
 {
-  os << "tr " << t.id;
+  os << "tr " << t.name;
   if (t.low != 0 or t.high != infinity)
   {
     os << " |" << t.low << ",";

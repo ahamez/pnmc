@@ -15,8 +15,11 @@ struct place
 {
   using arcs_type = std::map<std::string, arc>;
 
-  /// @brief This place's id.
-  const std::string id;
+  /// @brief This place's unique identifier.
+  std::size_t uid;
+
+  /// @brief This place's name.
+  const std::string name;
 
   /// @brief This place's marking.
   unsigned int marking;
@@ -28,7 +31,7 @@ struct place
   arcs_type post;
 
   /// @brief Constructor.
-  place(const std::string& id, valuation_type m);
+  place(std::size_t, const std::string&, valuation_type);
 
   /// @brief Tell if this place is connected to one or more transitions.
   bool connected() const noexcept;

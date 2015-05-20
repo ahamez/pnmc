@@ -6,8 +6,8 @@ namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
-place::place(const std::string& i, valuation_type m)
-  : id{i}, marking{m}, pre{}, post{}
+place::place(std::size_t id, const std::string& n, valuation_type m)
+  : uid{id}, name{n}, marking{m}, pre{}, post{}
 {}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -25,7 +25,7 @@ bool
 operator<(const pn::place& lhs, const pn::place& rhs)
 noexcept
 {
-  return lhs.id < rhs.id;
+  return lhs.uid < rhs.uid;
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -33,7 +33,7 @@ noexcept
 std::ostream&
 operator<<(std::ostream& os, const pn::place& p)
 {
-  return os << "pl " << p.id  <<  " (" << p.marking << ")";
+  return os << "pl " << p.name  <<  " (" << p.marking << ")";
 }
 
 /*------------------------------------------------------------------------------------------------*/

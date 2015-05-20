@@ -76,13 +76,13 @@ untimed( const conf::configuration& conf, const order& o, const pn::net& net
       if (transition.pre.empty())
       {
         // t is always enabled, it's useless to test if it's live.
-        transitions_bitset[transition.index] = true;
+        transitions_bitset[transition.uid] = true;
       }
       else
       {
         // Target the same variable as the last pre or post to be fired to avoid evaluations.
         const auto var = transition.pre.cbegin()->first;
-        const auto f = function(o, var, shared::live{transition.index, transitions_bitset});
+        const auto f = function(o, var, shared::live{transition.uid, transitions_bitset});
         h_t = composition(h_t, f);
       }
     }
@@ -158,7 +158,7 @@ untimed( const conf::configuration& conf, const order& o, const pn::net& net
       h_t = composition(h_t, f);
     }
 
-    operands.emplace(h_t, transition.id);
+    operands.emplace(h_t, transition.name);
   }
   return operands;
 }
@@ -189,7 +189,7 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
     // An untimed transition doesn't have a clock.
     if (t.timed())
     {
-      h_t = function(o, t.id, pre_clock{t.low});
+      h_t = function(o, t.name, pre_clock{t.low});
     }
 
     // Sort pre arcs using the variable order.
@@ -270,13 +270,13 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
       if (t.pre.empty())
       {
         // t is always enabled, it's useless to test if it's live.
-        transitions_bitset[t.index] = true;
+        transitions_bitset[t.uid] = true;
       }
       else
       {
         // Target the same variable as the last pre to be fired to avoid useless evaluations.
         const auto var = t.pre.crbegin()->first;
-        const auto f = function(o, var, shared::live{t.index, transitions_bitset});
+        const auto f = function(o, var, shared::live{t.uid, transitions_bitset});
         h_t = composition(f, h_t);
       }
     }
@@ -368,7 +368,7 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
       // newly enabled neither persistent, as t will consume tokens of some pre places of u.
       if (conf.one_safe and shared_pre_post.empty() and not u_has_inhibitor and not t_has_read)
       {
-        h_t = composition(function(o, u.id, set{pn::sharp}), h_t);
+        h_t = composition(function(o, u.name, set{pn::sharp}), h_t);
         continue; // to next u
       }
 
@@ -428,7 +428,7 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
 
       const auto u_persistence_possible = [&]
       {
-        if (t.id == u.id) // by convention, t cannot be persistent vs itself.
+        if (t.uid == u.uid) // by convention, t cannot be persistent vs itself.
         {
           return false;
         }
@@ -528,16 +528,16 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
             return persistence;
           }();
 
-          return if_then_else(u_is_persistent, sdd::id<sdd_conf>(), function(o, u.id, set{0}));
+          return if_then_else(u_is_persistent, sdd::id<sdd_conf>(), function(o, u.name, set{0}));
         }
         else // not u_persistence_possible
         {
-          return function(o, u.id, set{0});
+          return function(o, u.name, set{0});
         }
       }(); // enabled_branch
 
       const auto ite_u
-        = if_then_else(u_is_enabled, enabled_branch, function(o, u.id, set{pn::sharp}));
+        = if_then_else(u_is_enabled, enabled_branch, function(o, u.name, set{pn::sharp}));
 
       h_t = composition(ite_u, h_t);
 
@@ -568,7 +568,7 @@ post_and_advance_time:
     h_t = composition(post_t, h_t);
 
     // The operation for transition t is ready.
-    operands.emplace(h_t, t.id);
+    operands.emplace(h_t, t.name);
   } // for (const pn::transition& t : net.transitions())
 
   const auto advance_time = [&]
@@ -579,8 +579,8 @@ post_and_advance_time:
       if (t.timed())
       {
         const auto f = t.high == pn::infinity
-                     ? function(o, t.id, advance_capped{t.low, t.high})
-                     : function(o, t.id, advance{t.high});
+                     ? function(o, t.name, advance_capped{t.low, t.high})
+                     : function(o, t.name, advance{t.high});
         res = composition(f, res);
       }
     }

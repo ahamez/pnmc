@@ -34,7 +34,7 @@ make_hierarchical_order(const std::vector<pn::module>& modules)
     operator()(const pn::place& p)
     const
     {
-      return p.connected() ? order_builder(p.id) : order_builder();
+      return p.connected() ? order_builder(p.name) : order_builder();
     }
 
     // Hierarchy.
@@ -76,7 +76,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   {
     if (not place.connected())
     {
-      std::cerr << "Warning: place " << place.id << " is not connected";
+      std::cerr << "Warning: place " << place.name << " is not connected";
       if (place.marking > 0)
       {
         std::cerr << " and has an initial marking";
@@ -111,7 +111,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     boost::container::flat_set<std::string> pn_identifiers;
     std::transform( begin(net.places()), end(net.places())
                   , std::inserter(pn_identifiers, pn_identifiers.end())
-                  , [](const pn::place& p){return p.id;});
+                  , [](const pn::place& p){return p.name;});
 
     if (net.timed())
     {
@@ -119,7 +119,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       {
         if (t.timed())
         {
-          pn_identifiers.insert(t.id);
+          pn_identifiers.insert(t.name);
         }
       }
     }
@@ -176,7 +176,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     {
       if (place.connected())
       {
-        identifiers.emplace_back(place.id);
+        identifiers.emplace_back(place.name);
       }
     }
 
@@ -185,7 +185,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     {
       if (transition.timed())
       {
-        identifiers.emplace_back(transition.id);
+        identifiers.emplace_back(transition.name);
       }
     }
 
@@ -210,7 +210,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
 
       if (transition.timed())
       {
-        identifiers.emplace_back(transition.id);
+        identifiers.emplace_back(transition.name);
       }
 
       graph.add_hyperedge(identifiers.cbegin(), identifiers.cend());
@@ -233,7 +233,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
 
     for (const auto& place : net.places())
     {
-      to_sort.push_back(place.id);
+      to_sort.push_back(place.name);
     }
 
     if (net.timed())
@@ -242,7 +242,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       {
         if (transition.timed())
         {
-          to_sort.push_back(transition.id);
+          to_sort.push_back(transition.name);
         }
       }
     }
@@ -282,7 +282,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     {
       if (rcit->connected())
       {
-        ob.push(rcit->id);
+        ob.push(rcit->name);
       }
     }
 
@@ -292,7 +292,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       {
         if (transition.timed())
         {
-          ob.push(transition.id);
+          ob.push(transition.name);
         }
       }
     }
@@ -304,7 +304,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     {
       if (place.connected())
       {
-        ob.push(place.id);
+        ob.push(place.name);
       }
     }
 
@@ -314,7 +314,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       {
         if (transition.timed())
         {
-          ob.push(transition.id);
+          ob.push(transition.name);
         }
       }
     }

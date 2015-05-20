@@ -100,7 +100,7 @@ mk_functions(const std::deque<std::string>& identifiers, const pn::net& net)
             throw std::runtime_error(__PRETTY_FUNCTION__);
         }
       }();
-      add_fn(arc, transition.id, fn);
+      add_fn(arc, transition.name, fn);
     }
 
     for (const auto& arc : transition.post)
@@ -116,7 +116,7 @@ mk_functions(const std::deque<std::string>& identifiers, const pn::net& net)
             throw std::runtime_error(__PRETTY_FUNCTION__);
         }
       }();
-      add_fn(arc, transition.id, fn);
+      add_fn(arc, transition.name, fn);
     }
   }
 
@@ -268,7 +268,7 @@ shortest_path( const order& o, const SDD& initial, const SDD& targets, const pn:
   std::random_device rd;
   std::mt19937 g(rd());
 
-  const auto id = [](const auto& transition){return transition.id;};
+  const auto id = [](const auto& transition){return transition.name;};
   auto transitions = std::vector<std::string>{ make_transform_iterator(begin(net.transitions()), id)
                                              , make_transform_iterator(end(net.transitions()), id)};
 

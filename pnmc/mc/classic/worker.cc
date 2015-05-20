@@ -33,7 +33,7 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 {
   std::map<std::string, std::reference_wrapper<const pn::transition>> timed;
   boost::range::for_each( net.transitions()
-                        , [&](const auto& t){if (t.timed()) timed.emplace(t.id, t);});
+                        , [&](const auto& t){if (t.timed()) timed.emplace(t.name, t);});
 
   return {order, [&](const auto& id)
                     {
@@ -46,7 +46,7 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
                       {
                         const auto t_cit = timed.find(id);
                         assert(t_cit != timed.end());
-                        return net.enabled(t_cit->second.get().id)
+                        return net.enabled(t_cit->second.get().name)
                              ? flat_set{0}
                              : flat_set{pn::sharp};
                       }}};
@@ -177,11 +177,11 @@ worker::operator()(const pn::net& net, const properties::formulae& formulae)
   {
     shared::step step{"dead transitions"};
     res.dead_transitions.emplace();
-    for (std::size_t i = 0; i < net.transitions().size(); ++i)
+    for (const auto& t : net.transitions())
     {
-      if (not live_transitions[i])
+      if (not live_transitions[t.uid])
       {
-        res.dead_transitions->emplace(net.get_transition_by_index(i).id);
+        res.dead_transitions->emplace(t.name);
       }
     }
   }

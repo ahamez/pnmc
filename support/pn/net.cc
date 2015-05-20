@@ -7,24 +7,24 @@ namespace pnmc { namespace pn {
 /*------------------------------------------------------------------------------------------------*/
 
 net::net()
-  : name(), places_set(), transitions_set(), modules(), root_modules()
+  : name{}, modules{}, root_modules{}, m_places{}, m_transitions{}
 {}
 
 /*------------------------------------------------------------------------------------------------*/
 
 const place&
-net::add_place(const std::string& pid, valuation_type marking)
+net::add_place(const std::string& pname, valuation_type marking)
 {
-  const auto cit = places().find(pid);
-  if (cit == end(places()))
+  const auto cit = places_by<name_index>().find(pname);
+  if (cit == places_by<name_index>().end())
   {
-    return *places_set.get<insertion_index>().emplace_back(pid, marking).first;
+    return *places_by<insertion_index>().emplace_back(m_current_place_uid++, pname, marking).first;
   }
   else
   {
     // This place was created before by add_post_place() or add_pre_place().
     // At this time, the marking was not known. We can now update it.
-    places_set.get<id_index>().modify(cit, [&](place& p){p.marking = marking;});
+    places_by<name_index>().modify(cit, [&](place& p){p.marking = marking;});
     return *cit;
   }
 }
@@ -32,13 +32,12 @@ net::add_place(const std::string& pid, valuation_type marking)
 /*------------------------------------------------------------------------------------------------*/
 
 const transition&
-net::add_transition(const std::string& tid)
+net::add_transition(const std::string& tname)
 {
-  static std::size_t transition_index = 0;
-  const auto cit = transitions_set.get<id_index>().find(tid);
-  if (cit == transitions_set.get<id_index>().cend())
+  const auto cit = transitions_by<name_index>().find(tname);
+  if (cit == transitions_by<name_index>().cend())
   {
-    return *transitions_set.get<id_index>().insert({tid, transition_index++}).first;
+    return *transitions_by<name_index>().insert({m_current_transition_uid++, tname}).first;
   }
   else
   {
@@ -49,7 +48,7 @@ net::add_transition(const std::string& tid)
 /*------------------------------------------------------------------------------------------------*/
 
 void
-net::add_post_place( const std::string& tid, const std::string& post
+net::add_post_place( const std::string& tname, const std::string& post
                    , valuation_type weight, arc::type ty)
 {
   if (ty != arc::type::normal)
@@ -57,8 +56,8 @@ net::add_post_place( const std::string& tid, const std::string& post
     throw std::runtime_error("An output arc of a transition must be normal.");
   }
 
-  const auto it = transitions_set.get<id_index>().find(tid);
-  if (it == end(transitions_set.get<id_index>()))
+  const auto it = transitions_by<name_index>().find(tname);
+  if (it == transitions_by<name_index>().cend())
   {
     throw std::runtime_error("Adding a post place to a non-existing transition.");
   }
@@ -66,41 +65,41 @@ net::add_post_place( const std::string& tid, const std::string& post
   if (it->post.find(post) != end(it->post))
   {
     // Add weights of arcs with the same direction between the same place and transition.
-    transitions_set.modify(it, [&](transition& t)
-                                  {
-                                    auto search = t.post.find(post);
-                                    search->second.weight += weight;
-                                  });
+    m_transitions.modify(it, [&](transition& t)
+                             {
+                               auto search = t.post.find(post);
+                               search->second.weight += weight;
+                             });
   }
   else
   {
-    transitions_set.modify( it
-                          , [&](transition& t)
-                               {
-                                 t.post.emplace_hint(end(t.post), post , pn::arc{weight, ty});
-                               });
+    m_transitions.modify( it
+                        , [&](transition& t)
+                          {
+                            t.post.emplace_hint(end(t.post), post , pn::arc{weight, ty});
+                          });
 
   }
 
-  if (places().find(post) == end(places()))
+  if (places_by<name_index>().find(post) == places_by<name_index>().end())
   {
     add_place(post, 0);
   }
-  places_set.get<id_index>().modify( places().find(post)
-                                   , [&](place& p)
-                                        {
-                                          p.pre.emplace_hint(end(p.pre), tid, pn::arc{weight, ty});
-                                        });
+  places_by<name_index>().modify( places_by<name_index>().find(post)
+                                , [&](place& p)
+                                  {
+                                    p.pre.emplace_hint(end(p.pre), tname, pn::arc{weight, ty});
+                                  });
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 void
-net::add_pre_place( const std::string& tid, const std::string& pre
+net::add_pre_place( const std::string& tname, const std::string& pre
                   , valuation_type weight, arc::type ty)
 {
-  const auto it = transitions_set.get<id_index>().find(tid);
-  if (it == end(transitions_set.get<id_index>()))
+  const auto it = transitions_by<name_index>().find(tname);
+  if (it == transitions_by<name_index>().end())
   {
     throw std::runtime_error("Adding a pre place to a non-existing transition.");
   }
@@ -115,31 +114,31 @@ net::add_pre_place( const std::string& tid, const std::string& pre
     }
 
     // Add weights of arcs with the same direction between the same place and transition.
-    transitions_set.modify(it, [&](transition& t)
-                                  {
-                                    auto search = t.pre.find(pre);
-                                    search->second.weight += weight;
-                                  });
+    m_transitions.modify(it, [&](transition& t)
+                             {
+                               auto search = t.pre.find(pre);
+                               search->second.weight += weight;
+                             });
   }
   else
   {
-    transitions_set.modify( it
-                          , [&](transition& t)
-                               {
-                                 t.pre.emplace_hint(end(t.pre), pre , pn::arc{weight, ty});
-                               });
+    m_transitions.modify( it
+                        , [&](transition& t)
+                          {
+                            t.pre.emplace_hint(end(t.pre), pre , pn::arc{weight, ty});
+                          });
 
   }
 
-  if (places().find(pre) == end(places()))
+  if (places_by<name_index>().find(pre) == places_by<name_index>().end())
   {
     add_place(pre, 0);
   }
-  places_set.get<id_index>().modify( places().find(pre)
-                                   , [&](place& p)
-                                        {
-                                          p.post.emplace_hint(end(p.post), tid, pn::arc{weight, ty});
-                                        });
+  places_by<name_index>().modify( places_by<name_index>().find(pre)
+                                , [&](place& p)
+                                  {
+                                    p.post.emplace_hint(end(p.post), tname, pn::arc{weight, ty});
+                                  });
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -148,43 +147,43 @@ const net::places_type::index<net::insertion_index>::type&
 net::places_by_insertion()
 const noexcept
 {
-  return places_set.get<insertion_index>();
+  return m_places.get<insertion_index>();
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
-const net::places_type::index<net::id_index>::type&
+const net::places_type::index<net::name_index>::type&
 net::places()
 const noexcept
 {
-  return places_set.get<id_index>();
+  return m_places.get<name_index>();
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
-const net::transitions_type::index<net::id_index>::type&
+const net::transitions_type::index<net::name_index>::type&
 net::transitions()
 const noexcept
 {
-  return transitions_set.get<id_index>();
+  return transitions_by<name_index>();
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 const transition&
-net::get_transition_by_index(std::size_t index)
+net::get_transition_by_uid(std::size_t uid)
 const
 {
-  return *transitions_set.get<index_index>().find(index);
+  return *transitions_by<uid_index>().find(uid);
 }
 
 /*------------------------------------------------------------------------------------------------*/
 
 void
-net::add_time_interval(const std::string& tid, clock_type low, clock_type high)
+net::add_time_interval(const std::string& tname, clock_type low, clock_type high)
 {
-  const auto it = transitions_set.get<id_index>().find(tid);
-  transitions_set.modify(it, [&](transition& t){t.low = low; t.high = high;});
+  const auto it = transitions_by<name_index>().find(tname);
+  m_transitions.modify(it, [&](transition& t){t.low = low; t.high = high;});
 }
 
 /*------------------------------------------------------------------------------------------------*/
@@ -200,13 +199,13 @@ const noexcept
 /*------------------------------------------------------------------------------------------------*/
 
 bool
-net::enabled(const std::string& tid)
+net::enabled(const std::string& tname)
 const
 {
-  const auto search = transitions().find(tid);
+  const auto search = transitions().find(tname);
   if (search == transitions().cend())
   {
-    throw std::invalid_argument("Transition " + tid + " doesn't exist");
+    throw std::invalid_argument("Transition " + tname + " doesn't exist");
   }
   const auto& t = *search;
 
