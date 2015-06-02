@@ -1,3 +1,9 @@
+/// @file
+/// @copyright The code is licensed under the BSD License
+///            <http://opensource.org/licenses/BSD-2-Clause>,
+///            Copyright (c) 2013-2015 Alexandre Hamez.
+/// @author Alexandre Hamez
+
 #include <unordered_set>
 
 #include <boost/iterator/transform_iterator.hpp>
