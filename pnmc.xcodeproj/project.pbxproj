@@ -592,19 +592,16 @@
 					"$(SRCROOT)/external/rapidxml",
 					"$(SRCROOT)",
 				);
-				LIBRARY_SEARCH_PATHS = "$(BOOST_LIB)";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = (
-					"$(BOOST_LIB)/libboost_system.a",
-					"$(BOOST_LIB)/libboost_coroutine.a",
-					"$(BOOST_LIB)/libboost_context.a",
-					"$(BOOST_LIB)/libboost_program_options.a",
-					"$(BOOST_LIB)/libboost_thread.a",
-					"$(BOOST_LIB)/libboost_filesystem.a",
-					"$(BOOST_LIB)/libboost_iostreams.a",
-					"-lz",
+					"$(BOOST_LIB)/libboost_system-mt.a",
+					"$(BOOST_LIB)/libboost_coroutine-mt.a",
+					"$(BOOST_LIB)/libboost_context-mt.a",
+					"$(BOOST_LIB)/libboost_program_options-mt.a",
+					"$(BOOST_LIB)/libboost_thread-mt.a",
+					"$(BOOST_LIB)/libboost_filesystem-mt.a",
 				);
 				SDKROOT = macosx;
 			};
@@ -654,18 +651,15 @@
 					"$(SRCROOT)/external/rapidxml",
 					"$(SRCROOT)",
 				);
-				LIBRARY_SEARCH_PATHS = "$(BOOST_LIB)";
 				MACOSX_DEPLOYMENT_TARGET = 10.8;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = (
-					"$(BOOST_LIB)/libboost_system.a",
-					"$(BOOST_LIB)/libboost_coroutine.a",
-					"$(BOOST_LIB)/libboost_context.a",
-					"$(BOOST_LIB)/libboost_program_options.a",
-					"$(BOOST_LIB)/libboost_thread.a",
-					"$(BOOST_LIB)/libboost_filesystem.a",
-					"$(BOOST_LIB)/libboost_iostreams.a",
-					"-lz",
+					"$(BOOST_LIB)/libboost_system-mt.a",
+					"$(BOOST_LIB)/libboost_coroutine-mt.a",
+					"$(BOOST_LIB)/libboost_context-mt.a",
+					"$(BOOST_LIB)/libboost_program_options-mt.a",
+					"$(BOOST_LIB)/libboost_thread-mt.a",
+					"$(BOOST_LIB)/libboost_filesystem-mt.a",
 				);
 				SDKROOT = macosx;
 			};
