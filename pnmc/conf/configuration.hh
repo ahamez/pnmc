@@ -75,11 +75,19 @@ struct configuration
   /// @brief Path to a file containing an order.
   boost::optional<boost::filesystem::path> order_file;
 
+  /// @brief Configure what to export to DOT
   std::set<mc::shared::dot_export> dot_conf;
+
+  /// @brief Configure statistics to show
   std::set<mc::shared::stats> stats_conf;
+
+  /// @brief Configure what to export to JSON
   std::set<mc::shared::json_export> json_conf;
 
+  /// @brief Configure cache sizes
   std::map<std::string, std::size_t> cache_sizes;
+
+   /// @brief Configure unique table sizes
   std::map<std::string, std::size_t> ut_sizes;
 };
 
