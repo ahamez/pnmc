@@ -17,7 +17,6 @@
 #include "mc/classic/path_to.hh"
 #include "mc/classic/reachability.hh"
 #include "mc/classic/sdd.hh"
-#include "mc/classic/sharp_output.hh"
 #include "mc/classic/threads.hh"
 #include "mc/classic/worker.hh"
 #include "mc/shared/exceptions.hh"
@@ -25,6 +24,7 @@
 #include "mc/shared/results.hh"
 #include "mc/shared/statistics.hh"
 #include "mc/shared/step.hh"
+#include "support/pn/constants.hh"
 #include "support/util/timer.hh"
 
 #pragma GCC diagnostic push
