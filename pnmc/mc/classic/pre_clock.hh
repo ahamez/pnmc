@@ -20,6 +20,7 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Keep clocks smaller than a given value, always discarding #.
 struct pre_clock
 {
   const pn::clock_type lower_clock;
