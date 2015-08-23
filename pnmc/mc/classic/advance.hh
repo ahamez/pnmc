@@ -21,6 +21,7 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Advance clocks up to a given value, always keep # if it exists
 struct advance
 {
   const pn::clock_type upper_clock;

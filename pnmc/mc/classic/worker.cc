@@ -134,7 +134,7 @@ worker::operator()(const pn::net& net, const properties::formulae& formulae)
     shared::step step("firing rule", &stats.relation_duration);
     return firing_rule(conf, *res.order, net, live_transitions, stop_flag);
   }();
-  const auto key = [](const auto& kv){return kv.first;};
+  const auto key = [](const auto& kv){return kv.first;}; // Extract keys of a map
   const auto h = fixpoint(sum( *res.order
                              , boost::make_transform_iterator(begin(h_operands), key)
                              , boost::make_transform_iterator(end(h_operands), key)));
