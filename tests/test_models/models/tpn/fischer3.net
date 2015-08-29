@@ -1,0 +1,35 @@
+net {(.1 | (proc.1 proc.2 proc.3).2)}
+tr {0t1.1|set.1.2} : set1 [0,1] {0.1} {trying.1.2} -> {writing.1.2} {1.1} 
+tr {0t2.1|set.2.2} : set2 [0,1] {0.1} {trying.2.2} -> {writing.2.2} {2.1} 
+tr {0t3.1|set.3.2} : set3 [0,1] {0.1} {trying.3.2} -> {writing.3.2} {3.1} 
+tr {1t0.1|set0.1.2} : set0 {1.1} {critical.1.2} -> {0.1} {idle.1.2} 
+tr {1t0.1|set0.2.2} : set0 {1.1} {critical.2.2} -> {0.1} {idle.2.2} 
+tr {1t0.1|set0.3.2} : set0 {1.1} {critical.3.2} -> {0.1} {idle.3.2} 
+tr {1t2.1|set.2.2} : set2 [0,1] {1.1} {trying.2.2} -> {writing.2.2} {2.1} 
+tr {1t3.1|set.3.2} : set3 [0,1] {1.1} {trying.3.2} -> {writing.3.2} {3.1} 
+tr {2t0.1|set0.1.2} : set0 {2.1} {critical.1.2} -> {0.1} {idle.1.2} 
+tr {2t0.1|set0.2.2} : set0 {2.1} {critical.2.2} -> {0.1} {idle.2.2} 
+tr {2t0.1|set0.3.2} : set0 {2.1} {critical.3.2} -> {0.1} {idle.3.2} 
+tr {2t1.1|set.1.2} : set1 [0,1] {trying.1.2} {2.1} -> {writing.1.2} {1.1} 
+tr {2t3.1|set.3.2} : set3 [0,1] {2.1} {trying.3.2} -> {writing.3.2} {3.1} 
+tr {3t0.1|set0.1.2} : set0 {3.1} {critical.1.2} -> {0.1} {idle.1.2} 
+tr {3t0.1|set0.2.2} : set0 {3.1} {critical.2.2} -> {0.1} {idle.2.2} 
+tr {3t0.1|set0.3.2} : set0 {3.1} {critical.3.2} -> {0.1} {idle.3.2} 
+tr {3t1.1|set.1.2} : set1 [0,1] {trying.1.2} {3.1} -> {writing.1.2} {1.1} 
+tr {3t2.1|set.2.2} : set2 [0,1] {trying.2.2} {3.1} -> {writing.2.2} {2.1} 
+tr {i1.1|enter.1.2} : is1 {1.1}?1 {check.1.2} -> {critical.1.2} 
+tr {i2.1|enter.2.2} : is2 {2.1}?1 {check.2.2} -> {critical.2.2} 
+tr {i3.1|enter.3.2} : is3 {3.1}?1 {check.3.2} -> {critical.3.2} 
+tr {n1.1|retry.1.2} : isNot1 {1.1}?-1 {check.1.2} -> {idle.1.2} 
+tr {n2.1|retry.2.2} : isNot2 {2.1}?-1 {check.2.2} -> {idle.2.2} 
+tr {n3.1|retry.3.2} : isNot3 {3.1}?-1 {check.3.2} -> {idle.3.2} 
+tr {start.1|start.1.2} : start {0.1}?1 {idle.1.2} -> {trying.1.2} 
+tr {start.1|start.2.2} : start {0.1}?1 {idle.2.2} -> {trying.2.2} 
+tr {start.1|start.3.2} : start {0.1}?1 {idle.3.2} -> {trying.3.2} 
+tr {wait.1.2} [2,w[ {writing.1.2} -> {check.1.2} 
+tr {wait.2.2} [2,w[ {writing.2.2} -> {check.2.2} 
+tr {wait.3.2} [2,w[ {writing.3.2} -> {check.3.2} 
+pl {0.1} (1)
+pl {idle.1.2} (1)
+pl {idle.2.2} (1)
+pl {idle.3.2} (1)

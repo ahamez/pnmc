@@ -1,0 +1,37 @@
+tr Lose_Request_1 [0,w[ RequestBuffer_1 ->
+tr Lose_Request_2 [0,w[ RequestBuffer_2 ->
+tr Lose_Request_3 [0,w[ RequestBuffer_3 ->
+tr Lose_Request_4 [0,w[ RequestBuffer_4 ->
+tr Prepare_Request_1 [0,w[ Client_Waiting_1 -> Client_Sending_1
+tr Prepare_Request_2 [0,w[ Client_Waiting_2 -> Client_Sending_2
+tr Prepare_Request_3 [0,w[ Client_Waiting_3 -> Client_Sending_3
+tr Prepare_Request_4 [0,w[ Client_Waiting_4 -> Client_Sending_4
+tr Read_Request_1_1 [0,w[ RequestBuffer_1 Server_Waiting_1 -> Server_Anwering_1_1 RequestBufferSlots
+tr Read_Request_1_2 [0,w[ Server_Waiting_2 RequestBuffer_1 -> Server_Anwering_1_2 RequestBufferSlots
+tr Read_Request_2_1 [0,w[ Server_Waiting_1 RequestBuffer_2 -> RequestBufferSlots Server_Anwering_2_1
+tr Read_Request_2_2 [0,w[ RequestBuffer_2 Server_Waiting_2 -> Server_Anwering_2_2 RequestBufferSlots
+tr Read_Request_3_1 [0,w[ Server_Waiting_1 RequestBuffer_3 -> Server_Anwering_3_1 RequestBufferSlots
+tr Read_Request_3_2 [0,w[ Server_Waiting_2 RequestBuffer_3 -> Server_Anwering_3_2 RequestBufferSlots
+tr Read_Request_4_1 [0,w[ Server_Waiting_1 RequestBuffer_4 -> RequestBufferSlots Server_Anwering_4_1
+tr Read_Request_4_2 [0,w[ RequestBuffer_4 Server_Waiting_2 -> Server_Anwering_4_2 RequestBufferSlots
+tr Send_Answer_1_1 [0,w[ Client_Sending_1 Server_Anwering_1_1 -> Client_Waiting_1 Server_Waiting_1
+tr Send_Answer_1_2 [0,w[ Server_Anwering_1_2 Client_Sending_1 -> Server_Waiting_2 Client_Waiting_1
+tr Send_Answer_2_1 [0,w[ Server_Anwering_2_1 Client_Sending_2 -> Client_Waiting_2 Server_Waiting_1
+tr Send_Answer_2_2 [0,w[ Client_Sending_2 Server_Anwering_2_2 -> Server_Waiting_2 Client_Waiting_2
+tr Send_Answer_3_1 [0,w[ Client_Sending_3 Server_Anwering_3_1 -> Client_Waiting_3 Server_Waiting_1
+tr Send_Answer_3_2 [0,w[ Client_Sending_3 Server_Anwering_3_2 -> Server_Waiting_2 Client_Waiting_3
+tr Send_Answer_4_1 [0,w[ Server_Anwering_4_1 Client_Sending_4 -> Client_Waiting_4 Server_Waiting_1
+tr Send_Answer_4_2 [0,w[ Client_Sending_4 Server_Anwering_4_2 -> Server_Waiting_2 Client_Waiting_4
+tr Send_Request_1 [0,w[ RequestBufferSlots Client_Sending_1 -> Client_Sending_1 RequestBuffer_1
+tr Send_Request_2 [0,w[ RequestBufferSlots Client_Sending_2 -> RequestBuffer_2 Client_Sending_2
+tr Send_Request_3 [0,w[ RequestBufferSlots Client_Sending_3 -> RequestBuffer_3 Client_Sending_3
+tr Send_Request_4 [0,w[ RequestBufferSlots Client_Sending_4 -> Client_Sending_4 RequestBuffer_4
+pl Client_Waiting_1 (1)
+pl Client_Waiting_2 (1)
+pl Client_Waiting_3 (1)
+pl Client_Waiting_4 (1)
+pl Server_Waiting_1 (1)
+pl RequestBufferSlots (2)
+pl Server_Waiting_2 (1)
+net {CSRepetitions-PT-02}
+

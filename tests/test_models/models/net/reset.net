@@ -1,0 +1,6 @@
+tr t0 [0,w[ p1** p0 -> p1*100 p2
+tr t1 [0,w[ p2 -> p0
+pl p0 (1)
+pl p1 (100)
+net buffer
+

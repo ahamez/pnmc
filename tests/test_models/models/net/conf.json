@@ -1,0 +1,24 @@
+{
+    "arguments": [
+        "",
+        "--order-force",
+        "--dead-states",
+        "--order-force --dead-states",
+        "--order-lexical"
+    ],
+    "models": {
+        "CSRepetitions-PT-02.net": {
+            "states": 7424
+        },
+        "inhibitor.net": {
+            "states": 12
+        },
+        "reset.net": {
+            "states": 2
+        },
+        "test.net": {
+            "states": 6
+        }
+    },
+    "type": "net"
+}

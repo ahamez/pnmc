@@ -1,0 +1,8 @@
+tr t0 [0,w[ p1 -> p0
+tr t1 [0,w[ p0 p2?2 -> p1
+tr t2 [0,w[ p2 -> p3
+tr t3 [0,w[ p3 -> p2
+pl p0 (1)
+pl p3 (2)
+net test
+

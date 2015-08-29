@@ -1,0 +1,5 @@
+tr t0 [0,1] p4 p0?-1 ->
+tr t1 [0,1] p4 p0?-1 ->
+pl p4 (2)
+net tina_001
+# TPN Inhibitors

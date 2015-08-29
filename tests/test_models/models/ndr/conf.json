@@ -1,0 +1,23 @@
+{
+    "arguments": [
+        "",
+        "--order-force",
+        "--dead-states",
+        "--order-force --dead-states"
+    ],
+    "models": {
+        "001.ndr": {
+            "states": 10
+        },
+        "inhibitor.ndr": {
+            "states": 12
+        },
+        "loss.ndr": {
+            "states": 14
+        },
+        "test.ndr": {
+            "states": 6
+        }
+    },
+    "type": "ndr"
+}

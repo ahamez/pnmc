@@ -4,6 +4,8 @@ cmake_minimum_required (VERSION 2.8.9)
 
 project (pnmc)
 
+################################################################################
+
 option (LIBSDD_PATH "Path to libsdd")
 option (PACKED "Pack structs in memory (experimental)" OFF)
 
@@ -72,5 +74,11 @@ add_subdirectory(support)
 link_directories(${pnmc_BINARY_DIR}/support)
 add_subdirectory(pnmc)
 add_subdirectory(translator)
+
+################################################################################
+
+enable_testing()
+add_subdirectory(tests)
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
 
 ################################################################################

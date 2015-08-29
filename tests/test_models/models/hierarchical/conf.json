@@ -1,0 +1,14 @@
+{
+    "arguments": [
+        "",
+        "--order-force",
+        "--dead-states",
+        "--order-force --dead-states"
+    ],
+    "models": {
+        "philo3.net": {
+            "states": 76
+        }
+    },
+    "type": "net"
+}

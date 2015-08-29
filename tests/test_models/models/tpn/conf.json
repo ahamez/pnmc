@@ -1,0 +1,67 @@
+{
+    "arguments": [
+        "",
+        "--order-force",
+        "--order-lexical"
+    ],
+    "models": {
+        "001.net": {
+            "states": 7
+        },
+        "002.net": {
+            "states": 5
+        },
+        "003.net": {
+            "arguments": [
+                "--1-safe"
+            ],
+            "states": 4
+        },
+        "004.net": {
+            "arguments": [
+                "--1-safe"
+            ],
+            "states": 5
+        },
+        "005.net": {
+            "arguments": [
+                "--1-safe"
+            ],
+            "states": 3
+        },
+        "006.net": {
+            "states": 37
+        },
+        "007.net": {
+            "arguments": [
+                "--1-safe"
+            ],
+            "states": 3
+        },
+        "008.net": {
+            "arguments": [
+                "--1-safe"
+            ],
+            "states": 3
+        },
+        "fischer2.net": {
+            "arguments": [
+                "--1-safe"
+            ],
+            "states": 61
+        },
+        "fischer3.net": {
+            "arguments": [
+                "--1-safe"
+            ],
+            "states": 381
+        },
+        "fischer4.net": {
+            "arguments": [
+                "--1-safe"
+            ],
+            "states": 2297
+        }
+    },
+    "type": "net"
+}

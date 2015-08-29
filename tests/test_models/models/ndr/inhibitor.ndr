@@ -1,0 +1,15 @@
+p 115.0 55.0 p0 1 n
+p 115.0 220.0 p1 0 n
+t 115.0 135.0 t0 0 w n
+t 25.0 135.0 t1 0 w n
+p 205.0 50.0 p2 10 n
+t 205.0 140.0 t2 0 w n
+e p0 t0 1 n
+e t0 p1 1 n
+e p1 t1 1 n
+e t1 p0 1 n
+e p2 t0 ?-1 n
+e p2 t2 1 n
+h inhibitor
+
+

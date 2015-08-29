@@ -1,0 +1,24 @@
+tr GoEat0 Idle0 -> WaitLeft0 WaitRight0
+tr GoEat1 Idle1 -> WaitLeft1 WaitRight1
+tr GoEat2 Idle2 -> WaitLeft2 WaitRight2
+tr GoLeft0 Fork2 WaitLeft0 -> HasLeft0
+tr GoLeft1 Fork0 WaitLeft1 -> HasLeft1
+tr GoLeft2 Fork1 WaitLeft2 -> HasLeft2
+tr GoRight0 Fork0 WaitRight0 -> HasRight0
+tr GoRight1 Fork1 WaitRight1 -> HasRight1
+tr GoRight2 Fork2 WaitRight2 -> HasRight2
+tr Release0 HasLeft0 HasRight0 -> Fork0 Fork2 Idle0
+tr Release1 HasLeft1 HasRight1 -> Fork0 Fork1 Idle1
+tr Release2 HasLeft2 HasRight2 -> Fork1 Fork2 Idle2
+pl Fork0 (1)
+pl Idle0 (1)
+pl Fork1 (1)
+pl Idle1 (1)
+pl Fork2 (1)
+pl Idle2 (1)
+net Philo
+#! md Philo philo0 philo1 philo2
+#! md philo0 Fork0 Idle0 WaitLeft0 WaitRight0 HasLeft0 HasRight0
+#! md philo1 Fork1 Idle1 WaitLeft1 WaitRight1 HasLeft1 HasRight1
+#! md philo2 Fork2 Idle2 WaitLeft2 WaitRight2 HasLeft2 HasRight2
+

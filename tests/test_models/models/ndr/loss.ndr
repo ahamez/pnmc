@@ -1,0 +1,27 @@
+p 380.0 235.0 S2 0 n
+t 110.0 130.0 CSend 0 w n
+p 245.0 130.0 M 0 n
+p 250.0 305.0 R 0 n
+p 110.0 50.0 C1 2 n
+p 110.0 230.0 C2 0 n
+t 110.0 305.0 CRcv 0 w n
+t 380.0 130.0 SRcv 0 w n
+p 380.0 50.0 S1 1 n
+t 245.0 195.0 Loss 0 w n
+t 380.0 305.0 SSend 0 w n
+e C1 CSend 1 n
+e CSend C2 1 n
+e CSend M 1 n
+e M SRcv 1 n
+e SRcv S2 1 n
+e S2 SSend 1 n
+e SSend R 1 n
+e R CRcv 1 n
+e C2 CRcv 1 n
+e CRcv 0.4403676353 95.63472179 C1 0.5877060854 112.6809656 1 n
+e SSend 0.1064252519 103.2327467 S1 0.8588702056 83.86894532 1 n
+e S1 SRcv 1 n
+e M Loss 1 n
+h cs
+
+
