@@ -34,6 +34,8 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
+namespace /* unnamed */ {
+
 SDD
 initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 {
@@ -57,6 +59,8 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
                              : flat_set{pn::sharp};
                       }}};
 }
+
+} // namespace unnamed
 
 /*------------------------------------------------------------------------------------------------*/
 
