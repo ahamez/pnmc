@@ -288,21 +288,35 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
     }
 
     const bool has_impact_on_time
-      = t.timed() or
+      = t.timed()
         // The transition t is untimed, but we should check if the places it marks are pre of
         // some timed transition.
+        or
         std::any_of( t.post.cbegin(), t.post.cend()
-                   , [&](const pn::transition::arcs_type::value_type& arc)
-                        {
-                          const auto& p = *net.places().find(arc.first);
-                          return std::any_of( p.post.cbegin(), p.post.cend()
-                                            , [&](const auto& arc2)
-                                                 {
-                                                   const auto& u
-                                                     = *net.transitions().find(arc2.first);
-                                                   return u.timed();
-                                                 });
-                        });
+                   , [&](const auto& arc)
+                     {
+                       const auto& p = *net.places().find(arc.first);
+                       return std::any_of( p.post.cbegin(), p.post.cend()
+                                         , [&](const auto& arc2)
+                                           {
+                                             const auto& u = *net.transitions().find(arc2.first);
+                                             return u.timed();
+                                           });
+                     })
+        // The transition t is untimed, but we should check if the places it take tokens from are
+        // pre of some timed transition.
+        or
+        std::any_of( t.pre.cbegin(), t.pre.cend()
+                   , [&](const auto& arc)
+                     {
+                       const auto& p = *net.places().find(arc.first);
+                       return std::any_of( p.post.cbegin(), p.post.cend()
+                                         , [&](const auto& arc2)
+                                           {
+                                             const auto& u = *net.transitions().find(arc2.first);
+                                             return u.timed();
+                                           });
+                     });
 
     if (not has_impact_on_time)
     {
