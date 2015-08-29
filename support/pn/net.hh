@@ -132,7 +132,7 @@ public:
   const places_type::index<name_index>::type&
   places() const noexcept;
 
-  /// @brief Return all transitions.
+  /// @brief Return all transitions by name.
   const transitions_type::index<name_index>::type&
   transitions() const noexcept;
 
