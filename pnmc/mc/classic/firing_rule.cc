@@ -31,19 +31,39 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
+using namespace std::string_literals;
+
+/*------------------------------------------------------------------------------------------------*/
+
 /// @brief Compute the transition relation corresponding to a petri net.
 std::multimap<homomorphism, std::string>
 untimed( const conf::configuration& conf, const order& o, const pn::net& net
        , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
-  // Each transition will produce an operand.
-  std::multimap<homomorphism, std::string> operands;
-  operands.emplace(sdd::id<sdd_conf>(), "id");
+  // Store created operations and associate them with a label.
+  auto operands = std::multimap<homomorphism, std::string>{};
+
+  // An operation will be created for Id. We thus have to generate a name that is not
+  // the one of a transition.
+  const auto id_name = [&]
+  {
+    const auto base_name = "id"s;
+    auto name = base_name;
+    auto index = 0ul;
+    while (net.transitions().find(name) != net.transitions().end())
+    {
+      name = base_name + std::to_string(index++);
+    }
+    return name;
+  }();
+
+  // The id operation for the transitive closure.
+  operands.emplace(sdd::id<sdd_conf>(), id_name);
 
   using target_arc_type = pn::transition::arcs_type::value_type;
 
   // Temporary storage to sort post and pre arcs.
-  std::vector<std::reference_wrapper<const target_arc_type>> arcs;
+  auto arcs = std::vector<std::reference_wrapper<const target_arc_type>>{};
   arcs.reserve(128);
 
   for (const pn::transition& transition : net.transitions())
@@ -176,14 +196,44 @@ std::multimap<homomorphism, std::string>
 timed( const conf::configuration& conf, const order& o, const pn::net& net
      , boost::dynamic_bitset<>& transitions_bitset, const bool& stop)
 {
-  // Each transition will produce an operand.
-  std::multimap<homomorphism, std::string> operands;
-  operands.emplace(sdd::id<sdd_conf>(), "id");
+  // Store created operations and associate them with a label.
+  auto operands = std::multimap<homomorphism, std::string>{};
+
+  // An operation will be created to advance time. We thus have to generate a name that is not
+  // the one of a transition.
+  const auto advance_time_name = [&]
+  {
+    const auto base_name = "advance_time"s;
+    auto name = base_name;
+    auto index = 0ul;
+    while (net.transitions().find(name) != net.transitions().end())
+    {
+      name = base_name + std::to_string(index++);
+    }
+    return name;
+  }();
+
+  // An operation will be created for Id. We thus have to generate a name that is not
+  // the one of a transition.
+  const auto id_name = [&]
+  {
+    const auto base_name = "id"s;
+    auto name = base_name;
+    auto index = 0ul;
+    while (net.transitions().find(name) != net.transitions().end())
+    {
+      name = base_name + std::to_string(index++);
+    }
+    return name;
+  }();
+
+  // The id operation for the transitive closure.
+  operands.emplace(sdd::id<sdd_conf>(), id_name);
 
   using target_arc_type = pn::transition::arcs_type::value_type;
 
   // Temporary storage to sort post and pre arcs.
-  std::vector<std::reference_wrapper<const target_arc_type>> arcs;
+  auto arcs = std::vector<std::reference_wrapper<const target_arc_type>>{};
   arcs.reserve(128);
 
   for (const pn::transition& t : net.transitions())
@@ -606,7 +656,7 @@ post_and_advance_time:
     }
     return res;
   }();
-  operands.emplace(advance_time, "___time___");
+  operands.emplace(advance_time, advance_time_name);
 
   return operands;
 }
