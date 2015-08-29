@@ -383,19 +383,19 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
       }
 
       // Indicates that u has an inhibitor arc to a place shared with t.
-      bool u_has_inhibitor = false;
+      auto u_has_inhibitor = false;
 
       // Indicates that t has a read arc to place shared with u.
-      bool t_has_read = false;
+      auto t_has_read = false;
 
       // Pre places of u which are post of t.
-      std::vector<std::string> shared_pre_post;
+      auto shared_pre_post = std::vector<std::string>{};
 
       // Pre places of u which are not post of t.
-      std::vector<std::string> unshared_pre_post;
+      auto unshared_pre_post = std::vector<std::string>{};
 
       // Pre places of u which are also pre of t.
-      std::vector<std::string> shared_pre;
+      auto shared_pre = std::vector<std::string>{};
 
       for (const auto& u_pre_arc : u.pre)
       {

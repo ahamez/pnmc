@@ -232,7 +232,7 @@ std::deque<std::pair<std::string, SDD>>
 shortest_path( const order& o, const SDD& initial, const SDD& targets, const pn::net& net
              , const std::multimap<homomorphism, std::string>& operands)
 {
-  std::deque<std::string> identifiers;
+  auto identifiers = std::deque<std::string>{};
   o.flat(std::back_inserter(identifiers));
 
   auto top_bottom = [&]
@@ -242,10 +242,10 @@ shortest_path( const order& o, const SDD& initial, const SDD& targets, const pn:
                                            , make_transform_iterator(begin(operands), key)
                                            , make_transform_iterator(end(operands), key)));
 
-    SDD current_layer = initial;
-    SDD acc = current_layer; // Keep all computed states to avoid to recompute states.
+    auto current_layer = initial;
+    auto acc = current_layer; // Keep all computed states to avoid to recompute states.
 
-    std::deque<SDD> res;
+    auto res = std::deque<SDD>{};
     res.push_back(initial);
 
     // BFS
@@ -279,7 +279,7 @@ shortest_path( const order& o, const SDD& initial, const SDD& targets, const pn:
                                              , make_transform_iterator(end(net.transitions()), id)};
 
   const auto functions = mk_functions(identifiers, net);
-  std::deque<std::pair<std::string, SDD>> trace;
+  auto trace = std::deque<std::pair<std::string, SDD>>{};
   trace.emplace_front("", *top_bottom.rbegin());
   for (auto rcit = std::next(top_bottom.rbegin()); rcit != top_bottom.rend(); ++rcit)
   {
