@@ -18,6 +18,7 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Keep values greater or equal than a given value
 struct filter_ge
 {
   const pn::valuation_type value;
