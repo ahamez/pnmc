@@ -21,7 +21,7 @@ namespace po = boost::program_options;
 
 /*------------------------------------------------------------------------------------------------*/
 
-static const auto pn_input_str   = "input";
+static const auto pn_format_str   = "format";
 static const auto format_map = std::map<std::string, pn_format>
   { std::make_pair("ndr" , pn_format::ndr)
   , std::make_pair("net" , pn_format::net)
@@ -42,7 +42,7 @@ pn_input_options()
 {
   po::options_description options{"Petri net file format options"};
   options.add_options()
-    (pn_input_str, po::value<std::string>()->default_value("net"), possible_format_values.c_str());
+    (pn_format_str, po::value<std::string>()->default_value("net"), possible_format_values.c_str());
   return options;
 }
 
@@ -52,7 +52,7 @@ static
 pn_format
 pn_format_from_options(const po::variables_map& vm)
 {
-  const auto s = vm[pn_input_str].as<std::string>();
+  const auto s = vm[pn_format_str].as<std::string>();
   const auto search = format_map.find(s);
   if (search != end(format_map))
   {
