@@ -317,36 +317,29 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
       }
     }
 
+    // Tells if a transition can modify some pre-places of a timed transition.
+    const auto impact_timed_transitions = [&](const auto& t_arcs)
+    {
+      return std::any_of( t_arcs.cbegin(), t_arcs.cend()
+                        , [&](const auto& arc)
+                          {
+                            const auto& p = *net.places().find(arc.first);
+                            return std::any_of( p.post.cbegin(), p.post.cend()
+                                              , [&](const auto& arc2)
+                                                {
+                                                  const auto& u =
+                                                    *net.transitions().find(arc2.first);
+                                                  return u.timed();
+                                                });
+                          });
+    };
+
     const bool has_impact_on_time
       = t.timed()
-        // The transition t is untimed, but we should check if the places it marks are pre of
-        // some timed transition.
-        or
-        std::any_of( t.post.cbegin(), t.post.cend()
-                   , [&](const auto& arc)
-                     {
-                       const auto& p = *net.places().find(arc.first);
-                       return std::any_of( p.post.cbegin(), p.post.cend()
-                                         , [&](const auto& arc2)
-                                           {
-                                             const auto& u = *net.transitions().find(arc2.first);
-                                             return u.timed();
-                                           });
-                     })
-        // The transition t is untimed, but we should check if the places it take tokens from are
-        // pre of some timed transition.
-        or
-        std::any_of( t.pre.cbegin(), t.pre.cend()
-                   , [&](const auto& arc)
-                     {
-                       const auto& p = *net.places().find(arc.first);
-                       return std::any_of( p.post.cbegin(), p.post.cend()
-                                         , [&](const auto& arc2)
-                                           {
-                                             const auto& u = *net.transitions().find(arc2.first);
-                                             return u.timed();
-                                           });
-                     });
+        // The transition t is untimed, but we should check if the places it marks or it take
+        // tokens from are pre of some timed transition.
+        or impact_timed_transitions(t.post)
+        or impact_timed_transitions(t.pre);
 
     if (not has_impact_on_time)
     {
