@@ -9,7 +9,7 @@ PNMC INSTALLATION
 
   * Libraries
     - libsdd (https://github.com/ahamez/libsdd)
-    - Boost >= 1.56 (http://www.boost.org)
+    - Boost >= 1.58 (http://www.boost.org)
 
   * Tools
     - cmake >= 2.8.9
@@ -22,7 +22,7 @@ PNMC INSTALLATION
     $ make
     $ make install
 
-  * Available cmake variables to configure paths
+  * CMake variables to configure paths
     - CMAKE_INSTALL_PREFIX=/path/to/install
     - BOOST_ROOT=/path/to/boost
     - CMAKE_CXX_COMPILER=/path/to/bin/compiler
