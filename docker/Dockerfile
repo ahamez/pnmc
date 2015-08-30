@@ -9,12 +9,12 @@ RUN apt-get update\
 
 WORKDIR /tmp
 
-RUN curl -L http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.gz/download\
+RUN curl -L http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz/download\
 |  tar -v -C /tmp -xz\
-&& cd /tmp/boost_1_58_0\
+&& cd /tmp/boost_1_59_0\
 && ./bootstrap.sh --with-libraries=program_options,coroutine,context,system,thread,filesystem\
 && ./b2 -j 4 install\
-&& cd /tmp && rm -rf boost_1_58_0
+&& cd /tmp && rm -rf boost_1_59_0
 
 RUN git clone https://github.com/ahamez/libsdd.git\
 && git clone --recursive https://github.com/ahamez/pnmc.git
