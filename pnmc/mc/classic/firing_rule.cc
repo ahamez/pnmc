@@ -27,11 +27,21 @@
 #include "mc/shared/live.hh"
 #include "support/pn/constants.hh"
 
-namespace pnmc { namespace mc { namespace classic {
+namespace pnmc { namespace mc { namespace classic { namespace /* unnamed */ {
 
 /*------------------------------------------------------------------------------------------------*/
 
-using namespace std::string_literals;
+std::string
+unique_label(const pn::net& net, const std::string& base_name)
+{
+  auto name = base_name;
+  auto index = 0ul;
+  while (net.transitions().find(name) != net.transitions().end())
+  {
+    name = base_name + std::to_string(index++);
+  }
+  return name;
+}
 
 /*------------------------------------------------------------------------------------------------*/
 
@@ -45,17 +55,7 @@ untimed( const conf::configuration& conf, const order& o, const pn::net& net
 
   // An operation will be created for Id. We thus have to generate a name that is not
   // the one of a transition.
-  const auto id_name = [&]
-  {
-    const auto base_name = "id"s;
-    auto name = base_name;
-    auto index = 0ul;
-    while (net.transitions().find(name) != net.transitions().end())
-    {
-      name = base_name + std::to_string(index++);
-    }
-    return name;
-  }();
+  const auto id_name = unique_label(net, "id");
 
   // The id operation for the transitive closure.
   operands.emplace(sdd::id<sdd_conf>(), id_name);
@@ -201,31 +201,11 @@ timed( const conf::configuration& conf, const order& o, const pn::net& net
 
   // An operation will be created to advance time. We thus have to generate a name that is not
   // the one of a transition.
-  const auto advance_time_name = [&]
-  {
-    const auto base_name = "advance_time"s;
-    auto name = base_name;
-    auto index = 0ul;
-    while (net.transitions().find(name) != net.transitions().end())
-    {
-      name = base_name + std::to_string(index++);
-    }
-    return name;
-  }();
+  const auto advance_time_name = unique_label(net, "advance_time");
 
   // An operation will be created for Id. We thus have to generate a name that is not
   // the one of a transition.
-  const auto id_name = [&]
-  {
-    const auto base_name = "id"s;
-    auto name = base_name;
-    auto index = 0ul;
-    while (net.transitions().find(name) != net.transitions().end())
-    {
-      name = base_name + std::to_string(index++);
-    }
-    return name;
-  }();
+  const auto id_name = unique_label(net, "id");
 
   // The id operation for the transitive closure.
   operands.emplace(sdd::id<sdd_conf>(), id_name);
@@ -660,6 +640,10 @@ post_and_advance_time:
 
   return operands;
 }
+
+/*------------------------------------------------------------------------------------------------*/
+
+} // namespace unnamed
 
 /*------------------------------------------------------------------------------------------------*/
 
