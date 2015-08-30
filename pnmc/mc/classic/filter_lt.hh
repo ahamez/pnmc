@@ -27,7 +27,7 @@ struct filter_lt
   operator()(const flat_set& val)
   const
   {
-    flat_set_builder builder;
+    auto builder = flat_set_builder{};
     builder.reserve(val.size());
     // Only keep values that are less than the requested valuation.
     std::copy(val.cbegin(), val.lower_bound(value), std::inserter(builder, builder.end()));

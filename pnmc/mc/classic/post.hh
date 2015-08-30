@@ -27,7 +27,7 @@ struct post
   operator()(const flat_set& val)
   const
   {
-    flat_set_builder builder;
+    auto builder = flat_set_builder{};
     builder.reserve(val.size());
     std::transform( val.cbegin(), val.cend(), std::inserter(builder, builder.end())
                   , [this](unsigned int v){return v + valuation;});

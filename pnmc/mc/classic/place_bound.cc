@@ -100,7 +100,9 @@ place_bound(const order& o, const SDD& states, const std::set<std::string>& plac
   sdd::visit(bound_visitor{variables_bounds}, states, o);
 
   const auto to_id = [&](auto kv)
-    {return std::make_pair(o.node_from_position(kv.first).identifier().user(), kv.second);};
+  {
+    return std::make_pair(o.node_from_position(kv.first).identifier().user(), kv.second);
+  };
   return { boost::make_transform_iterator(begin(variables_bounds), to_id)
          , boost::make_transform_iterator(end(variables_bounds), to_id)};
 }

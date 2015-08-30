@@ -134,9 +134,9 @@ static const auto stats_values_str = []
 boost::optional<configuration>
 fill_configuration(int argc, const char** argv)
 {
-  configuration conf;
+  auto conf = configuration{};
 
-  po::options_description general_options("General options");
+  auto general_options = po::options_description{"General options"};
   general_options.add_options()
     (help_str       , "Show this help")
     (help_exp_str   , "Show experimental/dev features help")
@@ -147,13 +147,13 @@ fill_configuration(int argc, const char** argv)
                     , "Output directory path")
   ;
 
-  po::options_description hidden_input_options("Hidden input options");
+  auto hidden_input_options = po::options_description{"Hidden input options"};
   hidden_input_options.add_options()
     ("input-file"   , po::value<std::string>()
                     , "The Petri net file to analyse")
   ;
 
-  po::options_description export_options("Export options");
+  auto export_options = po::options_description{"Export options"};
   export_options.add_options()
     (dot_export_str , po::value<std::string>()
                     , dot_export_values_str.c_str())
@@ -161,34 +161,34 @@ fill_configuration(int argc, const char** argv)
                     , json_export_values_str.c_str())
   ;
 
-  po::options_description stats_options("Statistics options");
+  auto stats_options = po::options_description{"Statistics options"};
   stats_options.add_options()
     (stats_str      , po::value<std::string>()
                     , stats_values_str.c_str())
   ;
 
-  po::options_description order_options("Order options");
+  auto order_options = po::options_description{"Order options"};
   order_options.add_options()
     (order_flat_str    , "Don't use hierarchy informations")
     (order_force_str   , "Use FORCE ordering heuristic")
     (order_lexical_str , "Sort variables using a lexical order on the place names")
   ;
 
-  po::options_description petri_options("Petri net options");
+  auto petri_options = po::options_description{"Petri net options"};
   petri_options.add_options()
     (pn_marking_bound_str      , po::value<unsigned int>()->default_value(0)
                                , "Limit marking")
     (pn_one_safe_str           , "Optimize for 1-safe Petri nets")
   ;
 
-  po::options_description mc_options("Model checking options");
+  auto mc_options = po::options_description{"Model checking options"};
   mc_options.add_options()
     (mc_dead_transitions_str   , "Compute dead transitions")
     (mc_dead_states_str        , "Compute dead states")
     (mc_count_tokens_str       , "Compute maximal markings")
   ;
 
-  po::options_description advanced_options("Advanced options");
+  auto advanced_options = po::options_description{"Advanced options"};
   advanced_options.add_options()
     (time_limit_str             , po::value<unsigned int>()
                                 , "Limit the execution time (s)")
@@ -198,7 +198,7 @@ fill_configuration(int argc, const char** argv)
                                 , ut_values.c_str())
   ;
 
-  po::options_description hidden_exp_options("Hidden dev/experimental options");
+  auto hidden_exp_options = po::options_description{"Hidden dev/experimental options"};
   hidden_exp_options.add_options()
     (order_force_iterations_str , po::value<unsigned int>()->default_value(100)
                                 , "Number of FORCE iterations")
@@ -210,10 +210,10 @@ fill_configuration(int argc, const char** argv)
     (mc_trace_str               , "Compute the shortest trace")
   ;
 
-  po::positional_options_description p;
+  auto p = po::positional_options_description{};
   p.add("input-file", 1);
   
-  po::options_description cmdline_options;
+  auto cmdline_options = po::options_description{};
   cmdline_options
   	.add(general_options)
     .add(pn_input_options())
@@ -227,7 +227,7 @@ fill_configuration(int argc, const char** argv)
     .add(advanced_options)
     .add(hidden_input_options);
 
-  po::options_description config_file_options;
+  auto config_file_options = po::options_description{};
   config_file_options
     .add(order_options)
     .add(export_options)
@@ -238,17 +238,15 @@ fill_configuration(int argc, const char** argv)
     .add(advanced_options)
     .add(hidden_input_options);
 
-  po::variables_map vm;
-  po::parsed_options parsed
-    = po::command_line_parser(argc, argv).options(cmdline_options)
-                                         .positional(p)
-                                         .allow_unregistered()
-                                         .run();
+  auto vm = po::variables_map{};
+  auto parsed = po::command_line_parser(argc, argv).options(cmdline_options)
+                                                   .positional(p)
+                                                   .allow_unregistered()
+                                                   .run();
   po::store(parsed, vm);
   po::notify(vm);
 
-  std::vector<std::string> unrecognized
-    = po::collect_unrecognized(parsed.options, po::exclude_positional);
+  auto unrecognized = po::collect_unrecognized(parsed.options, po::exclude_positional);
 
   if (vm.count(help_exp_str))
   {
@@ -356,7 +354,7 @@ fill_configuration(int argc, const char** argv)
   const auto parse_conf = [&](const std::string& option, auto& conf_map, const auto& values_map)
   {
     using separator = boost::char_separator<char>;
-    boost::tokenizer<separator> tks{vm[option].as<std::string>(), separator{","}};
+    auto tks = boost::tokenizer<separator>{vm[option].as<std::string>(), separator{","}};
     std::transform( begin(tks), end(tks), std::inserter(conf_map, end(conf_map))
                   , [&](const auto& s)
                     {
@@ -389,11 +387,11 @@ fill_configuration(int argc, const char** argv)
   const auto parse_sizes = [&](const std::string& option, auto& map)
   {
     using separator = boost::char_separator<char>;
-    boost::tokenizer<separator> tks{vm[option].as<std::string>(), separator{","}};
+    auto tks = boost::tokenizer<separator>{vm[option].as<std::string>(), separator{","}};
     for (const auto& tk : tks)
     {
-      std::vector<std::string> tmp;
-      boost::tokenizer<separator> subtks{tk, separator{":"}};
+      auto tmp = std::vector<std::string>{};
+      auto subtks = boost::tokenizer<separator>{tk, separator{":"}};
       std::copy(begin(subtks), end(subtks), std::back_inserter(tmp));
       if (tmp.size() != 2)
       {

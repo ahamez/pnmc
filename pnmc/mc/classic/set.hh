@@ -18,6 +18,7 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Replace all values by a single one.
 struct set
 {
   const pn::clock_type value;

@@ -29,7 +29,7 @@ struct pre_clock
   operator()(const flat_set& val)
   const
   {
-    flat_set_builder builder;
+    auto builder = flat_set_builder{};
     builder.reserve(val.size());
     for (auto cit = val.lower_bound(lower_clock); cit != val.cend(); ++cit)
     {

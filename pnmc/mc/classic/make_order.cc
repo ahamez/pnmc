@@ -49,7 +49,7 @@ make_hierarchical_order(const std::vector<pn::module>& modules)
     const
     {
       assert(not m.all().empty());
-      order_builder local_ob;
+      auto local_ob = order_builder{};
       if (m.all().size() == 1)
       {
         return boost::apply_visitor(*this, m.all().front().variant());
@@ -108,13 +108,13 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     {
       throw std::runtime_error("Empty JSON order file " + conf.order_file->string());
     }
-    order o{*ob};
+    auto o = order{*ob};
 
     // Check if loaded order corresponds to the Petri net.
-    std::set<std::string> order_identifiers;
+    auto order_identifiers = std::set<std::string>{};
     o.flat(std::inserter(order_identifiers, order_identifiers.end()));
 
-    boost::container::flat_set<std::string> pn_identifiers;
+    auto pn_identifiers = boost::container::flat_set<std::string>{};
     std::transform( begin(net.places()), end(net.places())
                   , std::inserter(pn_identifiers, pn_identifiers.end())
                   , [](const pn::place& p){return p.name;});
@@ -130,7 +130,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
       }
     }
 
-    std::vector<std::string> diff;
+    auto diff = std::vector<std::string>{};
     diff.reserve(order_identifiers.size());
 
     std::set_difference( order_identifiers.cbegin(), order_identifiers.cend()
@@ -139,7 +139,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
 
     if (not diff.empty())
     {
-      std::stringstream ss;
+      std::stringstream ss{};
       ss << "The following identifiers from " << conf.order_file->string()
          << " don't exist in PN: ";
       std::copy( diff.cbegin(), std::prev(diff.cend())
@@ -154,7 +154,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
 
     if (not diff.empty())
     {
-      std::stringstream ss;
+      std::stringstream ss{};
       ss << "The following identifiers from PN don't exist in " << conf.order_file->string()
          << ": ";
       std::copy( diff.cbegin(), std::prev(diff.cend())
@@ -167,14 +167,14 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   }
 
   // FORCE heuristic.
-  order_builder ob;
+  auto ob = order_builder{};
   if (conf.order_ordering_force)
   {
     stats.force_duration.emplace();
-    shared::step s{"force", &*stats.force_duration};
+    auto s = shared::step{"force", &*stats.force_duration};
 
     // Temporary placeholder for identifiers.
-    std::vector<identifier_type> identifiers;
+    auto identifiers = std::vector<identifier_type>{};
 
     // Collect identifiers.
     identifiers.reserve(net.places_by_insertion().size());
@@ -196,7 +196,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
     }
 
     // The hypergraph that stores connections between the places of the Petri net.
-    sdd::force::hypergraph<sdd_conf> graph(identifiers.cbegin(), identifiers.cend());
+    auto graph = sdd::force::hypergraph<sdd_conf>{identifiers.cbegin(), identifiers.cend()};
 
     // This container will be used again.
     identifiers.clear();
@@ -235,7 +235,7 @@ make_order(const conf::configuration& conf, statistics& stats, const pn::net& ne
   // Lexical order
   else if (conf.order_lexical)
   {
-    std::vector<identifier_type> to_sort;
+    auto to_sort = std::vector<identifier_type>{};
 
     for (const auto& place : net.places())
     {

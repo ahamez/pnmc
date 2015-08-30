@@ -475,9 +475,9 @@ net(std::istream& in)
 
   const auto text = preprocess(in);
   const auto tks = tokens(begin(text), end(text));
-  parse_cxt cxt{tks.cbegin(), tks.cend()};
+  auto cxt = parse_cxt{tks.cbegin(), tks.cend()};
 
-  std::unordered_map<std::string, std::vector<std::string>> modules_id;
+  auto modules_id = std::unordered_map<std::string, std::vector<std::string>>{};
 
   while (not cxt.eof())
   {
@@ -493,7 +493,7 @@ net(std::istream& in)
   {
     const auto& net_name = net_ptr->name;
     const auto& root_search = modules_id.find(net_name);
-    std::unordered_set<std::string> places_encountered;
+    auto places_encountered = std::unordered_set<std::string>{};
 
     if (root_search == end(modules_id))
     {
@@ -504,7 +504,7 @@ net(std::istream& in)
       net_ptr->root_modules.emplace_back(make_module( submodule, modules_id, *net_ptr, net_name
                                                     , places_encountered));
     }
-    std::vector<std::string> invalid;
+    auto invalid = std::vector<std::string>{};
     std::for_each( begin(net_ptr->places()), end(net_ptr->places())
                  , [&](const auto& p)
                       {

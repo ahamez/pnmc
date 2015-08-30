@@ -56,17 +56,16 @@ struct count_tokens_visitor
     auto insertion = cache_.emplace(reinterpret_cast<const char*>(&n), std::make_pair(0, 0));
     if (insertion.second)
     {
-      unsigned long markings = 0;
-      unsigned long places = 0;
+      auto markings = 0ul;
+      auto places = 0ul;
 
       for (const auto& arc : n)
       {
-        const unsigned long max_value
-          = *std::max_element(arc.valuation().cbegin(), arc.valuation().cend());
+        const auto max_value = *std::max_element(arc.valuation().cbegin(), arc.valuation().cend());
         const auto res = visit(*this, arc.successor());
 
         markings = std::max(markings, max_value + res.first);
-        places = std::max({places, max_value, res.second});
+        places = std::max({places, static_cast<unsigned long>(max_value), res.second});
       }
 
       insertion.first->second = std::make_pair(markings, places);
@@ -82,8 +81,8 @@ struct count_tokens_visitor
     auto insertion = cache_.emplace(reinterpret_cast<const char*>(&n), std::make_pair(0, 0));
     if (insertion.second)
     {
-      unsigned long markings = 0;
-      unsigned long places = 0;
+      auto markings = 0ul;
+      auto places = 0ul;
 
       for (const auto& arc : n)
       {

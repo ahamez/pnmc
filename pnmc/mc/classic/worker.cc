@@ -39,7 +39,7 @@ namespace /* unnamed */ {
 SDD
 initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 {
-  std::map<std::string, std::reference_wrapper<const pn::transition>> timed;
+  auto timed = std::map<std::string, std::reference_wrapper<const pn::transition>>{};
   boost::range::for_each( net.transitions()
                         , [&](const auto& t){if (t.timed()) timed.emplace(t.name, t);});
 
@@ -89,7 +89,7 @@ worker::operator()(const pn::net& net, const properties::formulae& formulae)
   using conf::filename;
   using dot_sdd = shared::dot_sdd<sdd_conf>;
 
-  util::timer total_timer;
+  auto total_timer = util::timer{};
 
   // Configure libsdd.
   sdd_conf sconf;
@@ -114,7 +114,7 @@ worker::operator()(const pn::net& net, const properties::formulae& formulae)
   auto res = results{};
 
   // Set to true by an asynchrous thread when the time limit is reached.
-  bool stop_flag = false;
+  auto stop_flag = false;
 
   std::cout << "\n-- Steps\n";
 
@@ -130,12 +130,12 @@ worker::operator()(const pn::net& net, const properties::formulae& formulae)
   res.m0 = initial_state(*res.order, net);
 
   // Map of live transitions.
-  boost::dynamic_bitset<> live_transitions(net.transitions().size());
+  auto live_transitions = boost::dynamic_bitset<>{net.transitions().size()};
 
   // Compute the transition relation.
   const auto h_operands = [&]
   {
-    shared::step step("firing rule", &stats.relation_duration);
+    auto step = shared::step{"firing rule", &stats.relation_duration};
     return firing_rule(conf, *res.order, net, live_transitions, stop_flag);
   }();
   const auto key = [](const auto& kv){return kv.first;}; // Extract keys of a map
@@ -152,8 +152,9 @@ worker::operator()(const pn::net& net, const properties::formulae& formulae)
 
   // Compute the state space.
   {
-    shared::step step{"state space", &stats.state_space_duration};
-    threads _{conf, stats, stop_flag, manager, step.timer}; // threads will be stopped at scope exit
+    auto step = shared::step{"state space", &stats.state_space_duration};
+    // Threads will be stopped at scope exit.
+    threads _{conf, stats, stop_flag, manager, step.timer};
     try
     {
       res.states = h_opt(*res.order, *res.m0);
@@ -179,13 +180,13 @@ worker::operator()(const pn::net& net, const properties::formulae& formulae)
   if (conf.count_tokens)
   {
     stats.tokens_duration.emplace();
-    shared::step step{"count tokens", &*stats.tokens_duration};
+    auto step = shared::step{"count tokens", &*stats.tokens_duration};
     count_tokens(res, *res.states, net);
   }
 
   if (conf.compute_dead_transitions)
   {
-    shared::step step{"dead transitions"};
+    auto step = shared::step{"dead transitions"};
     res.dead_transitions.emplace();
     for (const auto& t : net.transitions())
     {
@@ -200,13 +201,13 @@ worker::operator()(const pn::net& net, const properties::formulae& formulae)
   {
     {
       stats.dead_states_duration.emplace();
-      shared::step step{"dead states", &*stats.dead_states_duration};
+      auto step = shared::step{"dead states", &*stats.dead_states_duration};
       res.dead_states = dead_states(*res.order, net, *res.states);
     }
     if (conf.trace)
     {
       stats.trace_duration.emplace();
-      shared::step step{"trace", &*stats.trace_duration};
+      auto step = shared::step{"trace", &*stats.trace_duration};
       res.trace = shortest_path(*res.order, *res.m0, *res.dead_states, net, h_operands);
     }
   }
@@ -214,7 +215,7 @@ worker::operator()(const pn::net& net, const properties::formulae& formulae)
   if (not formulae.booleans.empty() or not formulae.integers.empty())
   {
     stats.reachability_duration.emplace();
-    shared::step step{"reachability", &*stats.reachability_duration};
+    auto step = shared::step{"reachability", &*stats.reachability_duration};
     reachability(*res.order, formulae, res);
   }
 

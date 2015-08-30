@@ -433,12 +433,13 @@ net(parse_cxt& cxt, pn::net& n)
 std::shared_ptr<pn::net>
 ndr(std::istream& in)
 {
-  const std::string text{std::istreambuf_iterator<char>{in}, std::istreambuf_iterator<char>{}};
+  const auto text = std::string{ std::istreambuf_iterator<char>{in}
+                               , std::istreambuf_iterator<char>{}};
   auto net_ptr = std::make_shared<pn::net>();
 
   const auto tks = tokens(begin(text), end(text));
-  parse_cxt cxt{tks.cbegin(), tks.cend()};
-  bool edge_seen = false;
+  auto cxt = parse_cxt{tks.cbegin(), tks.cend()};
+  auto edge_seen = false;
 
   while (not cxt.eof())
   {

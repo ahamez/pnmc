@@ -37,7 +37,7 @@ state_type
 one_state_of(const SDD& x)
 {
   assert(x != zero());
-  state_type res;
+  auto res = state_type{};
   auto path_generator = x.paths();
   const auto& path = path_generator.get(); // get only first path
   for (const auto& values : path)
@@ -52,8 +52,8 @@ one_state_of(const SDD& x)
 using fn_type = std::function<flat_set (const flat_set&)>;
 
 using identifier_map_type =
-std::unordered_map< std::string // transition identifier
-                  , std::vector<fn_type>>; // operations to apply on a flat_set
+  std::unordered_map< std::string // transition identifier
+                    , std::vector<fn_type>>; // operations to apply on a flat_set
 
 using functions_type = std::vector<identifier_map_type>;
 

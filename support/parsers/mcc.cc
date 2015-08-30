@@ -251,7 +251,7 @@ element(context&, const rapidxml::xml_node<>*)
 properties::formula
 is_fireable(context& cxt, const rapidxml::xml_node<>* node)
 {
-  std::set<std::string> transitions;
+  auto transitions = std::set<std::string>{};
   auto* transition_node = node->first_node("transition");
   while (transition_node)
   {
@@ -368,15 +368,15 @@ mcc(std::istream& in)
 {
   using namespace rapidxml;
 
-  properties::formulae formulae;
+  auto formulae = properties::formulae{};
 
-  std::string buffer{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>{}};
+  auto buffer = std::string{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>{}};
   if (buffer.empty())
   {
     throw parsers::parse_error("MCC formula parser: empty file");
   }
 
-  rapidxml::xml_document<> doc;
+  rapidxml::xml_document<> doc{};
   try
   {
     doc.parse<0>(&buffer[0]);
@@ -388,7 +388,7 @@ mcc(std::istream& in)
 
   if (const auto properties_node = doc.first_node("property-set"))
   {
-    std::set<std::string> targets;
+    auto targets = std::set<std::string>{};
     auto cxt = context{ formulae.compute_deadlock, formulae.places_bounds
                       , formulae.fireable_transitions, targets};
 

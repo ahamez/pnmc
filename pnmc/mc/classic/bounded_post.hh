@@ -30,7 +30,7 @@ struct bounded_post
   operator()(const flat_set& val)
   const
   {
-    flat_set_builder builder;
+    auto builder = flat_set_builder{};
     builder.reserve(val.size());
     for (const auto& v : val)
     {

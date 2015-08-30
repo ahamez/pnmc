@@ -16,8 +16,8 @@ namespace pnmc { namespace mc { namespace classic {
 SDD
 dead_states(const order& o, const pn::net& net, const SDD& state_space)
 {
-  std::set<homomorphism> and_operands;
-  std::set<homomorphism> or_operands;
+  auto and_operands = std::set<homomorphism>{};
+  auto or_operands = std::set<homomorphism>{};
 
   for (const auto& transition : net.transitions())
   {

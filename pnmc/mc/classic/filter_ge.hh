@@ -27,7 +27,7 @@ struct filter_ge
   operator()(const flat_set& val)
   const
   {
-    flat_set_builder builder;
+    auto builder = flat_set_builder{};
     builder.reserve(val.size());
     // Only keep values that are greater or equal than the requested valuation.
     std::copy(val.lower_bound(value), val.cend(), std::inserter(builder, builder.end()));

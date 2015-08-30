@@ -30,7 +30,7 @@ struct advance_capped
   operator()(const flat_set& val)
   const
   {
-    flat_set_builder builder;
+    auto builder = flat_set_builder{};
     builder.reserve(val.size());
     for (auto cit = val.cbegin(); cit != val.lower_bound(upper_clock); ++cit)
     {

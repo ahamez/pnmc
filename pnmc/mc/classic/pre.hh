@@ -27,7 +27,7 @@ struct pre
   operator()(const flat_set& val)
   const
   {
-    flat_set_builder builder;
+    auto builder = flat_set_builder{};
     builder.reserve(val.size());
     // Start from first entry in val that is greater or equal than valuation.
     std::transform( val.lower_bound(valuation), val.cend(), std::inserter(builder, builder.end())
