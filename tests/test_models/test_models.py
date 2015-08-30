@@ -131,7 +131,7 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument('pnmc')
   parser.add_argument('outputdir')
-  parser.add_argument('--workers', action='store', default=4)
+  parser.add_argument('--workers', action='store', default=2)
   conf, others = parser.parse_known_args()
   conf.pnmc = os.path.abspath(conf.pnmc)
   conf.outputdir = os.path.abspath(conf.outputdir)
