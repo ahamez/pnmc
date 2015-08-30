@@ -34,7 +34,7 @@ def worker(conf, params):
     flat_args = "__"
 
   outputdir = os.path.join(conf.outputdir, os.path.basename(model_dir), model, flat_args)
-  # Create output directory for logs, if needed
+  # Create output directory for this model's logs, if needed
   os.makedirs(outputdir, exist_ok=True)
 
   outfile_path = os.path.join(outputdir, "out.txt")
@@ -73,6 +73,9 @@ def main(conf):
     if 'conf.json' in files:
       with open(os.path.join(dirname, 'conf.json'), 'r') as json_file:
         models_conf[dirname] = json.load(json_file)
+
+  # Create output directory for logs, if needed
+  os.makedirs(conf.outputdir, exist_ok=True)
 
   # Launch pnmc
   with concurrent.futures.ThreadPoolExecutor(max_workers=conf.workers) as executor\
