@@ -1,5 +1,4 @@
-set(Python_ADDITIONAL_VERSIONS 3)
-find_package(PythonInterp)
+find_package(PythonInterp 3.3)
 if (PYTHONINTERP_FOUND)
   message("-- Python interpreter: ${PYTHON_EXECUTABLE}")
   add_test(NAME test_models
