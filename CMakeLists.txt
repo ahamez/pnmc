@@ -12,10 +12,13 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 option (LIBSDD_PATH "Path to libsdd")
 option (PACKED "Pack structs in memory (experimental)" OFF)
+option (STATIC_BOOST "Force usage of static Boost libraries OFF")
 
 #--------------------------------------------------------------------------------------------------#
 
-set(Boost_USE_STATIC_LIBS ON)
+if (STATIC_BOOST)
+  set(Boost_USE_STATIC_LIBS ON)
+endif ()
 find_package(Boost 1.58.0 REQUIRED COMPONENTS program_options coroutine context system thread filesystem)
 
 if (NOT Boost_FOUND)
