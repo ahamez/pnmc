@@ -10,8 +10,8 @@ namespace pnmc { namespace parsers {
 
 /*------------------------------------------------------------------------------------------------*/
 
-parse_error::parse_error(const std::string& message)
-  : message_(message)
+parse_error::parse_error(std::string  message)
+  : message_(std::move(message))
 {}
 
 parse_error::parse_error()
@@ -33,8 +33,8 @@ const noexcept
 
 /*------------------------------------------------------------------------------------------------*/
 
-unsupported_error::unsupported_error(const std::string& message)
-  : message_(message)
+unsupported_error::unsupported_error(std::string  message)
+  : message_(std::move(message))
 {}
 
 unsupported_error::unsupported_error()

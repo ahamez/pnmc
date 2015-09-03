@@ -37,7 +37,7 @@ struct place
   arcs_type post;
 
   /// @brief Constructor.
-  place(std::size_t, const std::string&, valuation_type);
+  place(std::size_t, std::string , valuation_type);
 
   /// @brief Tell if this place is connected to one or more transitions.
   bool connected() const noexcept;

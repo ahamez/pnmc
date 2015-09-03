@@ -24,8 +24,8 @@ struct place_values
   std::string place;
   std::vector<pn::valuation_type> values;
 
-  place_values(const std::string& p, std::vector<pn::valuation_type>&& v)
-    : place{p}, values{std::move(v)}
+  place_values(std::string  p, std::vector<pn::valuation_type>&& v)
+    : place{std::move(p)}, values{std::move(v)}
   {}
 };
 

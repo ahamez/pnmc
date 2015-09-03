@@ -12,8 +12,8 @@ namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
-place::place(std::size_t id, const std::string& n, valuation_type m)
-  : uid{id}, name{n}, marking{m}, pre{}, post{}
+place::place(std::size_t id, std::string  n, valuation_type m)
+  : uid{id}, name{std::move(n)}, marking{m}, pre{}, post{}
 {}
 
 /*------------------------------------------------------------------------------------------------*/

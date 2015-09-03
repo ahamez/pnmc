@@ -41,7 +41,7 @@ struct transition
   clock_type high;
 
   /// @brief Constructor.
-  transition(std::size_t, const std::string&);
+  transition(std::size_t, std::string );
 
   /// @brief Tell if the transition has a time interval.
   bool timed() const;

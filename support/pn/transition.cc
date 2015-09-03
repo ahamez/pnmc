@@ -13,8 +13,8 @@ namespace pnmc { namespace pn {
 
 /*------------------------------------------------------------------------------------------------*/
 
-transition::transition(std::size_t id, const std::string& n)
-  : uid(id), name(n), pre(), post(), low(0), high(infinity)
+transition::transition(std::size_t id, std::string  n)
+  : uid(id), name(std::move(n)), pre(), post(), low(0), high(infinity)
 {}
 
 /*------------------------------------------------------------------------------------------------*/

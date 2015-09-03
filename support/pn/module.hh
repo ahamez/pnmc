@@ -39,8 +39,8 @@ private:
 
 public:
 
-  module_node(const std::string& id)
-    : id_{id}, all_{}, places_{}, nodes_{}
+  module_node(std::string  id)
+    : id_{std::move(id)}, all_{}, places_{}, nodes_{}
   {}
 
   const std::string&  id()     const noexcept {return id_;}

@@ -18,8 +18,8 @@ struct worker
 {
   conf::configuration conf;
 
-  worker(const conf::configuration& c)
-    : conf(c)
+  worker(conf::configuration  c)
+    : conf(std::move(c))
   {}
 
   void

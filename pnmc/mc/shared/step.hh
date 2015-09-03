@@ -7,6 +7,7 @@
 #pragma once
 
 #include <iosfwd>
+#include <utility>
 
 #include "support/util/timer.hh"
 
@@ -21,8 +22,8 @@ struct step
   std::chrono::duration<double>* stat;
   std::ostream& os;
 
-  step(const std::string& n, std::chrono::duration<double>* s, std::ostream& o)
-    : timer{}, name{n}, stat{s}, os{o}
+  step(std::string  n, std::chrono::duration<double>* s, std::ostream& o)
+    : timer{}, name{std::move(n)}, stat{s}, os{o}
   {
     os << name << std::setw(static_cast<int>(20 - name.size())) << ": " << std::flush;
   }
