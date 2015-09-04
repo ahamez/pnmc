@@ -15,3 +15,6 @@ RUN curl -L http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_
 && ./bootstrap.sh --with-libraries=program_options,coroutine,context,system,thread,filesystem\
 && ./b2 -j 4 install\
 && cd /tmp && rm -rf boost_1_59_0
+
+RUN apt-get install -y\
+      ninja-build
