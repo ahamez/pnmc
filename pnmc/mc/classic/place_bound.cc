@@ -25,6 +25,7 @@ struct bound_visitor
     : visited(), bounds(b)
   {}
 
+  [[noreturn]]
   void
   operator()(const sdd::zero_terminal<sdd_conf>&, const order&)
   const noexcept
