@@ -18,10 +18,6 @@ parse_error::parse_error()
   : parse_error("No message.")
 {}
 
-parse_error::~parse_error()
-noexcept
-{}
-
 /*------------------------------------------------------------------------------------------------*/
 
 const char*
@@ -39,10 +35,6 @@ unsupported_error::unsupported_error(std::string  message)
 
 unsupported_error::unsupported_error()
   : unsupported_error("No message.")
-{}
-
-unsupported_error::~unsupported_error()
-noexcept
 {}
 
 /*------------------------------------------------------------------------------------------------*/

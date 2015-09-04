@@ -25,8 +25,6 @@ public:
   parse_error(std::string  message);
   parse_error();
 
-  ~parse_error() noexcept;
-
   const char* what() const noexcept override;
 };
 
@@ -43,8 +41,6 @@ public:
 
   unsupported_error(std::string  message);
   unsupported_error();
-
-  ~unsupported_error() noexcept;
 
   const char* what() const noexcept override;
 };
