@@ -56,9 +56,7 @@ endif ()
 
 find_package (Threads)
 
-add_definitions("-Wall")
-add_definitions("-Wextra")
-add_definitions("-std=c++1y")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++1y ${CMAKE_CXX_FLAGS}")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   if (CMAKE_BUILD_TYPE STREQUAL "Release")
