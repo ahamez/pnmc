@@ -16,6 +16,9 @@
         "reset.net": {
             "states": 2
         },
+        "rpr555.net": {
+            "states": 966
+        },
         "test.net": {
             "states": 6
         }
