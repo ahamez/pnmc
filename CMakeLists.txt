@@ -37,7 +37,7 @@ endif ()
 #--------------------------------------------------------------------------------------------------#
 
 include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++1y" COMPILER_SUPPORTS_CXX14)
+check_cxx_compiler_flag("-std=c++1y" COMPILER_SUPPORTS_CXX14)
 if(NOT COMPILER_SUPPORTS_CXX14)
   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support.")
 endif ()
