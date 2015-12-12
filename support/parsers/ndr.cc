@@ -202,8 +202,7 @@ accept_anchor(parse_cxt& cxt)
 {
   static const std::string anchors[] = {"n", "nw", "w", "sw", "s", "se", "e", "ne", "c"};
   return accept(cxt, tk::name)
-       ? std::any_of(begin(anchors), end(anchors), [&](const auto& a){return a == cxt.val();})
-       : false;
+         and std::any_of(begin(anchors), end(anchors), [&](const auto& a){return a == cxt.val();});
 }
 
 /*------------------------------------------------------------------------------------------------*/

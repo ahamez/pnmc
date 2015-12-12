@@ -23,7 +23,6 @@ namespace /* anonymous */{
 /// @internal
 struct count_tokens_visitor
 {
-  /// @brief Required by mem::variant visitor mechanism.
   using result_type = std::pair<unsigned long, unsigned long>;
 
   /// @brief A cache is necessary to to know if a node has already been encountered.

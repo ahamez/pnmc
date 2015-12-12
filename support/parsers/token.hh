@@ -54,7 +54,7 @@ bool
 accept(Cxt& cxt, Ty ty)
 noexcept
 {
-  return cxt.curr->ty == ty ? cxt.advance(), true : false;
+  return cxt.curr->ty == ty and (cxt.advance(), true);
 }
 
 /*------------------------------------------------------------------------------------------------*/
