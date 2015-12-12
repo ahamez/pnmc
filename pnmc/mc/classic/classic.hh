@@ -13,12 +13,12 @@ namespace pnmc { namespace mc { namespace classic {
 
 /*------------------------------------------------------------------------------------------------*/
 
-struct worker
+struct classic
   : public mc_impl
 {
   conf::configuration conf;
 
-  worker(conf::configuration  c)
+  classic(conf::configuration  c)
     : conf(std::move(c))
   {}
 

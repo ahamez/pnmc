@@ -14,7 +14,7 @@
 		2B354EED1A0B7A3D00F23302 /* tina.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B354EEB1A0B7A3D00F23302 /* tina.cc */; };
 		2B51468A18D3A60100E4A467 /* make_order.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B51467E18D3A60100E4A467 /* make_order.cc */; };
 		2B51469218D3A65C00E4A467 /* mc.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B51469018D3A65C00E4A467 /* mc.cc */; };
-		2B51469518D3A67700E4A467 /* worker.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B51469318D3A67700E4A467 /* worker.cc */; };
+		2B51469518D3A67700E4A467 /* classic.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B51469318D3A67700E4A467 /* classic.cc */; };
 		2B65CB651A28B40D00ECA123 /* reachability_ast.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B65CB631A28B40D00ECA123 /* reachability_ast.cc */; };
 		2B65CB681A28E93400ECA123 /* reachability_eval.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B65CB661A28E93400ECA123 /* reachability_eval.cc */; };
 		2B67F7A41A1906DD00433ACE /* net.cc in Sources */ = {isa = PBXBuildFile; fileRef = 2B67F7871A1906DC00433ACE /* net.cc */; };
@@ -84,8 +84,8 @@
 		2B51468E18D3A63500E4A467 /* mc_impl.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mc_impl.hh; sourceTree = "<group>"; };
 		2B51469018D3A65C00E4A467 /* mc.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mc.cc; sourceTree = "<group>"; };
 		2B51469118D3A65C00E4A467 /* mc.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mc.hh; sourceTree = "<group>"; };
-		2B51469318D3A67700E4A467 /* worker.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = worker.cc; sourceTree = "<group>"; };
-		2B51469418D3A67700E4A467 /* worker.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = worker.hh; sourceTree = "<group>"; };
+		2B51469318D3A67700E4A467 /* classic.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = classic.cc; sourceTree = "<group>"; };
+		2B51469418D3A67700E4A467 /* classic.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = classic.hh; sourceTree = "<group>"; };
 		2B55C3F31A13B492002A8815 /* dead_states.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dead_states.cc; sourceTree = "<group>"; };
 		2B55C3F41A13B492002A8815 /* dead_states.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = dead_states.hh; sourceTree = "<group>"; };
 		2B65CB631A28B40D00ECA123 /* reachability_ast.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = reachability_ast.cc; sourceTree = "<group>"; };
@@ -241,6 +241,8 @@
 				2B6F1B01197EABF00018E64E /* advance.hh */,
 				2B3B4731197EAEC9004770BB /* advance_capped.hh */,
 				2B51467718D3A60100E4A467 /* bounded_post.hh */,
+				2B51469418D3A67700E4A467 /* classic.hh */,
+				2B51469318D3A67700E4A467 /* classic.cc */,
 				2BF0E75B18F9B4FF005FAA0A /* count_tokens.hh */,
 				2BF0E75A18F9B4FF005FAA0A /* count_tokens.cc */,
 				2B55C3F41A13B492002A8815 /* dead_states.hh */,
@@ -270,8 +272,6 @@
 				2B7B1D4A1A0AB9B000EF3A31 /* set.hh */,
 				2B7C845A1A0D17450072D018 /* threads.hh */,
 				2B7C84591A0D17450072D018 /* threads.cc */,
-				2B51469418D3A67700E4A467 /* worker.hh */,
-				2B51469318D3A67700E4A467 /* worker.cc */,
 			);
 			path = classic;
 			sourceTree = "<group>";
@@ -533,7 +533,7 @@
 				2B51468A18D3A60100E4A467 /* make_order.cc in Sources */,
 				2B51469218D3A65C00E4A467 /* mc.cc in Sources */,
 				2B67F7A41A1906DD00433ACE /* net.cc in Sources */,
-				2B51469518D3A67700E4A467 /* worker.cc in Sources */,
+				2B51469518D3A67700E4A467 /* classic.cc in Sources */,
 				2BE8F4991A24D85400FE4214 /* reachability.cc in Sources */,
 				2B7C845B1A0D17450072D018 /* threads.cc in Sources */,
 			);
@@ -847,6 +847,7 @@
 				2BB40F871C1C157A00360381 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

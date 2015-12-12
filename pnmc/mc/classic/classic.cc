@@ -18,7 +18,7 @@
 #include "mc/classic/reachability.hh"
 #include "mc/classic/sdd.hh"
 #include "mc/classic/threads.hh"
-#include "mc/classic/worker.hh"
+#include "classic.hh"
 #include "mc/shared/exceptions.hh"
 #include "mc/shared/export.hh"
 #include "mc/shared/results.hh"
@@ -65,7 +65,7 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 /*------------------------------------------------------------------------------------------------*/
 
 void
-worker::operator()(const pn::net& net, const properties::formulae& formulae)
+classic::operator()(const pn::net& net, const properties::formulae& formulae)
 {
   if (not formulae.fireable_transitions.empty())
   {

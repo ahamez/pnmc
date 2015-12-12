@@ -4,16 +4,16 @@
 ///            Copyright (c) 2013-2015 Alexandre Hamez.
 /// @author Alexandre Hamez
 
+#include "mc/classic/classic.hh"
 #include "mc/mc.hh"
 #include "mc/mc_impl.hh"
-#include "mc/classic/worker.hh"
 
 namespace pnmc { namespace mc {
 
 /*------------------------------------------------------------------------------------------------*/
 
 mc::mc(const conf::configuration& conf)
-  : impl_(std::shared_ptr<mc_impl>(new classic::worker{conf}))
+  : impl_(std::shared_ptr<mc_impl>(new classic::classic{conf}))
 {}
 
 /*------------------------------------------------------------------------------------------------*/
