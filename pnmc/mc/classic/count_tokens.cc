@@ -25,7 +25,7 @@ struct count_tokens_visitor
 {
   using result_type = std::pair<unsigned long, unsigned long>;
 
-  /// @brief A cache is necessary to to know if a node has already been encountered.
+  /// @brief A cache is necessary to know if a node has already been encountered.
   ///
   /// We use the addresses of nodes as key. It's legit because nodes are unified and immutable.
   mutable std::unordered_map<const char*, result_type> cache_;
