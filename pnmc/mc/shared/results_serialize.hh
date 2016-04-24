@@ -93,7 +93,8 @@ save(Archive& archive, const results<C>& r)
 {
   if (r.states)
   {
-    archive(cereal::make_nvp("states", r.states->size().template convert_to<long double>()));
+    archive(cereal::make_nvp("states-readable", r.states->size().template convert_to<long double>()));
+    archive(cereal::make_nvp("states", r.states->size().str()));
   }
   if (r.max_token_markings)
   {
