@@ -48,10 +48,10 @@ struct configuration
   /// @brief Maximum number of identifiers per hierarchy.
   unsigned int order_id_per_hierarchy;
 
-  /// @bref Display, if any, dead transitions.
+  /// @bref Compute and display, if any, dead transitions.
   bool compute_dead_transitions;
 
-  /// @brief Display, if any, dead states.
+  /// @brief Compute and display, if any, dead states.
   bool compute_dead_states;
 
   /// @brief Compute the shortest trace to the closest dead state.

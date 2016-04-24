@@ -164,7 +164,7 @@ struct visitor
           continue; // to next arc
         }
         const auto rec = visit( *this, arc.successor(), std::next(state_it)
-                               , std::next(functions_it));
+                              , std::next(functions_it));
         if (rec != zero())
         {
           return {n.variable(), arc.valuation(), rec}; // Hit!
