@@ -1,27 +1,34 @@
 {
-    "arguments": [
-        "",
-        "--order-force",
-        "--dead-states",
-        "--order-force --dead-states",
-        "--order-lexical"
-    ],
-    "models": {
-        "CSRepetitions-PT-02.net": {
-            "states": 7424
-        },
-        "inhibitor.net": {
-            "states": 12
-        },
-        "reset.net": {
-            "states": 2
-        },
-        "rpr555.net": {
-            "states": 966
-        },
-        "test.net": {
-            "states": 6
-        }
+  "arguments": [
+    "",
+    "--order-force",
+    "--dead-states",
+    "--order-force --dead-states",
+    "--order-lexical",
+    "--dead-transitions"
+  ],
+  "models": {
+    "CSRepetitions-PT-02.net": {
+      "states": 7424
     },
-    "type": "net"
+    "inhibitor.net": {
+      "states": 12
+    },
+    "reset.net": {
+      "states": 2
+    },
+    "rpr555.net": {
+      "states": 966
+    },
+    "test.net": {
+      "states": 6
+    },
+    "p5.net": {
+      "states": 2164
+    },
+    "p6.net": {
+      "states": 10054
+    }
+  },
+  "type": "net"
 }
