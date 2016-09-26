@@ -397,7 +397,8 @@ std::string
 preprocess(std::istream& in)
 {
   std::stringstream ss;
-  bool comment = false;
+  auto comment = false;
+  auto new_line = true;
   while (true)
   {
     const char c = in.get();
@@ -410,6 +411,7 @@ preprocess(std::istream& in)
       if (c == '!')
       {
         comment = false; // a comment is terminated by a line
+        new_line = false;
         ss << ' '; // remove pragma ! indicator, the parser will directly read the associated token
       }
       else if (c == '\n' or c == '\r')
@@ -419,6 +421,7 @@ preprocess(std::istream& in)
         if (c == '\r' and in.peek() == '\n')
         {
           ss << static_cast<char>(in.get());
+          new_line = true;
         }
       }
       // else Comments are not copied
@@ -427,15 +430,22 @@ preprocess(std::istream& in)
     {
       comment = true;
       ss << ' ';
+      new_line = false;
     }
-    else if (not comment and c == 'n' and in.peek() == 't')
+    else if (new_line and not comment and c == 'n' and in.peek() == 't')
     // process notes as comments
     {
       comment = true;
     }
+    else if (c == '\n')
+    {
+      ss << '\n';
+      new_line = true;
+    }
     else if (not comment)
     {
       ss << c;
+      new_line = false;
     }
   }
   return ss.str();
@@ -486,6 +496,7 @@ net(std::istream& in)
   auto net_ptr = std::make_shared<pn::net>();
 
   const auto text = preprocess(in);
+  std::cout << text << '\n';
   const auto tks = tokens(begin(text), end(text));
   auto cxt = parse_cxt{tks.cbegin(), tks.cend()};
 
