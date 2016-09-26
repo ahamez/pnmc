@@ -13,7 +13,14 @@ namespace pnmc { namespace pn {
 /*------------------------------------------------------------------------------------------------*/
 
 net::net()
-  : name{}, modules{}, root_modules{}, m_places{}, m_transitions{}
+  : name{}
+  , modules{}
+  , root_modules{}
+  , format{}
+  , m_places{}
+  , m_transitions{}
+  , m_current_place_uid{0}
+  , m_current_transition_uid{0}
 {}
 
 /*------------------------------------------------------------------------------------------------*/
