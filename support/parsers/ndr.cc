@@ -10,6 +10,7 @@
 #include <iostream>
 #include <limits>
 #include <regex>
+#include <sstream>
 #include <type_traits>
 
 #include <boost/optional.hpp>
@@ -425,6 +426,38 @@ net(parse_cxt& cxt, pn::net& n)
 
 /*------------------------------------------------------------------------------------------------*/
 
+/// @brief Remove commented lines and notes.
+std::string
+preprocess(std::istream& is)
+{
+  std::stringstream ss;
+  auto new_line = true;
+
+  while (is.peek() != std::char_traits<char>::eof())
+  {
+    const auto c = is.get();
+    if (new_line and (c == '#' or c == 'n'))
+    // Ignore comments and lines beginning with 'n' (notes).
+    {
+      is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      new_line = true;
+    }
+    else if (c == '\n')
+    {
+      ss << '\n';
+      new_line = true;
+    }
+    else
+    {
+      ss << static_cast<char>(c);
+      new_line = false;
+    }
+  }
+  return ss.str();
+}
+
+/*------------------------------------------------------------------------------------------------*/
+
 } // namespace anonymous
 
 /*------------------------------------------------------------------------------------------------*/
@@ -432,12 +465,12 @@ net(parse_cxt& cxt, pn::net& n)
 std::shared_ptr<pn::net>
 ndr(std::istream& in)
 {
-  const auto text = std::string{ std::istreambuf_iterator<char>{in}
-                               , std::istreambuf_iterator<char>{}};
   auto net_ptr = std::make_shared<pn::net>();
 
+  const auto text = preprocess(in);
   const auto tks = tokens(begin(text), end(text));
   auto cxt = parse_cxt{tks.cbegin(), tks.cend()};
+
   auto edge_seen = false;
 
   while (not cxt.eof())

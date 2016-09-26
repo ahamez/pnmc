@@ -410,7 +410,7 @@ preprocess(std::istream& in)
       if (c == '!')
       {
         comment = false; // a comment is terminated by a line
-        ss << ' '; // remove pragma '!' indicator, the parser will directly read the associated token
+        ss << ' '; // remove pragma ! indicator, the parser will directly read the associated token
       }
       else if (c == '\n' or c == '\r')
       {
@@ -423,8 +423,20 @@ preprocess(std::istream& in)
       }
       // else Comments are not copied
     }
-    else if (not comment and c == '#') {comment = true;  ss << ' ';}
-    else if (not comment)              {ss << c;}
+    else if (not comment and c == '#')
+    {
+      comment = true;
+      ss << ' ';
+    }
+    else if (not comment and c == 'n' and in.peek() == 't')
+    // process notes as comments
+    {
+      comment = true;
+    }
+    else if (not comment)
+    {
+      ss << c;
+    }
   }
   return ss.str();
 }
