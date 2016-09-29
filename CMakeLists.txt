@@ -73,8 +73,8 @@ endif()
 #--------------------------------------------------------------------------------------------------#
 
 include_directories(SYSTEM "${Boost_INCLUDE_DIRS}")
-include_directories(SYSTEM  "${PROJECT_SOURCE_DIR}/external/rapidxml")
-include_directories(SYSTEM  "${PROJECT_SOURCE_DIR}/external/cereal/include")
+include_directories(SYSTEM "${PROJECT_SOURCE_DIR}/external/rapidxml")
+include_directories(SYSTEM "${PROJECT_SOURCE_DIR}/external/cereal/include")
 include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${LIBSDD_INCLUDE_DIR}")
 

@@ -149,6 +149,8 @@
 		2B7C84651A128A810072D018 /* path_to.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = path_to.hh; sourceTree = "<group>"; };
 		2B92B4E71A27375600B2AF91 /* place_bound.hh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = place_bound.hh; sourceTree = "<group>"; };
 		2B92B4E81A27376900B2AF91 /* place_bound.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = place_bound.cc; sourceTree = "<group>"; };
+		2BA66C941D9D46E300BC401C /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		2BA66C951D9D46EF00BC401C /* INSTALL */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = INSTALL; sourceTree = "<group>"; };
 		2BB40F851C1C157A00360381 /* libsupport.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libsupport.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		2BC692701983DF1900AD16E6 /* enabled_inhibitor.hh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = enabled_inhibitor.hh; sourceTree = "<group>"; };
 		2BC692711983E0C500AD16E6 /* filter_lt.hh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = filter_lt.hh; sourceTree = "<group>"; };
@@ -203,6 +205,8 @@
 		2B10220A17FAC3E9006B0EEC = {
 			isa = PBXGroup;
 			children = (
+				2BA66C951D9D46EF00BC401C /* INSTALL */,
+				2BA66C941D9D46E300BC401C /* README */,
 				2BEF8DD21828E51A00AFEC85 /* CMakeLists.txt */,
 				2B1635C918B521A400608D68 /* bin */,
 				2B71E34517FAC42400F8298C /* pnmc */,

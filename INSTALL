@@ -18,7 +18,7 @@ PNMC INSTALLATION
 
   * Quick start
     $ mkdir build
-    $ cmake /path/to/pnmc -DLIBSDD=/path/to/libsdd
+    $ cmake /path/to/pnmc -DLIBSDD_PATH=/path/to/libsdd
     $ make
     $ make install
 
