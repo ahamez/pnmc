@@ -496,7 +496,6 @@ net(std::istream& in)
   auto net_ptr = std::make_shared<pn::net>();
 
   const auto text = preprocess(in);
-  std::cout << text << '\n';
   const auto tks = tokens(begin(text), end(text));
   auto cxt = parse_cxt{tks.cbegin(), tks.cend()};
 
