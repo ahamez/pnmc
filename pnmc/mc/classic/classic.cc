@@ -75,11 +75,6 @@ classic::operator()(const pn::net& net, const properties::formulae& formulae)
   {
     conf.compute_dead_states = true;
   }
-  if (conf.compute_dead_states and net.timed())
-  {
-    std::cerr << "Computation of dead states for Time Petri Nets is not supported yet.\n";
-    conf.compute_dead_states = false;
-  }
   if (conf.trace and net.timed())
   {
     std::cerr << "Computation of a trace for Time Petri Nets is not supported yet.\n";
