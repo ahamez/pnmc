@@ -60,6 +60,26 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
                       }}};
 }
 
+/*------------------------------------------------------------------------------------------------*/
+
+void
+export_results(const conf::configuration& conf, homomorphism h, homomorphism h_opt,
+               const results& res, const statistics& stats)
+{
+  std::cout << "\n\n-- Results\n";
+  std::cout << res;
+
+  using conf::filename;
+  using dot_sdd = shared::dot_sdd<sdd_conf>;
+
+  shared::export_dot(conf, filename::dot_h, h, filename::dot_h_opt, h_opt);
+  shared::export_dot(conf, filename::dot_m0, dot_sdd{*res.m0, *res.order});
+  shared::export_dot(conf, filename::dot_final, dot_sdd{*res.states, *res.order});
+  shared::export_json(conf, filename::json_stats, stats);
+  shared::export_json(conf, filename::json_results, res);
+  shared::export_json(conf, filename::json_h, h, filename::json_h_opt, h_opt);
+}
+
 } // namespace unnamed
 
 /*------------------------------------------------------------------------------------------------*/
@@ -67,6 +87,32 @@ initial_state(const sdd::order<sdd_conf>& order, const pn::net& net)
 void
 classic::operator()(const pn::net& net, const properties::formulae& formulae)
 {
+  // Configure libsdd.
+  sdd_conf sconf;
+  sconf.sdd_unique_table_size = conf.ut_sizes.at("sdd");
+  sconf.sdd_difference_cache_size = conf.cache_sizes.at("diff");
+  sconf.sdd_intersection_cache_size = conf.cache_sizes.at("inter");
+  sconf.sdd_intersection_cache_size = conf.cache_sizes.at("sum");
+  sconf.hom_unique_table_size = conf.ut_sizes.at("hom");
+  sconf.hom_cache_size = conf.cache_sizes.at("hom");
+
+  // This pointer WILL NOT be deleted to avoid a too long shutdown time due to big hash table
+  // cleanups.
+  auto manager_ptr = new sdd::manager<sdd_conf>{sdd::init(sconf)};
+  auto& manager = *manager_ptr;
+
+  if (net.places().empty() and net.transitions().empty())
+  {
+    auto res = results{};
+    auto stats = statistics{};
+    res.m0 = zero();
+    res.states = zero();
+    res.order = make_order(conf, stats, net);
+    std::cout << "Empty model.\n";
+    export_results(conf, id<sdd_conf>(), id<sdd_conf>(), res, stats);
+    return;
+  }
+
   if (not formulae.fireable_transitions.empty())
   {
     conf.compute_dead_transitions = true;
@@ -82,23 +128,8 @@ classic::operator()(const pn::net& net, const properties::formulae& formulae)
   }
 
   using conf::filename;
-  using dot_sdd = shared::dot_sdd<sdd_conf>;
 
   auto total_timer = util::timer{};
-
-  // Configure libsdd.
-  sdd_conf sconf;
-  sconf.sdd_unique_table_size = conf.ut_sizes.at("sdd");
-  sconf.sdd_difference_cache_size = conf.cache_sizes.at("diff");
-  sconf.sdd_intersection_cache_size = conf.cache_sizes.at("inter");
-  sconf.sdd_intersection_cache_size = conf.cache_sizes.at("sum");
-  sconf.hom_unique_table_size = conf.ut_sizes.at("hom");
-  sconf.hom_cache_size = conf.cache_sizes.at("hom");
-
-  // This pointer WILL NOT be deleted to avoid a too long shutdown time due to big hash table
-  // cleanups.
-  auto manager_ptr = new sdd::manager<sdd_conf>{sdd::init(sconf)};
-  auto& manager = *manager_ptr;
 
   auto stats = statistics{};
   stats.max_time = conf.max_time;
@@ -222,15 +253,8 @@ classic::operator()(const pn::net& net, const properties::formulae& formulae)
 
   stats.total_duration = total_timer.duration();
   std::cout << "total" << std::setw(15) << ": " << stats.total_duration.count() << "s";
-  std::cout << "\n\n-- Results\n";
-  std::cout << res;
 
-  shared::export_dot(conf, filename::dot_h, h, filename::dot_h_opt, h_opt);
-  shared::export_dot(conf, filename::dot_m0, dot_sdd{*res.m0, *res.order});
-  shared::export_dot(conf, filename::dot_final, dot_sdd{*res.states, *res.order});
-  shared::export_json(conf, filename::json_stats, stats);
-  shared::export_json(conf, filename::json_results, res);
-  shared::export_json(conf, filename::json_h, h, filename::json_h_opt, h_opt);
+  export_results(conf, h, h_opt, res, stats);
 }
 
 /*------------------------------------------------------------------------------------------------*/

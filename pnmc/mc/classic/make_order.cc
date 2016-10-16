@@ -78,6 +78,11 @@ make_hierarchical_order(const std::vector<pn::module>& modules)
 order
 make_order(const conf::configuration& conf, statistics& stats, const pn::net& net)
 {
+  if (net.places().empty() and net.transitions().empty())
+  {
+    return order{order_builder{}};
+  }
+
   for (const auto& place : net.places_by_insertion())
   {
     if (not place.connected())

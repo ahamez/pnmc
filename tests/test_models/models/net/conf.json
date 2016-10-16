@@ -28,6 +28,9 @@
     },
     "p6.net": {
       "states": 10054
+    },
+    "empty.net": {
+      "states": 0
     }
   },
   "type": "net"
