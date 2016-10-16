@@ -24,7 +24,20 @@ dead_states(const order& o, const pn::net& net, const SDD& state_space)
     // We are only interested in pre actions.
     for (const auto& arc : transition.pre)
     {
-      or_operands.insert(function(o, arc.first, filter_lt{arc.second.weight}));
+      switch (arc.kind)
+      {
+        case arc::type::normal:
+        case arc::type::read:
+          or_operands.insert(function(o, arc.first, filter_lt{arc.second.weight}));
+          break;
+
+        case arc::type::inhibitor:
+          or_operands.insert(function(o, arc.first, filter_ge{arc.second.weight}));
+          break;
+
+        default:
+          throw std::runtime_error{"Post arc type for pre arc"};
+      }
     }
 
     and_operands.insert(sum(o, or_operands.cbegin(), or_operands.cend()));

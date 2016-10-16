@@ -1,0 +1,4 @@
+tr t0 [0,w[ p0 p1?-1 -> p1 p0
+pl p0 (1)
+net dead
+

@@ -31,6 +31,9 @@
     },
     "empty.net": {
       "states": 0
+    },
+    "dead_inhibitor.net": {
+      "states": 2
     }
   },
   "type": "net"
