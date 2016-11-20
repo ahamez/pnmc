@@ -7,6 +7,7 @@
 #include <set>
 
 #include "mc/classic/dead_states.hh"
+#include "mc/classic/filter_ge.hh"
 #include "mc/classic/filter_lt.hh"
 
 namespace pnmc { namespace mc { namespace classic {
@@ -24,19 +25,26 @@ dead_states(const order& o, const pn::net& net, const SDD& state_space)
     // We are only interested in pre actions.
     for (const auto& arc : transition.pre)
     {
-      switch (arc.kind)
+      switch (arc.second.kind)
       {
-        case arc::type::normal:
-        case arc::type::read:
+        case pn::arc::type::normal:
+        case pn::arc::type::read:
           or_operands.insert(function(o, arc.first, filter_lt{arc.second.weight}));
           break;
 
-        case arc::type::inhibitor:
+        case pn::arc::type::reset:
+          // Does not impose a precondition on firing.
+          continue;
+
+        case pn::arc::type::inhibitor:
           or_operands.insert(function(o, arc.first, filter_ge{arc.second.weight}));
           break;
 
-        default:
-          throw std::runtime_error{"Post arc type for pre arc"};
+        case pn::arc::type::stopwatch:
+          throw std::runtime_error{"Unsupported stopwatch pre arc for dead states"};
+
+        case pn::arc::type::stopwatch_inhibitor:
+          throw std::runtime_error{"Unsupported stopwatch inhibitor pre arc for dead states"};
       }
     }
 
