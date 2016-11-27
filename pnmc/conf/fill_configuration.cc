@@ -105,12 +105,14 @@ static const auto dot_export_values_str = []
 
 /*------------------------------------------------------------------------------------------------*/
 
-// DOT export
+// JSON export
 const auto json_str = "json";
 static const auto json_export_values_map = std::map<std::string, mc::shared::json_export>
   { {"hom"     , mc::shared::json_export::hom}
+  , {"order"   , mc::shared::json_export::order}
+  , {"results" , mc::shared::json_export::results}
   , {"stats"   , mc::shared::json_export::stats}
-  , {"order"   , mc::shared::json_export::order}};
+  };
 static const auto json_export_values_str = []
 {
   return "[" + boost::algorithm::join(json_export_values_map | map_keys, "|") + "]+";

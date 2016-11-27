@@ -41,7 +41,7 @@ def worker(conf, params):
   errfile_path = os.path.join(outputdir, "err.txt")
   json_path = os.path.join(outputdir, "results.json")
 
-  cli = [conf.pnmc, '--format=' + model_type, '--output-dir=' + outputdir]
+  cli = [conf.pnmc, '--format=' + model_type, '--output-dir=' + outputdir, '--json=results']
   if args:
     cli.extend(args)
   cli.append(model_path)

@@ -187,12 +187,15 @@ struct json_exporter<results<C>>
   operator()(const results<C>& r)
   const
   {
-    exporter_helper( conf, name
-                   , [&](auto& file)
-                        {
-                          cereal::JSONOutputArchive archive(file);
-                          archive(cereal::make_nvp("pnmc", r));
-                        });
+    if (conf.json_conf.count(json_export::results))
+    {
+      exporter_helper( conf, name
+                     , [&](auto& file)
+                          {
+                            cereal::JSONOutputArchive archive(file);
+                            archive(cereal::make_nvp("pnmc", r));
+                          });
+    }
   }
 };
 
