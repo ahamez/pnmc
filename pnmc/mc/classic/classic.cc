@@ -142,8 +142,6 @@ classic::operator()(const pn::net& net, const properties::formulae& formulae)
   // Set to true by an asynchrous thread when the time limit is reached.
   auto stop_flag = false;
 
-  std::cout << "\n-- Steps\n";
-
   // Build the order.
   res.order = make_order(conf, stats, net);
   if (res.order->empty())
@@ -151,6 +149,11 @@ classic::operator()(const pn::net& net, const properties::formulae& formulae)
     throw std::runtime_error("Empty order");
   }
   shared::export_json(conf, filename::json_order, *res.order);
+
+  if (conf.order_only)
+  {
+    return;
+  }
 
   // Get the initial state.
   res.m0 = initial_state(*res.order, net);

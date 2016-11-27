@@ -32,6 +32,9 @@ struct configuration
   /// @brief Describe how to read the properties file.
   parsers::properties_configuration properties_input;
 
+  /// @brief Stop after order computation.
+  bool order_only;
+
   /// @brief Remove all hierarchy from order.
   bool order_flat;
 

@@ -14,7 +14,7 @@ enum class dot_export {sdd, hom, force};
 
 /*------------------------------------------------------------------------------------------------*/
 
-enum class json_export {hom, order, results, stats};
+enum class json_export {hom, order, order_cout, results, stats};
 
 /*------------------------------------------------------------------------------------------------*/
 

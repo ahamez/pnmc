@@ -48,6 +48,8 @@ const auto output_dir_str = "output-dir";
 const auto order_flat_str = "order-flat";
 const auto order_force_str = "order-force";
 const auto order_lexical_str = "order-lexical";
+const auto order_only_str = "order-only";
+const auto order_show_str = "order-show";
 const auto order_force_iterations_str = "order-force-iterations";
 const auto order_reverse_str = "order-reverse";
 const auto order_id_per_hier_str = "order-ids-per-hierarchy";
@@ -108,10 +110,11 @@ static const auto dot_export_values_str = []
 // JSON export
 const auto json_str = "json";
 static const auto json_export_values_map = std::map<std::string, mc::shared::json_export>
-  { {"hom"     , mc::shared::json_export::hom}
-  , {"order"   , mc::shared::json_export::order}
-  , {"results" , mc::shared::json_export::results}
-  , {"stats"   , mc::shared::json_export::stats}
+  { {"hom"        , mc::shared::json_export::hom}
+  , {"order"      , mc::shared::json_export::order}
+  , {"order-cout" , mc::shared::json_export::order_cout}
+  , {"results"    , mc::shared::json_export::results}
+  , {"stats"      , mc::shared::json_export::stats}
   };
 static const auto json_export_values_str = []
 {
@@ -174,6 +177,7 @@ fill_configuration(int argc, const char** argv)
     (order_flat_str    , "Don't use hierarchy informations")
     (order_force_str   , "Use FORCE ordering heuristic")
     (order_lexical_str , "Sort variables using a lexical order on the place names")
+    (order_only_str    , "Only compute an order")
   ;
 
   auto petri_options = po::options_description{"Petri net options"};
@@ -312,6 +316,7 @@ fill_configuration(int argc, const char** argv)
   conf.order_reverse = vm.count(order_reverse_str);
   conf.order_id_per_hierarchy = vm[order_id_per_hier_str].as<unsigned int>();
   conf.order_lexical = vm.count(order_lexical_str);
+  conf.order_only = vm.count(order_only_str);
 
   if (conf.order_ordering_force and conf.order_lexical)
   {

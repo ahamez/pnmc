@@ -153,6 +153,10 @@ struct json_exporter<sdd::order<C>>
     {
       exporter_helper(conf, name, [&](auto& file) {sdd::tools::dump_order(o, file);});
     }
+    if (conf.json_conf.count(json_export::order_cout))
+    {
+      sdd::tools::dump_order(o, std::cout);
+    }
   }
 };
 
