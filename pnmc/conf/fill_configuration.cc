@@ -49,7 +49,6 @@ const auto order_flat_str = "order-flat";
 const auto order_force_str = "order-force";
 const auto order_lexical_str = "order-lexical";
 const auto order_only_str = "order-only";
-const auto order_show_str = "order-show";
 const auto order_force_iterations_str = "order-force-iterations";
 const auto order_reverse_str = "order-reverse";
 const auto order_id_per_hier_str = "order-ids-per-hierarchy";
