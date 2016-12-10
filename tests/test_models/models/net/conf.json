@@ -34,6 +34,9 @@
     },
     "dead_inhibitor.net": {
       "states": 2
+    },
+    "sharp.net": {
+      "states": 2
     }
   },
   "type": "net"

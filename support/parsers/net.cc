@@ -426,7 +426,7 @@ preprocess(std::istream& in)
       }
       // else Comments are not copied
     }
-    else if (not comment and c == '#')
+    else if (new_line and not comment and c == '#' and in.peek())
     {
       comment = true;
       ss << ' ';
