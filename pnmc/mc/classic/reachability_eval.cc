@@ -66,7 +66,7 @@ struct integer_eval
 
   result_type
   operator()(const integer_tokens&)
-  const noexcept
+  const
   {
 //    return values[e.pos];
     throw std::runtime_error(__PRETTY_FUNCTION__);

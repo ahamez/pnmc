@@ -165,7 +165,7 @@ struct integer_ast_builder
 
   result_type
   operator()(const properties::tokens_count&)
-  const noexcept
+  const
   {
     throw std::runtime_error(__PRETTY_FUNCTION__);
   }
