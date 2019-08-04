@@ -37,7 +37,7 @@ endif ()
 #--------------------------------------------------------------------------------------------------#
 
 include(CheckCXXCompilerFlag)
-check_cxx_compiler_flag("-std=c++1y" COMPILER_SUPPORTS_CXX14)
+check_cxx_compiler_flag("-std=c++14" COMPILER_SUPPORTS_CXX14)
 if(NOT COMPILER_SUPPORTS_CXX14)
   message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support.")
 endif ()
@@ -56,7 +56,7 @@ endif ()
 
 find_package (Threads)
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++1y ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
 
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   if (CMAKE_BUILD_TYPE STREQUAL "Release")
