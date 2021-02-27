@@ -1,7 +1,7 @@
 # Presentation
 
 Pnmc is a symbolic model checker for Petri nets.
-The symbolic part is handled by the [libsdd](https://github.com/ahamez/libsdd) library which implements Hierarchical Set Decision Diagrams.
+The symbolic part is handled by the [libsdd](https://github.com/ahamez/libsdd) library which implements [Hierarchical Set Decision Diagrams](https://www.researchgate.net/publication/220703325_Hierarchical_Decision_Diagrams_to_Exploit_Model_Structure).
 It aims to be as efficient as possible, memory and CPU-wise. In this regard, it uses a very efficient technique called saturation
 to optimize the generation of state spaces.
 
