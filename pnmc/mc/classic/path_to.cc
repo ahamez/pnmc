@@ -288,7 +288,7 @@ shortest_path( const order& o, const SDD& initial, const SDD& targets, const pn:
     const auto next_states = *std::prev(rcit);
     const auto a_state = one_state_of(next_states);
     
-    for (const auto transition : transitions)
+    for (const auto & transition : transitions)
     {
       const auto res = visit( visitor{transition}
                             , *rcit            // current states to filter
