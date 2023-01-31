@@ -38,7 +38,7 @@ struct pre_clock
         builder.insert(builder.end(), *cit);
       }
     }
-    return std::move(builder);
+    return builder;
   }
 
   bool

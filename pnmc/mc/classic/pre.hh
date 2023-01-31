@@ -32,7 +32,7 @@ struct pre
     // Start from first entry in val that is greater or equal than valuation.
     std::transform( val.lower_bound(valuation), val.cend(), std::inserter(builder, builder.end())
                   , [this](unsigned int v){return v - valuation;});
-    return std::move(builder);
+    return builder;
   }
 
   bool

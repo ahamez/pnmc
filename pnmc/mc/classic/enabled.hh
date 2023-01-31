@@ -36,7 +36,7 @@ struct enabled
         builder.insert(builder.end(), v);
       }
     }
-    return std::move(builder);
+    return builder;
   }
 
   bool

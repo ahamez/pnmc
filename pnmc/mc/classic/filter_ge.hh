@@ -31,7 +31,7 @@ struct filter_ge
     builder.reserve(val.size());
     // Only keep values that are greater or equal than the requested valuation.
     std::copy(val.lower_bound(value), val.cend(), std::inserter(builder, builder.end()));
-    return std::move(builder);
+    return builder;
   }
 
   bool

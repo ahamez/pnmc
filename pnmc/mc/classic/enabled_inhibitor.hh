@@ -36,7 +36,7 @@ struct enabled_inhibitor
         builder.insert(builder.end(), v);
       }
     }
-    return std::move(builder);
+    return builder;
   }
 
   bool

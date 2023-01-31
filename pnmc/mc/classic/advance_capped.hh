@@ -41,7 +41,7 @@ struct advance_capped
     {
       builder.insert(builder.end(), pn::sharp);
     }
-    return std::move(builder);
+    return builder;
   }
 
   bool

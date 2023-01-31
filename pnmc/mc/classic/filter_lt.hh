@@ -31,7 +31,7 @@ struct filter_lt
     builder.reserve(val.size());
     // Only keep values that are less than the requested valuation.
     std::copy(val.cbegin(), val.lower_bound(value), std::inserter(builder, builder.end()));
-    return std::move(builder);
+    return builder;
   }
 
   bool
