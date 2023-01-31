@@ -9,6 +9,7 @@
 #include <functional> // reference_wrapper
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <boost/variant.hpp>
 
