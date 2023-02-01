@@ -102,6 +102,39 @@ unary(context& cxt, const rapidxml::xml_node<>* node)
   throw parse_error("boolean expression expected");
 }
 
+
+properties::formula
+ag(context& cxt, const rapidxml::xml_node<>* node)
+{
+  auto child = node->first_node();
+  if (child->name() != "globally"s) {
+	  throw parse_error("Child of all-paths should be globally");
+  }
+  properties::formula rec = formula(cxt, child->first_node());
+  if (properties::boolean_expression* ptr = boost::get<properties::boolean_expression>(&rec))
+  {
+    return properties::boolean_expression{properties::impossibility{properties::boolean_expression{properties::negation{std::move(*ptr)}}}};
+  }
+  throw parse_error("boolean expression expected as child of AG");
+}
+
+properties::formula
+ef(context& cxt, const rapidxml::xml_node<>* node)
+{
+  auto child = node->first_node();
+  if (child->name() != "finally"s) {
+	  throw parse_error("Child of exists-paths should be Finally");
+  }
+  properties::formula rec = formula(cxt, child->first_node());
+  if (properties::boolean_expression* ptr = boost::get<properties::boolean_expression>(&rec))
+  {
+    return properties::boolean_expression{properties::possibility{std::move(*ptr)}};
+  }
+  throw parse_error("boolean expression expected as child of EF");
+}
+
+
+
 /*------------------------------------------------------------------------------------------------*/
 
 template <typename Result, typename Expression>
@@ -226,7 +259,7 @@ place_bound(context& cxt, const rapidxml::xml_node<>* node)
 //    place_node = place_node->next_sibling();
 //  }
 //  auto vec = std::vector<std::string>{begin(places), end(places)};
-//  return properties::integer_expression{properties::place_bound{std::move(vec)}};
+//  return properties::integer_expression{properties::tokens_count{std::move(vec)}};
 //}
 
 /*------------------------------------------------------------------------------------------------*/
@@ -271,9 +304,8 @@ const std::unordered_map<std::string, fn_type> map =
   { {"invariant"             , unsupported}
   , {"impossibility"         , unary<properties::impossibility>}
   , {"possibility"           , unary<properties::possibility>}
-  , {"possibility"           , unary<properties::possibility>}
-  , {"all−paths"             , unsupported}
-  , {"exists−paths"          , unsupported}
+  , {"all-paths"             , ag}
+  , {"exists-path"           , ef}
   , {"globally"              , unsupported}
   , {"finally"               , unsupported}
   , {"next"                  , unsupported}
@@ -306,17 +338,17 @@ const std::unordered_map<std::string, fn_type> map =
   , {"integer-le"            , comparison<properties::integer_le>}
   , {"integer-gt"            , comparison<properties::integer_gt>}
   , {"integer-ge"            , comparison<properties::integer_ge>}
-  , {"integer−constant"      , integer_constant}
-  , {"integer−sum"           , nary< properties::integer_sum
+  , {"integer-constant"      , integer_constant}
+  , {"integer-sum"           , nary< properties::integer_sum
                                    , properties::integer_expression>}
-  , {"integer−product"       , nary< properties::integer_product
+  , {"integer-product"       , nary< properties::integer_product
                                    , properties::integer_expression>}
-  , {"integer−difference"    , binary< properties::integer_difference
+  , {"integer-difference"    , binary< properties::integer_difference
                                      , properties::integer_expression>}
-  , {"integer−division"      , binary< properties::integer_division
+  , {"integer-division"      , binary< properties::integer_division
                                      , properties::integer_expression>}
   , {"place-bound"           , place_bound}
-  , {"tokens-count"          , unsupported}
+  , {"tokens-count"          , unsupported /*tokens_count*/}
   };
 
 /*------------------------------------------------------------------------------------------------*/
@@ -355,7 +387,10 @@ top_formula(context& cxt, const rapidxml::xml_node<>* node)
 std::pair<std::string, properties::formula>
 property(context& cxt, const rapidxml::xml_node<>* node)
 {
-  tags(node);
+  const auto & n = node->first_node("formula")->first_node()->name();
+  if (n != "exists-path"s && n != "all-paths"s) {
+	  tags(node);
+  }
   return {id(node), top_formula(cxt, node)};
 }
 
@@ -385,16 +420,17 @@ mcc(std::istream& in)
   {
     throw parsers::parse_error(p.what());
   }
+  int nbprop = 0;
 
   if (const auto properties_node = doc.first_node("property-set"))
   {
     auto targets = std::set<std::string>{};
     auto cxt = context{ formulae.compute_deadlock, formulae.places_bounds
                       , formulae.fireable_transitions, targets};
-
     auto node = properties_node->first_node();
     while (node)
     {
+      nbprop++;
       try
       {
         auto p = property(cxt, node);
@@ -419,9 +455,9 @@ mcc(std::istream& in)
   }
   else
   {
-    throw parse_error("Unvalid properties file");
+    throw parse_error("Invalid properties file");
   }
-
+  std::cerr << "Parsed " << nbprop << " properties." << std::endl;
   return formulae;
 }
 
