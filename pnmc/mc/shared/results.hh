@@ -46,7 +46,9 @@ struct results
   {
     if (r.states)
     {
-      os << r.states->size().template convert_to<long double>() << " state(s)\n";
+//      os << r.states->size().template convert_to<long double>() << " state(s)\n";
+//    MCC now requires exact state count
+      os << r.states->size() << " state(s)\n";
     }
     if (r.max_token_markings)
     {
@@ -129,6 +131,7 @@ struct results
       for (const auto& id_status : *r.reachability)
       {
         os << "  " << id_status.first << " : " << std::boolalpha << id_status.second << '\n';
+        os << "FORMULA " << id_status.first << " " << (id_status.second?"TRUE":"FALSE") << " TECHNIQUES DECISION_DIAGRAMS" << std::endl;
       }
     }
 
