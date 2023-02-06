@@ -1,0 +1,32 @@
+name: Linux Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  repository_dispatch:
+    types: [Linux]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install packages
+      run: sudo apt-get install libboost-all-dev ;
+    - name: checkout libsdd
+      run: git clone -depth 1 https://github.com/ahamez/libsdd.git
+    - name: configure
+      run: mkdir build ; cd build ; cmake .. -DLIBSDD_PATH=$PWD/../libsdd -DSTATIC_BOOST=ON ; make -j 4; cd ..
+    - name: strip binaries
+      run: strip -s build/pnmc/pnmc ; mkdir website ; cp build/pnmc/pnmc website/pnmc 
+    
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
+      with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: website/ # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch 
+          single-commit: true
