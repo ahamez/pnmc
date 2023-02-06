@@ -25,10 +25,6 @@ jobs:
       run: mkdir build ; cd build ; cmake .. -DLIBSDD_PATH=$PWD/../libsdd -DSTATIC_BOOST=ON ; make -j 4; sed -i 's/-Wl,-Bdynamic//g'  pnmc/CMakeFiles/pnmc.dir/link.txt ; make pnmc ; cd ..
     - name: strip binaries
       run: strip -s build/pnmc/pnmc ; mkdir website ; cp build/pnmc/pnmc website/pnmc 
-    - name: checkout Caesar.SDD
-      run: git clone --depth 1 https://github.com/ahamez/caesar.sdd
-    - name: build Caesar.SDD
-      run: cd caesar.sdd ; mkdir build ; cd build ; cmake .. -DLIBSDD_PATH=$PWD/../../libsdd -DSTATIC_BOOST=ON ; make caesar.sdd ; cat src/CMakeFiles/caesar.sdd.dir/link.txt ; sed -i 's/-Wl,-Bdynamic/-static-libgcc -static-libstdc++ -static/g' src/CMakeFiles/caesar.sdd.dir/link.txt  ; make caesar.sdd VERBOSE=1 ; strip -s src/caesar.sdd ; cp src/caesar.sdd ../../website/ ; cd ../.. ;
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@v4.4.1
       with:

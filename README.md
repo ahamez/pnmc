@@ -17,6 +17,6 @@ to optimize the generation of state spaces.
 
 - Instructions to compile and install pnmc are given in the INSTALL file.
 
-- We also distribute the tool as a static binary for Linux x64 : [pnmc](https://github.com/yanntm/pnmc/raw/gh-pages/pnmc) [caesar.sdd](https://github.com/yanntm/pnmc/raw/gh-pages/caesar.sdd). These binaries are built from latest versions of source using GitHub actions (see "actions" tab at top of this page)
+- We also distribute the tool as a static binary for Linux x64 : [pnmc](https://github.com/yanntm/pnmc/raw/gh-pages/pnmc) These binaries are built from latest versions of source using GitHub actions (see "actions" tab at top of this page)
 
  
