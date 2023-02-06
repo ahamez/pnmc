@@ -18,6 +18,7 @@ option (STATIC_BOOST "Force usage of static Boost libraries OFF")
 
 if (STATIC_BOOST)
   set(Boost_USE_STATIC_LIBS ON)
+  set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 endif ()
 find_package(Boost 1.58.0 REQUIRED COMPONENTS program_options coroutine context system thread filesystem)
 
@@ -58,10 +59,8 @@ find_package (Threads)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
-  endif ()
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 endif ()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
