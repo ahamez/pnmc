@@ -18,7 +18,6 @@ option (STATIC_BOOST "Force usage of static Boost libraries OFF")
 
 if (STATIC_BOOST)
   set(Boost_USE_STATIC_LIBS ON)
-  set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 endif ()
 find_package(Boost 1.58.0 REQUIRED COMPONENTS program_options coroutine context system thread filesystem)
 
@@ -68,6 +67,11 @@ if (COVERAGE AND CMAKE_BUILD_TYPE MATCHES Debug)
   include(CodeCoverage)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
 endif()
+
+if (STATIC_BOOST)
+  set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
+endif ()
+
 
 #--------------------------------------------------------------------------------------------------#
 
