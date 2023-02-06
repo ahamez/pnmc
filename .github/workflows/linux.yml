@@ -1,0 +1,34 @@
+name: Linux Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  repository_dispatch:
+    types: [Linux]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository and submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Install packages (with workaround for bad mirror)
+      run: sudo gem install apt-spy2 ; sudo apt-spy2 check ; sudo apt-spy2 fix --commit ; sudo apt-get update ; sudo apt-get install libboost-all-dev ;
+    - name: checkout libsdd
+      run: git clone --depth 1 https://github.com/ahamez/libsdd.git
+    - name: configure
+      run: mkdir build ; cd build ; cmake .. -DLIBSDD_PATH=$PWD/../libsdd -DSTATIC_BOOST=ON ; make -j 4; sed -i 's/-Wl,-Bdynamic//g'  pnmc/CMakeFiles/pnmc.dir/link.txt ; make pnmc ; cd ..
+    - name: strip binaries
+      run: strip -s build/pnmc/pnmc ; mkdir website ; cp build/pnmc/pnmc website/pnmc 
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4.4.1
+      with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: website/ # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch 
+          single-commit: true

@@ -58,10 +58,8 @@ find_package (Threads)
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
-  endif ()
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto")
 endif ()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0")
@@ -69,6 +67,11 @@ if (COVERAGE AND CMAKE_BUILD_TYPE MATCHES Debug)
   include(CodeCoverage)
   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
 endif()
+
+if (STATIC_BOOST)
+  set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
+endif ()
+
 
 #--------------------------------------------------------------------------------------------------#
 

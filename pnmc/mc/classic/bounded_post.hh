@@ -40,7 +40,7 @@ struct bounded_post
       }
       builder.insert(builder.end(), v + valuation);
     }
-    return std::move(builder);
+    return builder;
   }
 
   friend

@@ -31,7 +31,7 @@ struct post
     builder.reserve(val.size());
     std::transform( val.cbegin(), val.cend(), std::inserter(builder, builder.end())
                   , [this](unsigned int v){return v + valuation;});
-    return std::move(builder);
+    return builder;
   }
 
   bool

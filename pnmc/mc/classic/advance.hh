@@ -44,7 +44,7 @@ struct advance
     {
       builder.insert(builder.end(), pn::sharp);
     }
-    return std::move(builder);
+    return builder;
   }
 
   bool
