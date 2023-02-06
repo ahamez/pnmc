@@ -17,13 +17,13 @@ jobs:
     - name: Install packages (with workaround for bad mirror)
       run: sudo gem install apt-spy2 ; sudo apt-spy2 check ; sudo apt-spy2 fix --commit ; sudo apt-get update ; sudo apt-get install libboost-all-dev ;
     - name: checkout libsdd
-      run: git clone -depth 1 https://github.com/ahamez/libsdd.git
+      run: git clone --depth 1 https://github.com/ahamez/libsdd.git
     - name: configure
       run: mkdir build ; cd build ; cmake .. -DLIBSDD_PATH=$PWD/../libsdd -DSTATIC_BOOST=ON ; make -j 4; cd ..
     - name: strip binaries
       run: strip -s build/pnmc/pnmc ; mkdir website ; cp build/pnmc/pnmc website/pnmc 
     - name: checkout Caesar.SDD
-      run: git clone -depth 1 https://github.com/ahamez/caesar.sdd
+      run: git clone --depth 1 https://github.com/ahamez/caesar.sdd
     - name: build Caesar.SDD
       run: cd caesar.sdd ; mkdir build ; cd build ; cmake .. -DLIBSDD_PATH=$PWD/../../libsdd -DSTATIC_BOOST=ON ; make caesar.sdd ; strip -s src/caesar.sdd ; cp src/caesar.sdd ../../website/ ; cd ../.. ;
     - name: Deploy to GitHub Pages
