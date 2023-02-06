@@ -22,7 +22,7 @@ jobs:
     - name: checkout libsdd
       run: git clone --depth 1 https://github.com/ahamez/libsdd.git
     - name: configure
-      run: mkdir build ; cd build ; cmake .. -DLIBSDD_PATH=$PWD/../libsdd -DSTATIC_BOOST=ON ; make -j 4; cd ..
+      run: mkdir build ; cd build ; cmake .. -DLIBSDD_PATH=$PWD/../libsdd -DSTATIC_BOOST=ON ; make -j 4; sed -i 's/-Wl,-Bdynamic//g'  pnmc/CMakeFiles/pnmc.dir/link.txt ; make pnmc ; cd ..
     - name: strip binaries
       run: strip -s build/pnmc/pnmc ; mkdir website ; cp build/pnmc/pnmc website/pnmc 
     - name: checkout Caesar.SDD
