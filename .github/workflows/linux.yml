@@ -26,7 +26,7 @@ jobs:
     - name: strip binaries
       run: strip -s build/pnmc/pnmc ; mkdir website ; cp build/pnmc/pnmc website/pnmc 
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@v4.4.1
+      uses: JamesIves/github-pages-deploy-action@v4.4.2
       with:
           branch: gh-pages # The branch the action should deploy to.
           folder: website/ # The folder the action should deploy.
